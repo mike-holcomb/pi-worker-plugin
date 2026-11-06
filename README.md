@@ -1,9 +1,30 @@
-# Pi Worker Plugin
+# Pi Worker Plugin marketplace
 
-A Codex marketplace plugin for bounded workers powered by [Earendil Pi Durable](https://github.com/earendil-works/pi/tree/main/packages/durable).
+Public repository marketplace for [Pi Agents](plugins/pi-agents/README.md), published by Mike Holcomb under the [MIT License](LICENSE). Delegate bounded work to local workers powered by [Earendil Pi Durable](https://github.com/earendil-works/pi/tree/main/packages/durable), then inspect evidence and record your review.
 
-Version **0.1.0** preserves durable task admission, recovery, progress, permissions, immutable evidence, and parent review from OpenCode Worker Plugin 2.1.0 (commit `aa5a2df14b8c8f6e2396b7dfd4d7c3b00f50be1d`). Workers use the bundled Pi Durable 1.5.0 library; no worker CLI or backend server installation is required.
+## Release 0.1.0
 
-See [Pi Agents](plugins/pi-agents/README.md) and the [installation guide](plugins/pi-agents/docs/installation.md). The marketplace is `.agents/plugins/marketplace.json`.
+Version **0.1.0** is prepared for its first release; `v0.1.0` has not yet been published. It preserves durable task admission, recovery, progress, permissions, immutable evidence, and parent review from OpenCode Worker Plugin 2.1.0. See the [release notes](docs/releases/v0.1.0.md) for changes, validation limits, and upgrade guidance.
 
-This repository is an independent MIT-licensed fork. It uses separate names, configuration, and state so both plugins can be installed together. No release tag or GitHub publication is implied by the local build.
+After the `v0.1.0` tag is available, install Node.js 24.15 or later within the 24.x line and select the plugin from the marketplace:
+
+```bash
+codex plugin marketplace add mike-holcomb/pi-worker-plugin --ref v0.1.0
+codex plugin add pi-agents@pi-worker-plugin
+```
+
+Until then, use the [local installation guide](plugins/pi-agents/docs/installation.md). Start a fresh Codex session and select `pi-agents:pi-agents` (**Pi Agents**). The executable includes Pi Durable 1.5.0 and its provider dependencies; no Pi CLI, backend server, Python, or runtime `npm install` is required.
+
+## Execution setup
+
+Follow the [installation and configuration guide](plugins/pi-agents/docs/installation.md) to declare project roots and model routes. Supported routes include OpenAI, Anthropic, Google, OpenRouter, and custom OpenAI-compatible endpoints. Hosted providers use credentials from the host environment; a loopback endpoint can run without a provider key. Installation and diagnostics do not run inference.
+
+The parent approves scoped worker effects and reviews immutable evidence before accepting a result. Approved shell commands run as the host user. See [validation](plugins/pi-agents/docs/validation.md) for measured coverage and remaining checks, and [progress](plugins/pi-agents/docs/progress.md) for incremental checkpoints.
+
+## Distribution and development
+
+The release assets are `pi-agents-v0.1.0.zip`, a per-file `.manifest.json`, and a `.sha256` sidecar. The [release process](docs/release-process.md) describes validation, draft preparation, and publication. This repository marketplace is separate from OpenAI's public plugin directory.
+
+The catalog is [.agents/plugins/marketplace.json](.agents/plugins/marketplace.json), and the canonical plugin source is [plugins/pi-agents](plugins/pi-agents). See its [build instructions](plugins/pi-agents/README.md#build-and-verify) and [evaluation guide](plugins/pi-agents/docs/evaluation.md).
+
+This independent fork derives from OpenCode Worker Plugin 2.1.0 (commit `aa5a2df14b8c8f6e2396b7dfd4d7c3b00f50be1d`). Separate names, configuration, and state allow both plugins to be installed together. Historical OpenCode results do not certify Pi execution.

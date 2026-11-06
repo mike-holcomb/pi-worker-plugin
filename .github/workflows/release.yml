@@ -1,0 +1,54 @@
+name: Prepare draft release
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag (for example v0.1.0)
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+jobs:
+  validate:
+    uses: ./.github/workflows/ci.yml
+    with:
+      ref: refs/tags/${{ inputs.tag || github.ref_name }}
+      release_tag: ${{ inputs.tag || github.ref_name }}
+  draft:
+    needs: validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ env.RELEASE_TAG }}
+          fetch-depth: 0
+      - name: Require a release commit on main
+        run: git merge-base --is-ancestor HEAD origin/main
+      - uses: actions/download-artifact@v4
+        with:
+          name: bundle-ubuntu-24.04-node-24.15.0
+          path: release-assets
+      - name: Verify asset checksums
+        working-directory: release-assets
+        run: sha256sum -c "pi-agents-${RELEASE_TAG}.zip.sha256"
+      - name: Create draft with validated assets
+        run: |
+          gh release create "$RELEASE_TAG" \
+            "release-assets/pi-agents-${RELEASE_TAG}.zip" \
+            "release-assets/pi-agents-${RELEASE_TAG}.zip.manifest.json" \
+            "release-assets/pi-agents-${RELEASE_TAG}.zip.sha256" \
+            --draft --verify-tag --latest=false \
+            --title "Pi Agents ${RELEASE_TAG}" \
+            --notes-file "docs/releases/${RELEASE_TAG}.md"

@@ -21,10 +21,10 @@ node scripts/build_bundle.mjs --check
 node --test tests/packaging.test.mjs
 node --test evaluation/harness.test.mjs
 node evaluation/harness.mjs validate
-node scripts/build_bundle.mjs --out /private/tmp/pi-agents-0.1.0.zip
-node scripts/smoke_installed_bundle.mjs /private/tmp/pi-agents-0.1.0.zip
+node scripts/build_bundle.mjs --out /tmp/pi-agents-v0.1.0.zip
+node scripts/smoke_installed_bundle.mjs /tmp/pi-agents-v0.1.0.zip
 ```
 
-The allowlisted archive is deterministic and ships per-file hashes, archive checksums, and third-party licenses. State, reports, configuration, and credentials live outside the installed bundle.
+Use a new archive output path for each build. The allowlisted archive is deterministic and ships per-file hashes, archive checksums, and third-party licenses. State, reports, configuration, and credentials live outside the installed bundle.
 
 Publisher: Mike Holcomb. License: [MIT](LICENSE). Derived from OpenCode Worker Plugin 2.1.0; its historical validation does not certify Pi execution.

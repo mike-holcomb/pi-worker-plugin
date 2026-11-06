@@ -1,16 +1,39 @@
 name: Validate Pi Agents
-on: [push, pull_request]
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      ref:
+        type: string
+        default: ''
+      release_tag:
+        type: string
+        default: ''
+permissions:
+  contents: read
 jobs:
   validate:
+    timeout-minutes: 20
     strategy:
+      fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest]
+        os: [macos-15, ubuntu-24.04]
+        node: ['24.15.0', '24.22.1']
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+      - name: Validate release and marketplace metadata
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: node scripts/validate-release.mjs "$RELEASE_TAG"
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: ${{ matrix.node }}
           cache: npm
           cache-dependency-path: plugins/pi-agents/runtime/package-lock.json
       - run: npm ci --ignore-scripts
@@ -19,5 +42,14 @@ jobs:
         working-directory: plugins/pi-agents/runtime
       - run: node scripts/build_bundle.mjs --check && node --test tests/packaging.test.mjs evaluation/harness.test.mjs && node evaluation/harness.mjs validate
         working-directory: plugins/pi-agents
-      - run: node scripts/build_bundle.mjs --out "${{ runner.temp }}/pi-agents.zip" && node scripts/smoke_installed_bundle.mjs "${{ runner.temp }}/pi-agents.zip"
+      - name: Build and smoke-test release assets
+        run: |
+          version=$(node -p 'JSON.parse(require("fs").readFileSync(".codex-plugin/plugin.json", "utf8")).version')
+          node scripts/build_bundle.mjs --out "$RUNNER_TEMP/pi-agents-v${version}.zip"
+          node scripts/smoke_installed_bundle.mjs "$RUNNER_TEMP/pi-agents-v${version}.zip"
         working-directory: plugins/pi-agents
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bundle-${{ matrix.os }}-node-${{ matrix.node }}
+          path: ${{ runner.temp }}/pi-agents-v*.zip*
+          if-no-files-found: error

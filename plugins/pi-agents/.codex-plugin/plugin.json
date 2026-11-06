@@ -13,18 +13,21 @@
   "interface": {
     "displayName": "Pi Agents",
     "shortDescription": "Delegate, monitor, and verify Pi work",
-    "longDescription": "Durable Pi tasks with bounded handoffs, exact-session recovery and independent parent verification.",
+    "longDescription": "Delegate bounded work to local Pi Durable workers. Monitor progress, approve scoped effects, recover exact executions, inspect immutable evidence, and record parent review. Includes the runtime and provider dependencies; requires Node.js 24.15+ within 24.x and a configured model route.",
     "developerName": "Mike Holcomb",
     "category": "Productivity",
     "capabilities": [],
     "websiteURL": "https://github.com/mike-holcomb/pi-worker-plugin",
     "defaultPrompt": [
-      "Prepare a bounded Pi task and verify its result."
+      "Use $pi-agents:pi-agents to prepare a bounded task, monitor it, and verify the deliverable."
     ]
   },
   "license": "MIT",
   "keywords": [
     "pi",
+    "codex",
+    "workers",
+    "durable-tasks",
     "delegation",
     "verification"
   ]

@@ -1,15 +1,34 @@
-# Installation and configuration
+# Installation, configuration, and rollback
+
+## Install release 0.1.0
+
+The first release is being prepared. These commands apply once the `v0.1.0` tag is available; until then, use local installation below.
+
+1. Install Node.js `>=24.15 <25` on macOS or Linux and ensure the Codex host's `node` resolves to that version.
+2. Add the repository marketplace and install the plugin:
+
+   ```bash
+   codex plugin marketplace add mike-holcomb/pi-worker-plugin --ref v0.1.0
+   codex plugin add pi-agents@pi-worker-plugin
+   ```
+
+3. Start a fresh Codex session and select `pi-agents:pi-agents` (**Pi Agents**).
+4. Configure project roots and model routes as described below before submitting live tasks.
+
+The GitHub release will include `pi-agents-v0.1.0.zip`, its per-file `.manifest.json`, and `.sha256` checksums. The runtime and provider dependencies are prebuilt. End-user installation needs no Pi CLI, backend server, TypeScript compilation, Python, or `npm install`. Repository marketplace distribution is separate from OpenAI's public plugin directory.
 
 ## Local installation
 
-Build the bundle first, then install this repository as a local Codex marketplace:
+The repository includes the compiled executable. For a modified checkout, follow the [build instructions](../README.md#build-and-verify) first, then install this repository as a local Codex marketplace:
 
 ```bash
 codex plugin marketplace add /absolute/path/pi-worker-plugin
 codex plugin add pi-agents@pi-worker-plugin
 ```
 
-Start a fresh session and select `pi-agents:pi-agents`. Node on the host PATH must be `>=24.15 <25`. No Pi CLI, backend server, or startup dependency download is needed. These commands describe local installation; a published remote tag is not yet available.
+Start a fresh session and select `pi-agents:pi-agents`. Node on the host PATH must be `>=24.15 <25`. No Pi CLI, backend server, or startup dependency download is needed.
+
+Use `pi_health` from Codex for read-only prerequisites. From the plugin directory, run `node ./bin/pi-agents.mjs doctor`; installation does not add a global shell executable. Packaging smoke verifies relocation and MCP launch, but does not prove marketplace installation in a fresh client.
 
 ## Private configuration
 
@@ -74,5 +93,7 @@ Build workers have `webfetch` and DuckDuckGo `websearch` tools. Each request nee
 Set `PI_AGENTS_CAPTURE_DIAGNOSTICS=1` to retain bounded permission and effect-status diagnostics. These contain operation IDs and outcomes, without query text, file contents, or shell output. Capture is advisory and may have gaps or repeated status lines across reconnection. The supervisor retains at most 64 KiB per execution for seven days; use the task diagnostic cursor to read it.
 
 ## Upgrade and rollback
+
+Before updating, reconcile active tasks, stop resolved workers and the daemon, and preserve the state database and reports. Do not run two plugin versions against the same state directory. Refresh a configured marketplace with `codex plugin marketplace upgrade pi-worker-plugin`; when changing a pinned release, select the new `--ref` explicitly and start a fresh Codex session. Uninstalling the plugin does not cancel accepted work or delete evidence.
 
 Keep this plugin's state separate from OpenCode state. There is no OpenCode database migration. Back up the state directory only after stopping resolved workers and the daemon. Install an earlier Pi bundle and restore a matching backup to roll back; do not open newer schemas with older code. Pi dependencies are pinned because their upstream API is experimental.
