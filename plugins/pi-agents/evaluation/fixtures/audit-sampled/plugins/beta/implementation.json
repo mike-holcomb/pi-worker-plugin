@@ -1,0 +1,9 @@
+{
+  "accepted_formats": [
+    "yaml"
+  ],
+  "modalities": [
+    "note",
+    "video"
+  ]
+}

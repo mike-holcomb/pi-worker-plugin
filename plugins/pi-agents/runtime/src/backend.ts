@@ -19,6 +19,7 @@ export type BackendInspection = {
     structuredOutput: boolean;
     sessionRecovery: boolean;
     progressCheckpoints?: boolean;
+    workerDenialContext?: boolean;
   };
 };
 
@@ -78,7 +79,7 @@ export interface WorkerBackend {
   inspectTurn(sessionId: string, messageId: string, control?: RequestControl): Promise<TurnObservation>;
   readCheckpoint?(event: BackendEvent, sessionId: string, userMessageId: string, control?: RequestControl): Promise<{ sourceId: string; checkpoint: unknown } | null>;
   subscribeEvents(control?: RequestControl): AsyncIterable<BackendEvent>;
-  replyToRequest(request: PendingRequest, reply: "allow_once" | "deny" | string[][], control?: RequestControl): Promise<void>;
+  replyToRequest(request: PendingRequest, reply: "allow_once" | "deny" | string[][], control?: RequestControl, workerExplanation?: string): Promise<void>;
   abortSession(sessionId: string, control?: RequestControl): Promise<boolean>;
   readResult(sessionId: string, messageId: string, control?: RequestControl): Promise<{ text: string; structured: unknown }>;
 }

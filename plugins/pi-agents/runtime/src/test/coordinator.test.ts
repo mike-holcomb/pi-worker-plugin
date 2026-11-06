@@ -5,18 +5,22 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import { ArtifactStore } from "../artifacts.js";
-import type { WorkerBackend, PendingRequest, RequestControl, TurnObservation } from "../backend.js";
+import type { WorkerBackend, PendingRequest, RequestControl, TurnObservation, BackendEvent } from "../backend.js";
 import { loadConfiguration } from "../config.js";
 import { ExecutionCoordinator } from "../coordinator.js";
 import type { TaskPacket } from "../contracts.js";
 import { renderPrompt } from "../prompt.js";
 import { SupervisorService } from "../service.js";
+import { PiBackend } from "../pi-backend.js";
 import { SqliteTaskStore, type CancellationDiagnostic } from "../store.js";
 import { captureBaseline } from "../workspace.js";
 
 class FakeBackend implements WorkerBackend {
   readonly backendId = "backend_fake";
   readonly workspace: string;
+  supportsProgress = false;
+  supportsDenialContext = true;
+  progressEvents: BackendEvent[] = [];
   submitted = false;
   finished = false;
   aborted = false;
@@ -30,6 +34,7 @@ class FakeBackend implements WorkerBackend {
   messageId = "";
   requests: PendingRequest[] = [];
   replyCount = 0;
+  explanations: Array<string | undefined> = [];
   replyFailure: "pending" | "gone" | null = null;
   inspectionCount = 0;
   error: string | null = null;
@@ -37,7 +42,7 @@ class FakeBackend implements WorkerBackend {
   async inspectBackend() { return { version: "fake", dependencyDigest: "fake", backendId: this.backendId,
     workspace: this.workspace, configurationDigest: "fake", supportedForExecution: true,
     capabilities: { callerAssignedMessageId: true, permissionRequests: true, questionRequests: false,
-      structuredOutput: false, sessionRecovery: true } }; }
+      structuredOutput: false, sessionRecovery: true, progressCheckpoints: this.supportsProgress, workerDenialContext: this.supportsDenialContext } }; }
   async createSession() {
     this.created = true;
     if (this.createAckLost) { this.createAckLost = false; throw new Error("lost session acknowledgement"); }
@@ -55,9 +60,19 @@ class FakeBackend implements WorkerBackend {
       activeTools: this.stopped ? 0 : 1, status: this.stopped ? "idle" : "busy", pendingRequests: this.requests,
       statusOmitted: this.stopped, finished: this.finished, error: this.error };
   }
-  async *subscribeEvents(_control?: RequestControl) { await new Promise(() => {}); }
-  async replyToRequest(request: PendingRequest, _reply: "allow_once" | "deny" | string[][]) {
-    this.replyCount++;
+  async *subscribeEvents(control?: RequestControl) {
+    if (!this.supportsProgress) { await new Promise(() => {}); return; }
+    while (!control?.signal?.aborted) {
+      const event = this.progressEvents.shift();
+      if (event) yield event;
+      else await new Promise(resolve => setTimeout(resolve, 10));
+    }
+  }
+  readCheckpoint(event: BackendEvent, sessionId: string, messageId: string) {
+    return new PiBackend("unused").readCheckpoint(event, sessionId, messageId);
+  }
+  async replyToRequest(request: PendingRequest, _reply: "allow_once" | "deny" | string[][], _control?: RequestControl, explanation?: string) {
+    this.replyCount++; this.explanations.push(explanation);
     if (this.replyFailure !== "pending") this.requests = this.requests.filter((item) => item.id !== request.id);
     if (this.replyFailure) throw new Error("lost reply acknowledgement");
   }
@@ -917,4 +932,141 @@ test("storage failure before dispatch intent prevents any prompt submission", as
     assert.equal(fx.backend.submitCount, 0);
     assert.equal(fx.store.reserve(`other_${randomUUID()}`, [`workspace:${task.workspace}`]), false);
   } finally { await fx.coordinator.close(); fx.restore(); }
+});
+
+
+test("multi-milestone events are ingested for the exact execution and wake advisory waits", async () => {
+  const fx = setup(); fx.backend.supportsProgress = true;
+  try {
+    fx.coordinator.start();
+    await until(() => fx.backend.submitted && fx.store.get("scope", fx.task.taskId)!.phase === "running");
+    const service = new SupervisorService(fx.store, fx.artifacts, fx.coordinator);
+    const task = fx.store.get("scope", fx.task.taskId)!;
+    const eventsBefore = fx.store.events(task.executionId);
+    const request = { scope_id: "scope", task_id: task.taskId, execution_id: task.executionId };
+    const initial = await service.handle("get_progress", request) as any;
+    assert.equal(initial.availability, "supported");
+    assert.equal(initial.worker_checkpoint_observed, false);
+    const waiting = service.handle("wait_tasks", { scope_id: "scope", targets: [{ task_id: task.taskId,
+      execution_id: task.executionId, after_cursor: eventsBefore.at(-1)!.cursor, after_progress_cursor: initial.next_cursor }], timeout_ms: 1000 });
+    const checkpoint = { stage: "investigating", summary: "Inventory checked", completed: ["Required inventory"], remaining: ["Source comparison"], blocker: null, evidence_refs: [] };
+    const event = (sourceId: string, messageId: string, summary: string): BackendEvent => ({ type: "message.part.updated",
+      sessionId: fx.backend.sessionId, data: { sourceId, messageId, checkpoint: { ...checkpoint, summary } } });
+    fx.backend.progressEvents.push(event("foreign", "other-message", "Ignore foreign execution"),
+      event("inventory", task.userMessageId!, "Inventory checked"), event("comparison", task.userMessageId!, "Sources compared"));
+    assert.equal((await waiting as any).timed_out, false);
+    await until(() => fx.coordinator.progress.read(task.executionId).updates.length === 2);
+    const page = await service.handle("get_progress", { ...request, after_cursor: initial.next_cursor, include_snapshot: true }) as any;
+    assert.equal(page.worker_checkpoint_observed, true);
+    assert.deepEqual(page.updates.map((item: any) => item.summary), ["Inventory checked", "Sources compared"]);
+    assert.equal(page.snapshot.summary, "Sources compared");
+    assert.equal(fx.store.get("scope", task.taskId)!.revision, task.revision);
+    assert.deepEqual(fx.store.events(task.executionId), eventsBefore);
+  } finally { await fx.coordinator.close(); fx.restore(); }
+});
+
+for (const lostReply of [false, true]) {
+  test(`service denial explanation has durable identity and at-most-once delivery (lost ack: ${lostReply})`, async () => {
+    const fx = setup();
+    try {
+      await fx.coordinator.start();
+      fx.backend.requests = [permission(fx, "30")]; fx.coordinator.kick();
+      await until(() => fx.store.get("scope", fx.task.taskId)?.pendingRequests.length === 1);
+      const service = new SupervisorService(fx.store, fx.artifacts, fx.coordinator);
+      const input = { scope_id: "scope", task_id: fx.task.taskId, execution_id: fx.task.executionId,
+        request_id: "30", request_revision: 1, reply: "deny", authorization_basis: "private audit rationale",
+        worker_explanation: "Finish the report using existing evidence.", idempotency_key: "explanation-denial-00001" };
+      await assert.rejects(service.handle("respond_to_request", { ...input, reply: "allow_once" }), /only valid/);
+      await assert.rejects(service.handle("respond_to_request", { ...input, worker_explanation: "é".repeat(2049) }), /4096/);
+      if (lostReply) fx.backend.replyFailure = "pending";
+      await service.handle("respond_to_request", input);
+      await service.handle("respond_to_request", input);
+      await assert.rejects(service.handle("respond_to_request", { ...input, worker_explanation: "Changed" }), /IDEMPOTENCY_CONFLICT/);
+      assert.equal(fx.backend.replyCount, 1);
+      assert.deepEqual(fx.backend.explanations, [input.worker_explanation]);
+      assert.equal(fx.store.inputRequests(fx.task.executionId)[0]!.workerExplanation, input.worker_explanation);
+      assert.equal(fx.store.inputRequests(fx.task.executionId)[0]!.status, lostReply ? "responding" : "responded");
+      assert.doesNotMatch(JSON.stringify(fx.backend.explanations), /private audit rationale/);
+    } finally { await fx.coordinator.close(); fx.restore(); }
+  });
+}
+
+test("coordinator exposes registration failures and retains workspace ownership", async () => {
+  const fx = setup();
+  const original = fx.store.upsertInputRequest.bind(fx.store);
+  try {
+    await fx.coordinator.start();
+    fx.store.upsertInputRequest = () => { throw new Error("synthetic registration failure"); };
+    fx.backend.requests = [permission(fx, "30")]; fx.coordinator.kick();
+    await until(() => fx.store.events(fx.task.executionId).some(event => event.kind === "input_request_registration_failed"));
+    const current = fx.store.get("scope", fx.task.taskId)!;
+    assert.equal(current.observation, "unknown");
+    assert.equal(current.phase, "running");
+    assert.equal(current.pendingRequests.length, 0);
+    const other = fx.store.start({ scopeId: "scope", idempotencyKey: "registration-owner-0001", workspace: fx.task.workspace,
+      packet: {}, model: "fake/model", profile: "bounded-build", baselineHash: "a".repeat(64), promptHash: "b".repeat(64) });
+    assert.equal(fx.store.admit("scope", other.taskId, other.revision, [`workspace:${fx.task.workspace}`]), null);
+    fx.store.upsertInputRequest = original; fx.coordinator.kick();
+    await until(() => fx.store.get("scope", fx.task.taskId)?.pendingRequests.length === 1);
+  } finally { fx.store.upsertInputRequest = original; await fx.coordinator.close(); fx.restore(); }
+});
+
+test("unsupported denial context is rejected before recording an intent", async () => {
+  const fx = setup();
+  try {
+    fx.backend.supportsDenialContext = false;
+    await fx.coordinator.start();
+    fx.backend.requests = [permission(fx, "30")]; fx.coordinator.kick();
+    await until(() => fx.store.get("scope", fx.task.taskId)?.pendingRequests.length === 1);
+    const service = new SupervisorService(fx.store, fx.artifacts, fx.coordinator);
+    await assert.rejects(service.handle("respond_to_request", { scope_id: "scope", task_id: fx.task.taskId,
+      execution_id: fx.task.executionId, request_id: "30", request_revision: 1, reply: "deny",
+      authorization_basis: "audit", worker_explanation: "Finish the report.", idempotency_key: "unsupported-explanation-01" }), /does not support/);
+    assert.equal(fx.backend.replyCount, 0);
+    assert.equal(fx.store.inputRequests(fx.task.executionId)[0]!.status, "pending");
+    assert.ok(!fx.store.events(fx.task.executionId).some(event => event.kind === "input_response_intent"));
+  } finally { await fx.coordinator.close(); fx.restore(); }
+});
+
+test("two coordinator backends with overlapping native request IDs remain independently replyable after restart", async () => {
+  const fx = setup();
+  const workspaceB = join(fx.root, "project-b"); mkdirSync(workspaceB); writeFileSync(join(workspaceB, "input.txt"), "original\n");
+  const packet = fx.task.packet as TaskPacket;
+  const baseline = captureBaseline({ workspace: workspaceB, projectRoots: [fx.root], packet });
+  const taskB = fx.store.start({ scopeId: "scope", idempotencyKey: "overlapping-backend-b-01", workspace: workspaceB,
+    packet, model: fx.task.model, profile: fx.task.profile, baselineHash: baseline.sha256, promptHash: fx.task.promptHash,
+    frozenPrompt: fx.task.frozenPrompt, frozenBaseline: baseline, reportPath: join(fx.root, "report-b"),
+    backendConfig: loadConfiguration(), launchContract: { configContent: "{}", effectiveConfigSha256: "fixture", reportPath: join(fx.root, "report-b") } });
+  const backendA = new FakeBackend(fx.task.workspace), backendB = new FakeBackend(workspaceB);
+  backendA.sessionId = "session-a"; backendB.sessionId = "session-b";
+  const opener = async (input: { backendId: string; workspace: string }) => {
+    const backend = input.workspace === workspaceB ? backendB : backendA;
+    Object.assign(backend, { backendId: input.backendId });
+    return { backendId: input.backendId, backend, close: async () => {} };
+  };
+  let coordinator = new ExecutionCoordinator(fx.store, fx.artifacts, opener);
+  try {
+    await coordinator.start();
+    await until(() => backendA.submitted && backendB.submitted);
+    for (const backend of [backendA, backendB]) backend.requests = [{ id: "30", sessionId: backend.sessionId,
+      type: "permission", api: "v2", detail: { tool: "edit", messageId: backend.messageId } }];
+    coordinator.kick();
+    await until(() => fx.store.get("scope", fx.task.taskId)?.pendingRequests.length === 1 && fx.store.get("scope", taskB.taskId)?.pendingRequests.length === 1);
+    await coordinator.close(); coordinator = new ExecutionCoordinator(fx.store, fx.artifacts, opener); await coordinator.start();
+    const service = new SupervisorService(fx.store, fx.artifacts, coordinator);
+    await service.handle("respond_to_request", { scope_id: "scope", task_id: fx.task.taskId,
+      execution_id: fx.task.executionId, request_id: "30", request_revision: 1, reply: "deny",
+      authorization_basis: "Only A is denied", worker_explanation: "Finish A's report.", idempotency_key: "overlap-reply-a-0001" });
+    assert.equal(backendA.replyCount, 1); assert.equal(backendB.replyCount, 0);
+    assert.equal(fx.store.inputRequests(taskB.executionId)[0]!.status, "pending");
+    assert.equal(fx.store.inputRequests(taskB.executionId)[0]!.workerExplanation, null);
+    await service.handle("respond_to_request", { scope_id: "scope", task_id: taskB.taskId,
+      execution_id: taskB.executionId, request_id: "30", request_revision: 1, reply: "allow_once",
+      authorization_basis: "Only B is approved", idempotency_key: "overlap-reply-b-0001" });
+    assert.equal(backendB.replyCount, 1);
+    assert.equal(fx.store.inputRequests(fx.task.executionId)[0]!.status, "responded");
+    const events = fx.store.events(fx.task.executionId);
+    assert.ok(events.some(event => event.kind === "input_response_intent" && JSON.stringify(event.detail).includes("Finish A's report")));
+    assert.ok(events.some(event => event.kind === "input_response_acknowledged" && JSON.stringify(event.detail).includes("acknowledged")));
+  } finally { await coordinator.close(); await fx.coordinator.close(); fx.restore(); }
 });

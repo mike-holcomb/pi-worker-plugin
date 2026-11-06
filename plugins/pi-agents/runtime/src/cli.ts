@@ -12,8 +12,8 @@ async function main(args: string[]): Promise<number> {
   if (args[0] === "worker" && args[1] === "run" && args.length === 4) {
     await (await import("./worker-runtime.js")).runWorker(args[2]!, args[3]!); return 0;
   }
-  if (args.length === 1 && args[0] === "doctor") {
-    process.stdout.write(`${JSON.stringify(await doctorAsync(), null, 2)}\n`);
+  if (args[0] === "doctor" && (args.length === 1 || args.length === 2 && args[1] === "--shell-preflight")) {
+    process.stdout.write(`${JSON.stringify(await doctorAsync({ shellPreflight: args[1] === "--shell-preflight" }), null, 2)}\n`);
     return 0;
   }
   if (args.length === 1 && args[0] === "mcp") {
@@ -69,7 +69,7 @@ async function main(args: string[]): Promise<number> {
       let digest: string | null = null;
       while (true) {
         const result = await rpcRequest(stateDirectory(), "read_artifact", { scope_id: args[2], task_id: args[3],
-          execution_id: args[4], artifact_id: args[5], byte_offset: offset, max_bytes: 65_536 }) as
+          execution_id: args[4], artifact_id: args[5], byte_offset: offset, max_bytes: 65_536, encoding: "base64" }) as
           { sha256: string; content_base64: string; next_offset: number | null };
         if (digest && result.sha256 !== digest) throw new Error("artifact changed during export");
         digest = result.sha256;
@@ -86,7 +86,7 @@ async function main(args: string[]): Promise<number> {
     } catch (error) { output.destroy(); rmSync(args[6]!, { force: true }); throw error; }
     return 0;
   }
-  process.stderr.write("Usage: pi-agents doctor|mcp|daemon start|status|stop|tasks list|get|diagnostics|wait|cancel|artifacts read|export\n");
+  process.stderr.write("Usage: pi-agents doctor [--shell-preflight]|mcp|daemon start|status|stop|tasks list|get|diagnostics|wait|cancel|artifacts read|export\n");
   return 2;
 }
 

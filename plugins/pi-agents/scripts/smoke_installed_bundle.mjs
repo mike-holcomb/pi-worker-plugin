@@ -150,10 +150,14 @@ export async function smoke(archive, node = process.execPath) {
     const before = filesDigest(plugin);
     const executable = join(plugin, "bin", "pi-agents.mjs");
     const diagnostic = JSON.parse(run(node, [executable, "doctor"], { cwd: unrelated, env }));
-    assert(diagnostic.runtime?.toolkit === "0.1.0", "wrong bundled toolkit version");
     assert(diagnostic.configuration?.status === "missing", "smoke unexpectedly loaded external configuration");
     const manifest = JSON.parse(readFileSync(join(plugin, ".codex-plugin", "plugin.json"), "utf8"));
+    assert(diagnostic.runtime?.toolkit === manifest.version, "wrong bundled toolkit version");
     assert(manifest.mcpServers === "./.mcp.json", "manifest MCP path changed");
+    const preflight = JSON.parse(run(node, [executable, "doctor", "--shell-preflight"], { cwd: unrelated, env }));
+    assert(preflight.shell_preflight?.source === "local_process" &&
+      preflight.shell_preflight.private_temp.status === "ready", "relocated shell preflight failed");
+    assert(!readdirSync(state).some(name => name.startsWith("preflight-")), "preflight left temporary state");
     const servers = JSON.parse(readFileSync(join(plugin, ".mcp.json"), "utf8")).mcpServers;
     assert(Object.keys(servers).length === 1, "MCP config must declare exactly one server");
     const server = Object.values(servers)[0];
@@ -169,8 +173,14 @@ export async function smoke(archive, node = process.execPath) {
     const listed = await client.request(2, "tools/list", {});
     assert(!listed.error, `MCP tools/list failed: ${JSON.stringify(listed.error)}`);
     const names = new Set(listed.result.tools.map((tool) => tool.name));
-    assert(names.size === 11 && names.has("pi_get_progress") && names.has("pi_start_task") && names.has("pi_record_review"),
+    assert(names.size === 12 && names.has("pi_prepare_review") && names.has("pi_get_progress") && names.has("pi_start_task") && names.has("pi_record_review"),
       "bundled MCP tools do not match v2 surface");
+    const health = await client.request(3, "tools/call", { name: "pi_health", arguments: { shell_preflight: true } });
+    assert(!health.error && health.result?.structuredContent?.shell_preflight?.source === "daemon",
+      "bundled daemon preflight was unavailable");
+    assert(health.result.structuredContent.shell_preflight.private_temp.status === "ready", "daemon private temp was unavailable");
+    assert(listed.result.tools.find(tool => tool.name === "pi_respond_to_request")?.inputSchema?.properties?.worker_explanation,
+      "bundled denial explanation input was unavailable");
     await stopChild(child);
     child = null;
     run(node, [executable, "daemon", "stop"], { cwd: unrelated, env }, 10_000);

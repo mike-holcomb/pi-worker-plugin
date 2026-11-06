@@ -1,6 +1,6 @@
 {
   "name": "@mike-holcomb/pi-agents",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -14,20 +14,23 @@
     "check": "tsc -p tsconfig.json --noEmit",
     "schemas": "npm run build && node dist/generate-schemas.js",
     "bundle": "npm run build && node scripts/bundle.mjs",
-    "test": "node --test dist/test/*.test.js"
+    "test": "node --test dist/test/*.test.js",
+    "evaluate:approvals": "node dist/approval-evaluation.js",
+    "evaluate:shell": "node dist/shell-evaluation.js"
   },
   "dependencies": {
-    "@modelcontextprotocol/server": "2.3.1",
-    "zod": "4.6.5",
-    "@earendil-works/pi-durable": "1.5.0",
-    "@earendil-works/pi-ai": "1.5.0",
     "@earendil-works/chord": "1.5.0",
-    "@earendil-works/pi-schema": "1.5.0"
+    "@earendil-works/pi-ai": "1.5.0",
+    "@earendil-works/pi-durable": "1.5.0",
+    "@earendil-works/pi-schema": "1.5.0",
+    "@modelcontextprotocol/server": "2.3.1",
+    "zod": "4.6.5"
   },
   "devDependencies": {
     "@modelcontextprotocol/client": "2.3.1",
     "@types/node": "24.10.3",
     "esbuild": "0.28.2",
+    "tsx": "4.20.6",
     "typescript": "6.0.2"
   }
 }

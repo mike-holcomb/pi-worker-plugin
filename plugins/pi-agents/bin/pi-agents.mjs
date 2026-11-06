@@ -1762,8 +1762,8 @@ var init_checks = __esm({
       (_a9 = inst._zod.def).when ?? (_a9.when = _whenHasSize);
       inst._zod.check = (payload) => {
         const input2 = payload.value;
-        const size2 = input2.size;
-        if (size2 <= def.maximum)
+        const size3 = input2.size;
+        if (size3 <= def.maximum)
           return;
         payload.issues.push({
           origin: getSizableOrigin(input2),
@@ -1782,8 +1782,8 @@ var init_checks = __esm({
       (_a9 = inst._zod.def).when ?? (_a9.when = _whenHasSize);
       inst._zod.check = (payload) => {
         const input2 = payload.value;
-        const size2 = input2.size;
-        if (size2 >= def.minimum)
+        const size3 = input2.size;
+        if (size3 >= def.minimum)
           return;
         payload.issues.push({
           origin: getSizableOrigin(input2),
@@ -1802,10 +1802,10 @@ var init_checks = __esm({
       (_a9 = inst._zod.def).when ?? (_a9.when = _whenHasSize);
       inst._zod.check = (payload) => {
         const input2 = payload.value;
-        const size2 = input2.size;
-        if (size2 === def.size)
+        const size3 = input2.size;
+        if (size3 === def.size)
           return;
-        const tooBig = size2 > def.size;
+        const tooBig = size3 > def.size;
         payload.issues.push({
           origin: getSizableOrigin(input2),
           ...tooBig ? { code: "too_big", maximum: def.size } : { code: "too_small", minimum: def.size },
@@ -15057,11 +15057,11 @@ function _minSize(minimum, params) {
   });
 }
 // @__NO_SIDE_EFFECTS__
-function _size(size2, params) {
+function _size(size3, params) {
   return new $ZodCheckSizeEquals({
     check: "size_equals",
     ...normalizeParams(params),
-    size: size2
+    size: size3
   });
 }
 // @__NO_SIDE_EFFECTS__
@@ -18905,8 +18905,8 @@ var init_schemas2 = __esm({
       $ZodFile.init(inst, def);
       ZodType.init(inst, def);
       inst._zod.processJSONSchema = (ctx, json3, params) => fileProcessor(inst, ctx, json3, params);
-      inst.min = (size2, params) => inst.check(_minSize(size2, params));
-      inst.max = (size2, params) => inst.check(_maxSize(size2, params));
+      inst.min = (size3, params) => inst.check(_minSize(size3, params));
+      inst.max = (size3, params) => inst.check(_maxSize(size3, params));
       inst.mime = (types3, params) => inst.check(_mime(Array.isArray(types3) ? types3 : [types3], params));
     });
     ZodTransform = /* @__PURE__ */ $constructor("ZodTransform", (inst, def) => {
@@ -20544,17 +20544,17 @@ function hashRegularFile(path6) {
     if (!before.isFile()) throw new Error("not a regular file");
     const digest = createHash("sha256");
     const chunk = Buffer.allocUnsafe(1024 * 1024);
-    let size2 = 0;
+    let size3 = 0;
     while (true) {
       const count = readSync(fd, chunk, 0, chunk.byteLength, null);
       if (!count) break;
       digest.update(chunk.subarray(0, count));
-      size2 += count;
+      size3 += count;
     }
     const after = fstatSync(fd);
-    if (size2 !== before.size || after.size !== before.size || after.mtimeMs !== before.mtimeMs || after.ino !== before.ino)
+    if (size3 !== before.size || after.size !== before.size || after.mtimeMs !== before.mtimeMs || after.ino !== before.ino)
       throw new Error("file changed during evidence scan");
-    return { sha256: digest.digest("hex"), byteLength: size2 };
+    return { sha256: digest.digest("hex"), byteLength: size3 };
   } finally {
     closeSync(fd);
   }
@@ -28508,7 +28508,7 @@ var init_EventStream = __esm({
         const readQueue = createEventQueue();
         const bufferedLedger = createBufferedEventLedger();
         let ended = this.ended;
-        let failure2;
+        let failure3;
         let failureDelivered = false;
         let detach = () => void 0;
         const doneResult = () => ({ value: void 0, done: true });
@@ -28518,11 +28518,11 @@ var init_EventStream = __esm({
           }
         };
         const rejectReader = () => {
-          if (!failure2 || failureDelivered || !readQueue.length) {
+          if (!failure3 || failureDelivered || !readQueue.length) {
             return;
           }
           failureDelivered = true;
-          readQueue.dequeue().reject(failure2);
+          readQueue.dequeue().reject(failure3);
         };
         const cleanup = () => {
           detach();
@@ -28605,13 +28605,13 @@ var init_EventStream = __esm({
           }
         };
         const onFailure = (error62) => {
-          failure2 = error62;
+          failure3 = error62;
           if (!pushQueue.length) {
             rejectReader();
           }
         };
         const adoptTerminalFailure = () => {
-          if (failure2) {
+          if (failure3) {
             return;
           }
           const terminal = __classPrivateFieldGet(this, _EventStream_terminalFailure, "f");
@@ -28619,7 +28619,7 @@ var init_EventStream = __esm({
             return;
           }
           if (terminal.kind === "error" ? rejectOnError : rejectOnAbort) {
-            failure2 = terminal.error;
+            failure3 = terminal.error;
           }
         };
         const onEnd = () => {
@@ -28659,9 +28659,9 @@ var init_EventStream = __esm({
             if (ended || this.ended) {
               adoptTerminalFailure();
             }
-            if (failure2 && !failureDelivered) {
+            if (failure3 && !failureDelivered) {
               failureDelivered = true;
-              return Promise.reject(failure2);
+              return Promise.reject(failure3);
             }
             if (ended) {
               return Promise.resolve(doneResult());
@@ -43198,8 +43198,8 @@ function getBunSandboxEnvValue(name) {
   if (procEnvCache === null) {
     procEnvCache = /* @__PURE__ */ new Map();
     try {
-      const { readFileSync: readFileSync11 } = __require("node:fs");
-      const data = readFileSync11("/proc/self/environ", "utf-8");
+      const { readFileSync: readFileSync12 } = __require("node:fs");
+      const data = readFileSync12("/proc/self/environ", "utf-8");
       for (const entry2 of data.split("\0")) {
         const idx = entry2.indexOf("=");
         if (idx > 0) {
@@ -50170,14 +50170,14 @@ var require_sha256 = __commonJS({
         })()
       );
       exports2.HMAC = HMAC;
-      function hash3(data) {
+      function hash4(data) {
         var h2 = new Hash().update(data);
         var digest = h2.digest();
         h2.clean();
         return digest;
       }
-      exports2.hash = hash3;
-      exports2["default"] = hash3;
+      exports2.hash = hash4;
+      exports2["default"] = hash4;
       function hmac(key, data) {
         var h2 = new HMAC(key).update(data);
         var digest = h2.digest();
@@ -53165,7 +53165,7 @@ function betaBashTool(ctx) {
         timeout_ms: { type: "integer", description: "Per-call timeout in milliseconds" }
       }
     },
-    run: async ({ command, restart, timeout_ms }, context) => {
+    run: async ({ command: command2, restart, timeout_ms }, context) => {
       const prev = tail;
       const gate = promiseWithResolvers();
       tail = gate.promise;
@@ -53178,14 +53178,14 @@ function betaBashTool(ctx) {
           session?.close();
           session = void 0;
         }
-        if (!command) {
+        if (!command2) {
           if (restart)
             return "bash session restarted";
           throw new ToolError("bash: command is required");
         }
         session ?? (session = new BashSession(ctx.workdir, ctx.env));
         try {
-          const { output: output2, exitCode } = await session.exec(command, {
+          const { output: output2, exitCode } = await session.exec(command2, {
             timeoutMs: timeout_ms ?? BASH_DEFAULT_TIMEOUT_MS,
             signal: context?.signal
           });
@@ -53648,7 +53648,7 @@ var init_node2 = __esm({
         get closed() {
           return __classPrivateFieldGet2(this, _BashSession_closed, "f");
         }
-        async exec(command, opts = {}) {
+        async exec(command2, opts = {}) {
           if (__classPrivateFieldGet2(this, _BashSession_closed, "f")) {
             throw new AnthropicError("bash session terminated");
           }
@@ -53659,7 +53659,7 @@ var init_node2 = __esm({
           __classPrivateFieldSet2(this, _BashSession_truncated, false, "f");
           const sentinel3 = `__ANT_CMD_${crypto3.randomUUID()}_DONE__`;
           const sentinelSplit = `${sentinel3.slice(0, 8)}''${sentinel3.slice(8)}`;
-          const wrapped = `{ ${command}
+          const wrapped = `{ ${command2}
 } </dev/null 2>&1; printf '\\n${sentinelSplit}%d\\n' $?
 `;
           __classPrivateFieldGet2(this, _BashSession_proc, "f").stdin.write(wrapped);
@@ -65298,12 +65298,12 @@ var require_common2 = __commonJS({
       createDebug.skips = [];
       createDebug.formatters = {};
       function selectColor(namespace) {
-        let hash3 = 0;
+        let hash4 = 0;
         for (let i2 = 0; i2 < namespace.length; i2++) {
-          hash3 = (hash3 << 5) - hash3 + namespace.charCodeAt(i2);
-          hash3 |= 0;
+          hash4 = (hash4 << 5) - hash4 + namespace.charCodeAt(i2);
+          hash4 |= 0;
         }
-        return createDebug.colors[Math.abs(hash3) % createDebug.colors.length];
+        return createDebug.colors[Math.abs(hash4) % createDebug.colors.length];
       }
       createDebug.selectColor = selectColor;
       function createDebug(namespace) {
@@ -67004,12 +67004,12 @@ var require_ponyfill_es2018 = __commonJS({
         }
         return pair.value;
       }
-      function EnqueueValueWithSize(container, value2, size2) {
-        if (!IsNonNegativeNumber(size2) || size2 === Infinity) {
+      function EnqueueValueWithSize(container, value2, size3) {
+        if (!IsNonNegativeNumber(size3) || size3 === Infinity) {
           throw new RangeError("Size must be a finite, non-NaN, non-negative number.");
         }
-        container._queue.push({ value: value2, size: size2 });
-        container._queueTotalSize += size2;
+        container._queue.push({ value: value2, size: size3 });
+        container._queueTotalSize += size3;
       }
       function PeekQueueValue(container) {
         const pair = container._queue.peek();
@@ -67312,12 +67312,12 @@ var require_ponyfill_es2018 = __commonJS({
         const maxBytesToCopy = Math.min(controller._queueTotalSize, pullIntoDescriptor.byteLength - pullIntoDescriptor.bytesFilled);
         const maxBytesFilled = pullIntoDescriptor.bytesFilled + maxBytesToCopy;
         let totalBytesToCopyRemaining = maxBytesToCopy;
-        let ready = false;
+        let ready2 = false;
         const remainderBytes = maxBytesFilled % pullIntoDescriptor.elementSize;
         const maxAlignedBytes = maxBytesFilled - remainderBytes;
         if (maxAlignedBytes >= pullIntoDescriptor.minimumFill) {
           totalBytesToCopyRemaining = maxAlignedBytes - pullIntoDescriptor.bytesFilled;
-          ready = true;
+          ready2 = true;
         }
         const queue = controller._queue;
         while (totalBytesToCopyRemaining > 0) {
@@ -67335,10 +67335,10 @@ var require_ponyfill_es2018 = __commonJS({
           ReadableByteStreamControllerFillHeadPullIntoDescriptor(controller, bytesToCopy, pullIntoDescriptor);
           totalBytesToCopyRemaining -= bytesToCopy;
         }
-        return ready;
+        return ready2;
       }
-      function ReadableByteStreamControllerFillHeadPullIntoDescriptor(controller, size2, pullIntoDescriptor) {
-        pullIntoDescriptor.bytesFilled += size2;
+      function ReadableByteStreamControllerFillHeadPullIntoDescriptor(controller, size3, pullIntoDescriptor) {
+        pullIntoDescriptor.bytesFilled += size3;
       }
       function ReadableByteStreamControllerHandleQueueDrain(controller) {
         if (controller._queueTotalSize === 0 && controller._closeRequested) {
@@ -67918,19 +67918,19 @@ var require_ponyfill_es2018 = __commonJS({
         return highWaterMark;
       }
       function ExtractSizeAlgorithm(strategy) {
-        const { size: size2 } = strategy;
-        if (!size2) {
+        const { size: size3 } = strategy;
+        if (!size3) {
           return () => 1;
         }
-        return size2;
+        return size3;
       }
       function convertQueuingStrategy(init, context) {
         assertDictionary(init, context);
         const highWaterMark = init === null || init === void 0 ? void 0 : init.highWaterMark;
-        const size2 = init === null || init === void 0 ? void 0 : init.size;
+        const size3 = init === null || init === void 0 ? void 0 : init.size;
         return {
           highWaterMark: highWaterMark === void 0 ? void 0 : convertUnrestrictedDouble(highWaterMark),
-          size: size2 === void 0 ? void 0 : convertQueuingStrategySize(size2, `${context} has member 'size' that`)
+          size: size3 === void 0 ? void 0 : convertQueuingStrategySize(size3, `${context} has member 'size' that`)
         };
       }
       function convertQueuingStrategySize(fn, context) {
@@ -70661,8 +70661,8 @@ async function* toIterator(parts, clone3 = true) {
         let position = part.byteOffset;
         const end = part.byteOffset + part.byteLength;
         while (position !== end) {
-          const size2 = Math.min(end - position, POOL_SIZE);
-          const chunk = part.buffer.slice(position, position + size2);
+          const size3 = Math.min(end - position, POOL_SIZE);
+          const chunk = part.buffer.slice(position, position + size3);
           position += chunk.byteLength;
           yield new Uint8Array(chunk);
         }
@@ -70801,9 +70801,9 @@ var init_fetch_blob = __esm({
        * @param {string} [type]
        */
       slice(start = 0, end = this.size, type = "") {
-        const { size: size2 } = this;
-        let relativeStart = start < 0 ? Math.max(size2 + start, 0) : Math.min(start, size2);
-        let relativeEnd = end < 0 ? Math.max(size2 + end, 0) : Math.min(end, size2);
+        const { size: size3 } = this;
+        let relativeStart = start < 0 ? Math.max(size3 + start, 0) : Math.min(start, size3);
+        let relativeEnd = end < 0 ? Math.max(size3 + end, 0) : Math.min(end, size3);
         const span = Math.max(relativeEnd - relativeStart, 0);
         const parts = this.#parts;
         const blobParts = [];
@@ -70812,20 +70812,20 @@ var init_fetch_blob = __esm({
           if (added >= span) {
             break;
           }
-          const size3 = ArrayBuffer.isView(part) ? part.byteLength : part.size;
-          if (relativeStart && size3 <= relativeStart) {
-            relativeStart -= size3;
-            relativeEnd -= size3;
+          const size4 = ArrayBuffer.isView(part) ? part.byteLength : part.size;
+          if (relativeStart && size4 <= relativeStart) {
+            relativeStart -= size4;
+            relativeEnd -= size4;
           } else {
             let chunk;
             if (ArrayBuffer.isView(part)) {
-              chunk = part.subarray(relativeStart, Math.min(size3, relativeEnd));
+              chunk = part.subarray(relativeStart, Math.min(size4, relativeEnd));
               added += chunk.byteLength;
             } else {
-              chunk = part.slice(relativeStart, Math.min(size3, relativeEnd));
+              chunk = part.slice(relativeStart, Math.min(size4, relativeEnd));
               added += chunk.size;
             }
-            relativeEnd -= size3;
+            relativeEnd -= size4;
             blobParts.push(chunk);
             relativeStart = 0;
           }
@@ -71563,7 +71563,7 @@ var init_body = __esm({
     INTERNALS = /* @__PURE__ */ Symbol("Body internals");
     Body = class {
       constructor(body, {
-        size: size2 = 0
+        size: size3 = 0
       } = {}) {
         let boundary = null;
         if (body === null) {
@@ -71596,7 +71596,7 @@ var init_body = __esm({
           disturbed: false,
           error: null
         };
-        this.size = size2;
+        this.size = size3;
         if (body instanceof Stream3) {
           body.on("error", (error_) => {
             const error62 = error_ instanceof FetchBaseError ? error_ : new FetchError(`Invalid response body while trying to fetch ${this.url}: ${error_.message}`, "system", error_);
@@ -72098,8 +72098,8 @@ var init_get_search = __esm({
         return parsedURL.search;
       }
       const lastOffset = parsedURL.href.length - 1;
-      const hash3 = parsedURL.hash || (parsedURL.href[lastOffset] === "#" ? "#" : "");
-      return parsedURL.href[lastOffset - hash3.length] === "?" ? "?" : "";
+      const hash4 = parsedURL.hash || (parsedURL.href[lastOffset] === "#" ? "#" : "");
+      return parsedURL.href[lastOffset - hash4.length] === "?" ? "?" : "";
     };
   }
 });
@@ -76075,11 +76075,11 @@ var require_safe_buffer = __commonJS({
       }
       return Buffer4(arg, encodingOrOffset, length);
     };
-    SafeBuffer.alloc = function(size2, fill, encoding) {
-      if (typeof size2 !== "number") {
+    SafeBuffer.alloc = function(size3, fill, encoding) {
+      if (typeof size3 !== "number") {
         throw new TypeError("Argument must be a number");
       }
-      var buf = Buffer4(size2);
+      var buf = Buffer4(size3);
       if (fill !== void 0) {
         if (typeof encoding === "string") {
           buf.fill(fill, encoding);
@@ -76091,17 +76091,17 @@ var require_safe_buffer = __commonJS({
       }
       return buf;
     };
-    SafeBuffer.allocUnsafe = function(size2) {
-      if (typeof size2 !== "number") {
+    SafeBuffer.allocUnsafe = function(size3) {
+      if (typeof size3 !== "number") {
         throw new TypeError("Argument must be a number");
       }
-      return Buffer4(size2);
+      return Buffer4(size3);
     };
-    SafeBuffer.allocUnsafeSlow = function(size2) {
-      if (typeof size2 !== "number") {
+    SafeBuffer.allocUnsafeSlow = function(size3) {
+      if (typeof size3 !== "number") {
         throw new TypeError("Argument must be a number");
       }
-      return buffer.SlowBuffer(size2);
+      return buffer.SlowBuffer(size3);
     };
   }
 });
@@ -81090,10 +81090,10 @@ var require_pluggable_auth_handler = __commonJS({
        * Parses given command string into component array, splitting on spaces unless
        * spaces are between quotation marks.
        */
-      static parseCommand(command) {
-        const components = command.match(/(?:[^\s"]+|"[^"]*")+/g);
+      static parseCommand(command2) {
+        const components = command2.match(/(?:[^\s"]+|"[^"]*")+/g);
         if (!components) {
-          throw new Error(`Provided command: "${command}" could not be parsed.`);
+          throw new Error(`Provided command: "${command2}" could not be parsed.`);
         }
         for (let i2 = 0; i2 < components.length; i2++) {
           if (components[i2][0] === '"' && components[i2].slice(-1) === '"') {
@@ -85211,7 +85211,7 @@ var require_websocket = __commonJS({
     var http3 = __require("http");
     var net = __require("net");
     var tls = __require("tls");
-    var { randomBytes: randomBytes2, createHash: createHash12 } = __require("crypto");
+    var { randomBytes: randomBytes2, createHash: createHash13 } = __require("crypto");
     var { Duplex, Readable: Readable2 } = __require("stream");
     var { URL: URL2 } = __require("url");
     var PerMessageDeflate2 = require_permessage_deflate();
@@ -85879,7 +85879,7 @@ var require_websocket = __commonJS({
           abortHandshake(websocket, socket, "Invalid Upgrade header");
           return;
         }
-        const digest = createHash12("sha1").update(key + GUID).digest("base64");
+        const digest = createHash13("sha1").update(key + GUID).digest("base64");
         if (res.headers["sec-websocket-accept"] !== digest) {
           abortHandshake(websocket, socket, "Invalid Sec-WebSocket-Accept header");
           return;
@@ -86248,7 +86248,7 @@ var require_websocket_server = __commonJS({
     var EventEmitter = __require("events");
     var http3 = __require("http");
     var { Duplex } = __require("stream");
-    var { createHash: createHash12 } = __require("crypto");
+    var { createHash: createHash13 } = __require("crypto");
     var extension2 = require_extension();
     var PerMessageDeflate2 = require_permessage_deflate();
     var subprotocol2 = require_subprotocol();
@@ -86555,7 +86555,7 @@ var require_websocket_server = __commonJS({
           );
         }
         if (this._state > RUNNING) return abortHandshake(socket, 503);
-        const digest = createHash12("sha1").update(key + GUID).digest("base64");
+        const digest = createHash13("sha1").update(key + GUID).digest("base64");
         const headers = [
           "HTTP/1.1 101 Switching Protocols",
           "Upgrade: websocket",
@@ -110004,9 +110004,9 @@ function convertMessages3(model2, context, compat, options) {
       if (combinedId.length <= 40) {
         return combinedId;
       }
-      const hash3 = shortHash(id).slice(0, 8);
-      const prefix = callId.slice(0, Math.max(1, 40 - hash3.length - 1));
-      return `${prefix}_${hash3}`;
+      const hash4 = shortHash(id).slice(0, 8);
+      const prefix = callId.slice(0, Math.max(1, 40 - hash4.length - 1));
+      return `${prefix}_${hash4}`;
     }
     if (model2.provider === "openai")
       return id.length > 40 ? id.slice(0, 40) : id;
@@ -111182,8 +111182,2093 @@ var init_pi_models = __esm({
   }
 });
 
+// node_modules/@earendil-works/pi-durable/dist/env/decode.js
+function rangeDecoder() {
+  return new TextDecoder("utf-8", { ignoreBOM: true });
+}
+function startsWithBom(firstBytes) {
+  return firstBytes[0] === 239 && firstBytes[1] === 187 && firstBytes[2] === 191;
+}
+var StreamDecoder;
+var init_decode = __esm({
+  "node_modules/@earendil-works/pi-durable/dist/env/decode.js"() {
+    StreamDecoder = class {
+      #decoder = rangeDecoder();
+      #started = false;
+      /** Text for `bytes`, holding back an incomplete character; without `bytes`, the end of the stream. */
+      decode(bytes2) {
+        const text3 = bytes2 === void 0 ? this.#decoder.decode() : this.#decoder.decode(bytes2, { stream: true });
+        if (this.#started || text3 === "")
+          return text3;
+        this.#started = true;
+        return text3.startsWith("\uFEFF") ? text3.slice(1) : text3;
+      }
+    };
+  }
+});
+
+// node_modules/@earendil-works/pi-durable/dist/env/line-scan.js
+function decodedBytes(text3) {
+  return text3 === "" ? 0 : encoder.encode(text3).length;
+}
+var NEWLINE2, encoder, LineScanner;
+var init_line_scan = __esm({
+  "node_modules/@earendil-works/pi-durable/dist/env/line-scan.js"() {
+    init_decode();
+    NEWLINE2 = 10;
+    encoder = new TextEncoder();
+    LineScanner = class {
+      #startLine;
+      #endLine;
+      #position = 0;
+      #newlines = 0;
+      #lineStart = 0;
+      #start;
+      #end;
+      #firstLineEnd;
+      #lastLineStart;
+      #selectedBytes = 0;
+      #firstLineBytes = 0;
+      #selection;
+      #firstLine;
+      /** The first bytes, held until it is known whether they are a byte-order mark. */
+      #head = [];
+      #bom = false;
+      /** `startLine` and `endLine` must be non-negative integers with `endLine > startLine`; `endLine` absent: to the end. */
+      constructor(startLine, endLine = Number.POSITIVE_INFINITY) {
+        if (!Number.isSafeInteger(startLine) || startLine < 0 || !(endLine > startLine)) {
+          throw new RangeError("Invalid line range");
+        }
+        if (endLine !== Number.POSITIVE_INFINITY && !Number.isSafeInteger(endLine))
+          throw new RangeError("Invalid line range");
+        this.#startLine = startLine;
+        this.#endLine = endLine;
+        if (startLine === 0)
+          this.#begin(0);
+      }
+      push(chunk) {
+        if (this.#head !== void 0) {
+          const take = Math.min(3 - this.#head.length, chunk.length);
+          this.#head.push(...chunk.subarray(0, take));
+          if (this.#head.length < 3)
+            return;
+          this.#releaseHead();
+          chunk = chunk.subarray(take);
+        }
+        this.#process(chunk);
+      }
+      #releaseHead() {
+        const head = Uint8Array.from(this.#head ?? []);
+        this.#head = void 0;
+        this.#bom = startsWithBom(head);
+        this.#process(head);
+      }
+      #process(chunk) {
+        const base = this.#position;
+        let from = 0;
+        for (let index = chunk.indexOf(NEWLINE2); index !== -1; index = chunk.indexOf(NEWLINE2, index + 1)) {
+          this.#feed(chunk, base, from, index);
+          const line = this.#newlines;
+          const position = base + index;
+          if (line === this.#startLine)
+            this.#endFirstLine(position);
+          if (line === this.#endLine - 1)
+            this.#endSelection(position);
+          this.#feed(chunk, base, index, index + 1);
+          from = index + 1;
+          this.#newlines++;
+          this.#lineStart = position + 1;
+          if (this.#newlines === this.#startLine)
+            this.#begin(this.#lineStart);
+          if (this.#newlines === this.#endLine - 1)
+            this.#lastLineStart = this.#lineStart;
+        }
+        this.#feed(chunk, base, from, chunk.length);
+        this.#position += chunk.length;
+      }
+      finish() {
+        if (this.#head !== void 0)
+          this.#releaseHead();
+        const size3 = this.#position;
+        if (this.#start === void 0) {
+          return {
+            newlines: this.#newlines,
+            start: size3,
+            end: size3,
+            firstLineEnd: size3,
+            lastLineStart: size3,
+            selectedBytes: 0,
+            firstLineBytes: 0
+          };
+        }
+        if (this.#firstLineEnd === void 0)
+          this.#endFirstLine(size3);
+        if (this.#end === void 0)
+          this.#endSelection(size3);
+        return {
+          newlines: this.#newlines,
+          start: this.#start,
+          end: this.#end ?? size3,
+          firstLineEnd: this.#firstLineEnd ?? size3,
+          // A selection that reaches past the last line ends with the last line.
+          lastLineStart: this.#lastLineStart ?? this.#lineStart,
+          selectedBytes: this.#selectedBytes,
+          firstLineBytes: this.#firstLineBytes
+        };
+      }
+      #begin(start) {
+        this.#start = start;
+        if (this.#startLine === this.#endLine - 1)
+          this.#lastLineStart = start;
+        this.#selection = rangeDecoder();
+        this.#firstLine = rangeDecoder();
+      }
+      #endFirstLine(position) {
+        this.#firstLineEnd = position;
+        if (this.#firstLine !== void 0)
+          this.#firstLineBytes += decodedBytes(this.#firstLine.decode());
+        this.#firstLine = void 0;
+      }
+      #endSelection(position) {
+        this.#end = position;
+        if (this.#selection !== void 0)
+          this.#selectedBytes += decodedBytes(this.#selection.decode());
+        this.#selection = void 0;
+      }
+      /** Feed `chunk[from, to)`, which starts at file offset `base`, to the decoders of the ranges still open. */
+      #feed(chunk, base, from, to) {
+        if (this.#bom && base + from < 3)
+          from = Math.min(to, 3 - base);
+        if (to <= from)
+          return;
+        const bytes2 = chunk.subarray(from, to);
+        if (this.#selection !== void 0) {
+          this.#selectedBytes += decodedBytes(this.#selection.decode(bytes2, { stream: true }));
+        }
+        if (this.#firstLine !== void 0) {
+          this.#firstLineBytes += decodedBytes(this.#firstLine.decode(bytes2, { stream: true }));
+        }
+      }
+    };
+  }
+});
+
+// node_modules/@earendil-works/pi-durable/dist/env/index.js
+function ok(value2) {
+  return { ok: true, value: value2 };
+}
+function err(error62) {
+  return { ok: false, error: error62 };
+}
+function getOrThrow(result2) {
+  if (!result2.ok)
+    throw result2.error;
+  return result2.value;
+}
+function toError(error62) {
+  if (error62 instanceof Error)
+    return error62;
+  if (typeof error62 === "string")
+    return new Error(error62);
+  try {
+    return new Error(JSON.stringify(error62));
+  } catch {
+    return new Error(String(error62));
+  }
+}
+var FileError, ExecutionError;
+var init_env3 = __esm({
+  "node_modules/@earendil-works/pi-durable/dist/env/index.js"() {
+    init_decode();
+    FileError = class extends Error {
+      code;
+      path;
+      constructor(code, message, path6, cause) {
+        super(message, cause === void 0 ? void 0 : { cause });
+        this.name = "FileError";
+        this.code = code;
+        this.path = path6;
+      }
+    };
+    ExecutionError = class extends Error {
+      code;
+      /** Spill file of a command that timed out or was aborted after its output crossed the spill thresholds. */
+      spillPath;
+      constructor(code, message, cause) {
+        super(message, cause === void 0 ? void 0 : { cause });
+        this.name = "ExecutionError";
+        this.code = code;
+      }
+    };
+  }
+});
+
+// node_modules/@earendil-works/pi-durable/dist/env/node-watch.js
+import { createHash as createHash3 } from "node:crypto";
+import { watch as fsWatch } from "node:fs";
+import { lstat, readdir as readdir2, readFile as readFile2, stat as stat4, statfs } from "node:fs/promises";
+import { dirname as dirname4, relative as relative3, sep as sep2 } from "node:path";
+function isNodeError(error62) {
+  return error62 instanceof Error && "code" in error62;
+}
+function isDenied(error62) {
+  return isNodeError(error62) && (error62.code === "EACCES" || error62.code === "EPERM");
+}
+function entryOf(stats, hash4) {
+  const kind = stats.isFile() ? "file" : stats.isDirectory() ? "directory" : stats.isSymbolicLink() ? "symlink" : "other";
+  return {
+    kind,
+    dev: stats.dev,
+    ino: stats.ino,
+    size: kind === "directory" ? 0 : stats.size,
+    mtimeMs: kind === "directory" ? 0 : stats.mtimeMs,
+    ...hash4 === void 0 ? {} : { hash: hash4 }
+  };
+}
+function sameEntry(a, b) {
+  return a.kind === b.kind && a.dev === b.dev && a.ino === b.ino && a.size === b.size && a.mtimeMs === b.mtimeMs && a.hash === b.hash;
+}
+function ancestorsOf(path6) {
+  const result2 = [];
+  for (let current = dirname4(path6); ; current = dirname4(current)) {
+    result2.push(current);
+    if (dirname4(current) === current)
+      return result2;
+  }
+}
+function isWithin2(path6, ancestor) {
+  return path6 === ancestor || path6.startsWith(ancestor.endsWith(sep2) ? ancestor : ancestor + sep2);
+}
+function excluded(target, name) {
+  return target.hidden && name.startsWith(".") || target.names.has(name);
+}
+async function anyUnreliable(paths2) {
+  if (process.platform !== "linux" && process.platform !== "android")
+    return false;
+  for (const path6 of paths2) {
+    for (const candidate of [path6, ...ancestorsOf(path6)]) {
+      const info = await statfs(candidate).catch(() => void 0);
+      if (info === void 0)
+        continue;
+      if (UNRELIABLE_FILE_SYSTEMS.has(info.type))
+        return true;
+      break;
+    }
+  }
+  return false;
+}
+var DEBOUNCE_MS, FSEVENTS_SETTLE_MS, DEFAULT_POLL_MS, DEFAULT_MAX_DIRECTORIES, OVERFLOW, HASH_MAX_BYTES, HASH_RECENT_MS, UNRELIABLE_FILE_SYSTEMS, BudgetExceeded, NodeFileWatcher;
+var init_node_watch = __esm({
+  "node_modules/@earendil-works/pi-durable/dist/env/node-watch.js"() {
+    init_env3();
+    DEBOUNCE_MS = 50;
+    FSEVENTS_SETTLE_MS = 500;
+    DEFAULT_POLL_MS = 2e3;
+    DEFAULT_MAX_DIRECTORIES = 1e4;
+    OVERFLOW = { kind: "overflow" };
+    HASH_MAX_BYTES = 256 * 1024;
+    HASH_RECENT_MS = 5e3;
+    UNRELIABLE_FILE_SYSTEMS = /* @__PURE__ */ new Set([
+      26985,
+      // NFS
+      20859,
+      // SMB
+      4283649346,
+      // CIFS
+      4266872130,
+      // SMB2
+      1702057286,
+      // FUSE (sshfs, Android shared storage)
+      16914839,
+      // 9P (WSL2 Windows drives)
+      198183888,
+      // Lustre
+      1196443219,
+      // GPFS
+      12805120,
+      // Ceph
+      1397113167,
+      // OpenAFS
+      1799439955,
+      // kAFS
+      1573531125
+      // sdcardfs
+    ]);
+    BudgetExceeded = class extends Error {
+    };
+    NodeFileWatcher = class _NodeFileWatcher {
+      #targets;
+      #onChange;
+      #pollIntervalMs;
+      #maxDirectories;
+      #watchers = /* @__PURE__ */ new Map();
+      #events = /* @__PURE__ */ new Set();
+      #mode;
+      #snapshot = /* @__PURE__ */ new Map();
+      #timer;
+      #settleTimer;
+      #running;
+      #dirty = false;
+      #stopped = false;
+      constructor(targets, onChange, mode, options) {
+        this.#targets = targets;
+        this.#onChange = onChange;
+        this.#mode = mode;
+        this.#pollIntervalMs = options.pollIntervalMs ?? DEFAULT_POLL_MS;
+        this.#maxDirectories = options.maxDirectories ?? DEFAULT_MAX_DIRECTORIES;
+      }
+      /** Establish coverage: watchers first, then the snapshot later changes are compared with. */
+      static async open(targets, resolvePath4, onChange, options) {
+        const resolved = targets.map((target) => ({
+          path: resolvePath4(target.path),
+          recursive: target.recursive === true,
+          hidden: target.exclude?.hidden === true,
+          names: new Set(target.exclude?.names ?? [])
+        }));
+        const mode = options.mode ?? (process.platform === "win32" || await anyUnreliable(resolved.map((target) => target.path)) ? "polling" : "native");
+        const watcher = new _NodeFileWatcher(resolved, onChange, mode, options);
+        try {
+          await watcher.#sync(false);
+        } catch (error62) {
+          watcher.#stop();
+          if (error62 instanceof BudgetExceeded)
+            throw new FileError("invalid", error62.message);
+          throw error62;
+        }
+        watcher.#schedulePoll();
+        return watcher;
+      }
+      get mode() {
+        return this.#mode;
+      }
+      async stop(_context) {
+        if (this.#stopped)
+          return;
+        this.#stop();
+        await this.#running;
+      }
+      #stop() {
+        this.#stopped = true;
+        clearTimeout(this.#timer);
+        this.#timer = void 0;
+        clearTimeout(this.#settleTimer);
+        this.#settleTimer = void 0;
+        for (const { watcher } of this.#watchers.values())
+          watcher.close();
+        this.#watchers.clear();
+      }
+      #deliver(change) {
+        if (this.#stopped)
+          return;
+        try {
+          this.#onChange(change);
+        } catch {
+        }
+      }
+      #schedulePoll() {
+        if (this.#stopped || this.#mode !== "polling")
+          return;
+        this.#timer = setTimeout(() => {
+          this.#timer = void 0;
+          void this.#flush().finally(() => this.#schedulePoll());
+        }, this.#pollIntervalMs);
+      }
+      #scheduleFlush() {
+        if (this.#stopped || this.#timer !== void 0)
+          return;
+        this.#timer = setTimeout(() => {
+          this.#timer = void 0;
+          void this.#flush();
+        }, DEBOUNCE_MS);
+      }
+      #scheduleSettle() {
+        if (this.#stopped)
+          return;
+        clearTimeout(this.#settleTimer);
+        this.#settleTimer = setTimeout(() => {
+          this.#settleTimer = void 0;
+          void this.#flush();
+        }, FSEVENTS_SETTLE_MS);
+      }
+      #flush() {
+        if (this.#running !== void 0) {
+          this.#dirty = true;
+          return this.#running;
+        }
+        this.#running = (async () => {
+          try {
+            do {
+              this.#dirty = false;
+              const events = [...this.#events];
+              this.#events.clear();
+              const changed = await this.#sync(true);
+              for (const path6 of events)
+                changed.add(path6);
+              if (changed.size > 0)
+                this.#deliver({ kind: "paths", paths: [...changed].sort() });
+            } while (this.#dirty && !this.#stopped);
+          } catch (error62) {
+            const message = error62 instanceof Error ? error62.message : String(error62);
+            const fileError = error62 instanceof FileError ? error62 : new FileError(isDenied(error62) ? "permission_denied" : "invalid", message);
+            this.#deliver({ kind: "failed", error: fileError });
+            this.#stop();
+          } finally {
+            this.#running = void 0;
+          }
+        })();
+        return this.#running;
+      }
+      /** Rescan, report differences, and install watchers for new directories, rescanning until none are new. */
+      async #sync(report2) {
+        const changed = /* @__PURE__ */ new Set();
+        for (let round = 0; round < 10 && !this.#stopped; round++) {
+          const scan = await this.#scan();
+          if (this.#stopped)
+            break;
+          const next = scan.snapshot;
+          if (report2)
+            for (const path6 of this.#diff(this.#snapshot, next))
+              changed.add(path6);
+          this.#snapshot = next;
+          if (this.#mode === "polling" || !this.#reconcileWatchers(scan))
+            break;
+          if (process.platform === "darwin")
+            this.#scheduleSettle();
+          report2 = true;
+        }
+        return changed;
+      }
+      #diff(previous, next) {
+        const changed = [];
+        for (const [path6, entry2] of next) {
+          const before = previous.get(path6);
+          if (before === void 0 || !sameEntry(before, entry2))
+            changed.push(this.#reported(path6));
+        }
+        for (const path6 of previous.keys())
+          if (!next.has(path6))
+            changed.push(this.#reported(path6));
+        return changed;
+      }
+      /** An ancestor that changed identity moved every target below it; report those targets. */
+      #reported(path6) {
+        if (this.#targets.some((target) => isWithin2(path6, target.path)))
+          return path6;
+        return this.#targets.find((target) => isWithin2(target.path, path6))?.path ?? path6;
+      }
+      async #scan() {
+        const snapshot = /* @__PURE__ */ new Map();
+        const linkedFiles = /* @__PURE__ */ new Set();
+        const counted = /* @__PURE__ */ new Set();
+        const traversed = /* @__PURE__ */ new Set();
+        const listed = /* @__PURE__ */ new Map();
+        const countDirectory = (path6) => {
+          counted.add(path6);
+          if (counted.size > this.#maxDirectories) {
+            throw new BudgetExceeded(`Watched paths exceed ${this.#maxDirectories} directories`);
+          }
+        };
+        const record2 = async (path6, stats) => {
+          let hash4;
+          if (this.#mode === "polling" && stats.isFile() && stats.size <= HASH_MAX_BYTES && Date.now() - stats.mtimeMs < HASH_RECENT_MS) {
+            hash4 = await readFile2(path6).then((content) => createHash3("sha256").update(content).digest("hex"), () => void 0);
+          }
+          snapshot.set(path6, entryOf(stats, hash4));
+        };
+        const scanDirectory = async (index, target, directory) => {
+          const key = `${index}\0${directory}`;
+          if (traversed.has(key))
+            return;
+          traversed.add(key);
+          let names2;
+          try {
+            names2 = await readdir2(directory);
+          } catch (error62) {
+            if (directory === target.path && isDenied(error62))
+              throw error62;
+            if (isNodeError(error62) && ["ENOENT", "EACCES", "EPERM", "ENOTDIR"].includes(error62.code ?? ""))
+              return;
+            throw error62;
+          }
+          for (const name of names2) {
+            if (excluded(target, name))
+              continue;
+            const path6 = `${directory.endsWith(sep2) ? directory : directory + sep2}${name}`;
+            let kind = listed.get(path6);
+            if (kind === void 0) {
+              const stats = await lstat(path6).catch(() => void 0);
+              if (stats === void 0)
+                continue;
+              kind = entryOf(stats).kind;
+              listed.set(path6, kind);
+              if (!snapshot.has(path6))
+                await record2(path6, stats);
+            }
+            if (target.recursive && kind === "directory") {
+              countDirectory(path6);
+              await scanDirectory(index, target, path6);
+            }
+          }
+        };
+        for (const [index, target] of this.#targets.entries()) {
+          for (const ancestor of ancestorsOf(target.path)) {
+            if (snapshot.has(ancestor))
+              continue;
+            const stats2 = await lstat(ancestor).catch(() => void 0);
+            if (stats2 !== void 0)
+              snapshot.set(ancestor, { ...entryOf(stats2), size: 0, mtimeMs: 0 });
+          }
+          let stats;
+          try {
+            stats = await stat4(target.path);
+          } catch (error62) {
+            if (isDenied(error62))
+              throw error62;
+            continue;
+          }
+          await record2(target.path, stats);
+          if (stats.isFile() && (await lstat(target.path).catch(() => void 0))?.isSymbolicLink()) {
+            linkedFiles.add(target.path);
+          }
+          if (stats.isDirectory()) {
+            countDirectory(target.path);
+            await scanDirectory(index, target, target.path);
+          }
+        }
+        return { snapshot, linkedFiles };
+      }
+      /**
+       * Watch every existing ancestor of each target, each target directory, each target that is a symbolic link to a file
+       * (changes to that file are not events of the link's directory), and on Linux each directory below a recursive target
+       * (elsewhere one recursive watcher per target). Returns whether a watcher was added.
+       */
+      #reconcileWatchers({ snapshot, linkedFiles }) {
+        const wanted = /* @__PURE__ */ new Map();
+        for (const path6 of linkedFiles)
+          wanted.set(path6, false);
+        const perDirectory = process.platform === "linux" || process.platform === "android";
+        for (const target of this.#targets) {
+          for (const ancestor of ancestorsOf(target.path)) {
+            if (snapshot.get(ancestor)?.kind === "directory" && !wanted.has(ancestor))
+              wanted.set(ancestor, false);
+          }
+          if (snapshot.get(target.path)?.kind !== "directory")
+            continue;
+          const recursiveRoot = target.recursive && !perDirectory;
+          wanted.set(target.path, recursiveRoot);
+          if (target.recursive && perDirectory) {
+            for (const [path6, entry2] of snapshot) {
+              if (entry2.kind === "directory" && path6 !== target.path && isWithin2(path6, target.path)) {
+                wanted.set(path6, false);
+              }
+            }
+          }
+        }
+        for (const [path6, installed] of this.#watchers) {
+          const entry2 = snapshot.get(path6);
+          if (!wanted.has(path6) || entry2 === void 0 || entry2.dev !== installed.dev || entry2.ino !== installed.ino) {
+            installed.watcher.close();
+            this.#watchers.delete(path6);
+          }
+        }
+        let added = false;
+        for (const [path6, recursive2] of wanted) {
+          const entry2 = snapshot.get(path6);
+          if (this.#watchers.has(path6) || entry2 === void 0)
+            continue;
+          const linked = linkedFiles.has(path6);
+          try {
+            const watcher = fsWatch(path6, { recursive: recursive2, persistent: false }, (_event, filename) => linked ? this.#onLinkedFileEvent(path6) : this.#onEvent(path6, filename === null ? void 0 : String(filename)));
+            watcher.on("error", () => {
+              watcher.close();
+              if (this.#watchers.get(path6)?.watcher === watcher)
+                this.#watchers.delete(path6);
+              this.#scheduleFlush();
+            });
+            this.#watchers.set(path6, { watcher, dev: entry2.dev, ino: entry2.ino });
+            added = true;
+          } catch (error62) {
+            if (isNodeError(error62) && error62.code !== "ENOENT" && error62.code !== "EACCES" && error62.code !== "EPERM") {
+              this.#switchToPolling();
+              return false;
+            }
+          }
+        }
+        return added;
+      }
+      #switchToPolling() {
+        if (this.#mode === "polling")
+          return;
+        this.#mode = "polling";
+        for (const { watcher } of this.#watchers.values())
+          watcher.close();
+        this.#watchers.clear();
+        this.#deliver(OVERFLOW);
+        clearTimeout(this.#timer);
+        this.#timer = void 0;
+        this.#schedulePoll();
+      }
+      #onEvent(directory, filename) {
+        if (this.#stopped)
+          return;
+        const path6 = filename === void 0 ? directory : `${directory.endsWith(sep2) ? directory : directory + sep2}${filename}`;
+        const relevant = this.#inScope(path6);
+        if (relevant)
+          this.#events.add(this.#reported(path6));
+        if (relevant || filename === void 0)
+          this.#scheduleFlush();
+      }
+      /** The file a target links to changed: report the target. */
+      #onLinkedFileEvent(target) {
+        if (this.#stopped)
+          return;
+        this.#events.add(target);
+        this.#scheduleFlush();
+      }
+      #inScope(path6) {
+        for (const target of this.#targets) {
+          if (isWithin2(target.path, path6))
+            return true;
+          if (!isWithin2(path6, target.path) || path6 === target.path)
+            continue;
+          const components = relative3(target.path, path6).split(sep2);
+          if (!target.recursive && components.length > 1)
+            continue;
+          if (components.some((name) => excluded(target, name)))
+            continue;
+          return true;
+        }
+        return false;
+      }
+    };
+  }
+});
+
+// node_modules/@earendil-works/pi-durable/dist/env/node.js
+import { spawn as spawn2 } from "node:child_process";
+import { randomUUID as randomUUID2 } from "node:crypto";
+import { constants as constants2, createWriteStream as createWriteStream2 } from "node:fs";
+import { access as access2, appendFile, lstat as lstat2, mkdir as mkdir2, mkdtemp, opendir, open as openFile, readdir as readdir3, readFile as readFile3, realpath as realpath2, rename, rm, writeFile as writeFile2 } from "node:fs/promises";
+import { homedir as homedir2, constants as osConstants, tmpdir } from "node:os";
+import { basename as basename4, isAbsolute as isAbsolute4, join as join3, resolve as resolve4, win32 } from "node:path";
+import { fileURLToPath } from "node:url";
+function resolveTimeoutMs(timeout) {
+  if (timeout === void 0)
+    return ok(void 0);
+  if (!Number.isFinite(timeout) || timeout <= 0) {
+    return err(new ExecutionError("timeout", "Invalid timeout: must be a finite number of seconds"));
+  }
+  const timeoutMs = timeout * 1e3;
+  if (timeoutMs > MAX_TIMEOUT_MS) {
+    return err(new ExecutionError("timeout", `Invalid timeout: maximum is ${MAX_TIMEOUT_SECONDS} seconds`));
+  }
+  return ok(timeoutMs);
+}
+function resolvePath2(cwd, path6) {
+  let normalized = path6;
+  if (normalized === "~") {
+    normalized = homedir2();
+  } else if (normalized.startsWith("~/") || process.platform === "win32" && normalized.startsWith("~\\")) {
+    normalized = join3(homedir2(), normalized.slice(2));
+  } else if (normalized.startsWith("file://")) {
+    try {
+      normalized = fileURLToPath(normalized);
+    } catch {
+    }
+  }
+  return isAbsolute4(normalized) ? resolve4(normalized) : resolve4(cwd, normalized);
+}
+function fileKindFromStats(stats) {
+  if (stats.isFile())
+    return "file";
+  if (stats.isDirectory())
+    return "directory";
+  if (stats.isSymbolicLink())
+    return "symlink";
+  return void 0;
+}
+function fileInfoFromStats(path6, stats) {
+  const kind = fileKindFromStats(stats);
+  if (!kind)
+    return err(new FileError("invalid", "Unsupported file type", path6));
+  return ok({
+    name: basename4(path6),
+    path: path6,
+    kind,
+    size: stats.size,
+    mtimeMs: stats.mtimeMs
+  });
+}
+function isNodeError2(error62) {
+  return error62 instanceof Error && "code" in error62;
+}
+function toFileError(error62, fallbackPath) {
+  if (error62 instanceof FileError)
+    return error62;
+  const cause = toError(error62);
+  const nodeError = isNodeError2(error62) ? error62 : void 0;
+  const path6 = typeof nodeError?.path === "string" ? nodeError.path : fallbackPath;
+  if (nodeError) {
+    const message = nodeError.message;
+    switch (nodeError.code) {
+      case "ABORT_ERR":
+        return new FileError("aborted", message, path6, cause);
+      case "ENOENT":
+        return new FileError("not_found", message, path6, cause);
+      case "EACCES":
+      case "EPERM":
+        return new FileError("permission_denied", message, path6, cause);
+      case "ENOTDIR":
+        return new FileError("not_directory", message, path6, cause);
+      case "EISDIR":
+        return new FileError("is_directory", message, path6, cause);
+      case "EINVAL":
+        return new FileError("invalid", message, path6, cause);
+    }
+  }
+  return new FileError("unknown", cause.message, path6, cause);
+}
+function abortResult(signal, path6) {
+  return signal?.aborted ? err(new FileError("aborted", "aborted", path6)) : void 0;
+}
+async function pathExists(path6) {
+  try {
+    await access2(path6, constants2.F_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+async function runCommand(command2, args, timeoutMs) {
+  return await new Promise((resolve9) => {
+    let stdout = "";
+    let child;
+    try {
+      child = spawn2(command2, args, {
+        stdio: ["ignore", "pipe", "ignore"],
+        windowsHide: true
+      });
+    } catch {
+      resolve9({ stdout: "", status: null });
+      return;
+    }
+    const timeout = setTimeout(() => {
+      if (child.pid)
+        killProcessTree(child.pid);
+    }, timeoutMs);
+    child.stdout?.setEncoding("utf8");
+    child.stdout?.on("data", (chunk) => {
+      stdout += chunk;
+    });
+    child.on("error", () => {
+      clearTimeout(timeout);
+      resolve9({ stdout: "", status: null });
+    });
+    child.on("close", (status) => {
+      clearTimeout(timeout);
+      resolve9({ stdout, status });
+    });
+  });
+}
+async function findBashOnPath() {
+  const result2 = process.platform === "win32" ? await runCommand("where", ["bash.exe"], 5e3) : await runCommand("which", ["bash"], 5e3);
+  if (result2.status !== 0 || !result2.stdout)
+    return null;
+  const firstMatch = result2.stdout.trim().split(/\r?\n/)[0];
+  return firstMatch && await pathExists(firstMatch) ? firstMatch : null;
+}
+function isLegacyWslBashPath(path6) {
+  const normalized = win32.normalize(path6).toLowerCase();
+  const systemRoot = process.env.SystemRoot;
+  if (systemRoot) {
+    if (!/^[a-z]:[\\/]/i.test(systemRoot))
+      return false;
+    return ["System32", "Sysnative"].some((directory) => normalized === win32.join(systemRoot, directory, "bash.exe").toLowerCase());
+  }
+  return /^[a-z]:\\windows\\(?:system32|sysnative)\\bash\.exe$/.test(normalized);
+}
+function getBashShellConfig(shell) {
+  return isLegacyWslBashPath(shell) ? { shell, args: ["-s"], commandTransport: "stdin" } : { shell, args: ["-c"] };
+}
+async function getShellConfig(customShellPath) {
+  if (customShellPath) {
+    if (await pathExists(customShellPath)) {
+      return ok(getBashShellConfig(customShellPath));
+    }
+    return err(new ExecutionError("shell_unavailable", `Custom shell path not found: ${customShellPath}`));
+  }
+  if (process.platform === "win32") {
+    const candidates = [];
+    const programFiles = process.env.ProgramFiles;
+    if (programFiles)
+      candidates.push(`${programFiles}\\Git\\bin\\bash.exe`);
+    const programFilesX86 = process.env["ProgramFiles(x86)"];
+    if (programFilesX86)
+      candidates.push(`${programFilesX86}\\Git\\bin\\bash.exe`);
+    for (const candidate of candidates) {
+      if (await pathExists(candidate)) {
+        return ok(getBashShellConfig(candidate));
+      }
+    }
+    const bashOnPath2 = await findBashOnPath();
+    if (bashOnPath2) {
+      return ok(getBashShellConfig(bashOnPath2));
+    }
+    return err(new ExecutionError("shell_unavailable", `No bash shell found. Options:
+  1. Install Git for Windows: https://git-scm.com/download/win
+  2. Add your bash to PATH (Cygwin, MSYS2, etc.)
+  3. Configure an explicit shellPath
+
+Searched Git Bash in:
+${candidates.map((path6) => `  ${path6}`).join("\n")}`));
+  }
+  if (await pathExists("/bin/bash")) {
+    return ok(getBashShellConfig("/bin/bash"));
+  }
+  const bashOnPath = await findBashOnPath();
+  if (bashOnPath) {
+    return ok(getBashShellConfig(bashOnPath));
+  }
+  return ok({ shell: "sh", args: ["-c"] });
+}
+function getShellEnv(baseEnv, extraEnv, inheritEnv = true) {
+  if (!inheritEnv)
+    return { ...extraEnv };
+  return {
+    ...process.env,
+    ...baseEnv,
+    ...extraEnv
+  };
+}
+function killProcessTree(pid) {
+  if (process.platform === "win32") {
+    try {
+      const child = spawn2(join3(process.env.SystemRoot || "C:\\Windows", "System32", "taskkill.exe"), ["/F", "/T", "/PID", String(pid)], {
+        stdio: "ignore",
+        detached: true,
+        windowsHide: true
+      });
+      child.once("error", () => {
+      });
+    } catch {
+    }
+    return;
+  }
+  try {
+    process.kill(-pid, "SIGKILL");
+  } catch {
+    try {
+      process.kill(pid, "SIGKILL");
+    } catch {
+    }
+  }
+}
+function waitForChildProcess(child, spillIsDraining) {
+  return new Promise((resolvePromise, reject2) => {
+    let settled = false;
+    let exited = false;
+    let exitCode = null;
+    let exitSignal = null;
+    let postExitTimer;
+    let stdoutEnded = child.stdout === null;
+    let stderrEnded = child.stderr === null;
+    const cleanup = () => {
+      if (postExitTimer)
+        clearTimeout(postExitTimer);
+      child.removeListener("error", onError);
+      child.removeListener("exit", onExit);
+      child.removeListener("close", onClose);
+      child.stdout?.removeListener("end", onStdoutEnd);
+      child.stderr?.removeListener("end", onStderrEnd);
+      child.stdout?.removeListener("data", onData);
+      child.stderr?.removeListener("data", onData);
+    };
+    const finalize2 = () => {
+      if (settled)
+        return;
+      settled = true;
+      cleanup();
+      child.stdout?.destroy();
+      child.stderr?.destroy();
+      resolvePromise({ code: exitCode, signal: exitSignal });
+    };
+    const maybeFinalizeAfterExit = () => {
+      if (exited && stdoutEnded && stderrEnded)
+        finalize2();
+    };
+    const armIdleTimer = () => {
+      if (postExitTimer)
+        clearTimeout(postExitTimer);
+      postExitTimer = setTimeout(() => {
+        if (spillIsDraining())
+          armIdleTimer();
+        else
+          finalize2();
+      }, EXIT_STDIO_GRACE_MS);
+    };
+    const onData = () => {
+      if (exited && !settled)
+        armIdleTimer();
+    };
+    const onStdoutEnd = () => {
+      stdoutEnded = true;
+      maybeFinalizeAfterExit();
+    };
+    const onStderrEnd = () => {
+      stderrEnded = true;
+      maybeFinalizeAfterExit();
+    };
+    const onError = (error62) => {
+      if (settled)
+        return;
+      settled = true;
+      cleanup();
+      reject2(error62);
+    };
+    const onExit = (code, signal) => {
+      exited = true;
+      exitCode = code;
+      exitSignal = signal;
+      maybeFinalizeAfterExit();
+      if (!settled)
+        armIdleTimer();
+    };
+    const onClose = (code, signal) => {
+      exitCode = code;
+      exitSignal = signal;
+      finalize2();
+    };
+    child.stdout?.once("end", onStdoutEnd);
+    child.stderr?.once("end", onStderrEnd);
+    child.stdout?.on("data", onData);
+    child.stderr?.on("data", onData);
+    child.once("error", onError);
+    child.once("exit", onExit);
+    child.once("close", onClose);
+  });
+}
+function closedResult(what, path6) {
+  return err(new FileError("invalid", `${what} is closed`, path6));
+}
+function symlinkRefused(path6, cause) {
+  return new FileError("invalid", "Refusing to follow a symbolic link", path6, cause);
+}
+var MAX_TIMEOUT_MS, MAX_TIMEOUT_SECONDS, EXIT_STDIO_GRACE_MS, SPILL_HIGH_WATER_MARK, BINARY_READ_CHUNK, NodeTextLineReader, NodeBinaryReader, NodeDirReader, NodeExecutionEnv;
+var init_node4 = __esm({
+  "node_modules/@earendil-works/pi-durable/dist/env/node.js"() {
+    init_decode();
+    init_env3();
+    init_line_scan();
+    init_node_watch();
+    MAX_TIMEOUT_MS = 2147483647;
+    MAX_TIMEOUT_SECONDS = MAX_TIMEOUT_MS / 1e3;
+    EXIT_STDIO_GRACE_MS = 100;
+    SPILL_HIGH_WATER_MARK = 1024 * 1024;
+    BINARY_READ_CHUNK = 1024 * 1024;
+    NodeTextLineReader = class {
+      file;
+      path;
+      decoder = new StreamDecoder();
+      chunk = new Uint8Array(64 * 1024);
+      byteOffset = 0;
+      buffered = "";
+      ended = false;
+      closed = false;
+      constructor(file2, path6) {
+        this.file = file2;
+        this.path = path6;
+      }
+      async readLine(context) {
+        const aborted2 = abortResult(context.abortSignal, this.path);
+        if (aborted2)
+          return aborted2;
+        if (this.closed)
+          return err(new FileError("invalid", "Text line reader is closed", this.path));
+        try {
+          while (true) {
+            const newline = this.buffered.indexOf("\n");
+            if (newline !== -1) {
+              const text3 = this.buffered.slice(0, newline);
+              this.buffered = this.buffered.slice(newline + 1);
+              return ok({ text: text3, terminated: true });
+            }
+            if (this.ended) {
+              if (this.buffered.length === 0)
+                return ok(void 0);
+              const text3 = this.buffered;
+              this.buffered = "";
+              return ok({ text: text3, terminated: false });
+            }
+            const { bytesRead } = await this.file.read(this.chunk, 0, this.chunk.length, this.byteOffset);
+            const afterReadAbort = abortResult(context.abortSignal, this.path);
+            if (afterReadAbort)
+              return afterReadAbort;
+            this.byteOffset += bytesRead;
+            if (bytesRead === 0) {
+              this.buffered += this.decoder.decode();
+              this.ended = true;
+            } else {
+              this.buffered += this.decoder.decode(this.chunk.subarray(0, bytesRead));
+            }
+          }
+        } catch (error62) {
+          return err(toFileError(error62, this.path));
+        }
+      }
+      async close(_context) {
+        if (this.closed)
+          return;
+        this.closed = true;
+        this.buffered = "";
+        try {
+          await this.file.close();
+        } catch {
+        }
+      }
+    };
+    NodeBinaryReader = class {
+      file;
+      path;
+      closed = false;
+      constructor(file2, path6) {
+        this.file = file2;
+        this.path = path6;
+      }
+      async info(context) {
+        const aborted2 = abortResult(context.abortSignal, this.path);
+        if (aborted2)
+          return aborted2;
+        if (this.closed)
+          return closedResult("Binary reader", this.path);
+        try {
+          return fileInfoFromStats(this.path, await this.file.stat());
+        } catch (error62) {
+          return err(toFileError(error62, this.path));
+        }
+      }
+      async read(offset, length, context) {
+        const aborted2 = abortResult(context.abortSignal, this.path);
+        if (aborted2)
+          return aborted2;
+        if (this.closed)
+          return closedResult("Binary reader", this.path);
+        if (!Number.isSafeInteger(offset) || offset < 0 || !Number.isSafeInteger(length) || length < 0) {
+          return err(new FileError("invalid", "Offset and length must be non-negative safe integers", this.path));
+        }
+        const chunks = [];
+        let total = 0;
+        try {
+          while (total < length) {
+            const chunk = new Uint8Array(Math.min(length - total, BINARY_READ_CHUNK));
+            const { bytesRead } = await this.file.read(chunk, 0, chunk.length, offset + total);
+            const afterReadAbort = abortResult(context.abortSignal, this.path);
+            if (afterReadAbort)
+              return afterReadAbort;
+            if (bytesRead === 0)
+              break;
+            chunks.push(bytesRead === chunk.length ? chunk : chunk.subarray(0, bytesRead));
+            total += bytesRead;
+          }
+        } catch (error62) {
+          return err(toFileError(error62, this.path));
+        }
+        if (chunks.length === 1)
+          return ok(chunks[0]);
+        const bytes2 = new Uint8Array(total);
+        let position = 0;
+        for (const chunk of chunks) {
+          bytes2.set(chunk, position);
+          position += chunk.length;
+        }
+        return ok(bytes2);
+      }
+      async scanLines(options, context) {
+        const aborted2 = abortResult(context.abortSignal, this.path);
+        if (aborted2)
+          return aborted2;
+        if (this.closed)
+          return closedResult("Binary reader", this.path);
+        let scanner;
+        try {
+          scanner = new LineScanner(options.startLine, options.endLine);
+        } catch {
+          return err(new FileError("invalid", "Invalid line range", this.path));
+        }
+        const chunk = new Uint8Array(64 * 1024);
+        try {
+          for (let position = 0; ; ) {
+            const { bytesRead } = await this.file.read(chunk, 0, chunk.length, position);
+            const afterReadAbort = abortResult(context.abortSignal, this.path);
+            if (afterReadAbort)
+              return afterReadAbort;
+            if (bytesRead === 0)
+              return ok(scanner.finish());
+            scanner.push(chunk.subarray(0, bytesRead));
+            position += bytesRead;
+          }
+        } catch (error62) {
+          return err(toFileError(error62, this.path));
+        }
+      }
+      async close(_context) {
+        if (this.closed)
+          return;
+        this.closed = true;
+        await this.file.close().catch(() => void 0);
+      }
+    };
+    NodeDirReader = class {
+      dir;
+      path;
+      done = false;
+      closed = false;
+      constructor(dir, path6) {
+        this.dir = dir;
+        this.path = path6;
+      }
+      async next(maxEntries, context) {
+        const aborted2 = abortResult(context.abortSignal, this.path);
+        if (aborted2)
+          return aborted2;
+        if (this.closed)
+          return closedResult("Directory reader", this.path);
+        if (!Number.isSafeInteger(maxEntries) || maxEntries <= 0) {
+          return err(new FileError("invalid", "maxEntries must be a positive safe integer", this.path));
+        }
+        const entries2 = [];
+        try {
+          while (!this.done && entries2.length < maxEntries) {
+            const entry2 = await this.dir.read();
+            if (entry2 === null) {
+              this.done = true;
+              break;
+            }
+            const loopAbort = abortResult(context.abortSignal, this.path);
+            if (loopAbort)
+              return loopAbort;
+            const entryPath = resolve4(this.path, entry2.name);
+            let stats;
+            try {
+              stats = await lstat2(entryPath);
+            } catch (error62) {
+              if (isNodeError2(error62) && error62.code === "ENOENT")
+                continue;
+              return err(toFileError(error62, entryPath));
+            }
+            const info = fileInfoFromStats(entryPath, stats);
+            if (info.ok)
+              entries2.push(info.value);
+          }
+          return ok({ entries: entries2, done: this.done });
+        } catch (error62) {
+          return err(toFileError(error62, this.path));
+        }
+      }
+      async close(_context) {
+        if (this.closed)
+          return;
+        this.closed = true;
+        await this.dir.close().catch(() => void 0);
+      }
+    };
+    NodeExecutionEnv = class {
+      /** Every local environment sees the same files. */
+      id = "node:local";
+      cwd;
+      shellPath;
+      shellEnv;
+      watchOptions;
+      activeChildPids = /* @__PURE__ */ new Set();
+      constructor(options) {
+        this.cwd = options.cwd;
+        this.shellPath = options.shellPath;
+        this.shellEnv = options.shellEnv;
+        this.watchOptions = options.watch ?? {};
+      }
+      async watch(targets, onChange, context) {
+        const aborted2 = abortResult(context.abortSignal);
+        if (aborted2)
+          return aborted2;
+        try {
+          const watcher = await NodeFileWatcher.open(targets, (path6) => resolvePath2(this.cwd, path6), onChange, this.watchOptions);
+          const afterOpenAbort = abortResult(context.abortSignal);
+          if (afterOpenAbort) {
+            await watcher.stop(context);
+            return afterOpenAbort;
+          }
+          return ok(watcher);
+        } catch (error62) {
+          return err(toFileError(error62));
+        }
+      }
+      async absolutePath(path6, _context) {
+        return ok(resolvePath2(this.cwd, path6));
+      }
+      async joinPath(parts, _context) {
+        return ok(join3(...parts));
+      }
+      async exec(command2, options, context) {
+        const signal = context.abortSignal;
+        if (signal?.aborted)
+          return err(new ExecutionError("aborted", "aborted"));
+        const timeoutMsResult = resolveTimeoutMs(options?.timeout);
+        if (!timeoutMsResult.ok)
+          return err(timeoutMsResult.error);
+        const timeoutMs = timeoutMsResult.value;
+        const cwd = options?.cwd ? resolvePath2(this.cwd, options.cwd) : this.cwd;
+        let program;
+        let args;
+        let stdinCommand;
+        if (typeof command2 === "string") {
+          const shellConfig = await getShellConfig(this.shellPath);
+          if (!shellConfig.ok)
+            return shellConfig;
+          const commandFromStdin = shellConfig.value.commandTransport === "stdin";
+          program = shellConfig.value.shell;
+          args = commandFromStdin ? shellConfig.value.args : [...shellConfig.value.args, command2];
+          stdinCommand = commandFromStdin ? command2 : void 0;
+        } else {
+          const [first, ...rest] = command2;
+          if (first === void 0)
+            return err(new ExecutionError("spawn_error", "Empty argv: no program to run"));
+          program = first;
+          args = rest;
+        }
+        try {
+          await access2(cwd, constants2.F_OK);
+        } catch (error62) {
+          const cause = toError(error62);
+          return err(new ExecutionError("spawn_error", `Working directory does not exist: ${cwd}
+Cannot execute bash commands.`, cause));
+        }
+        return await new Promise((resolvePromise) => {
+          let settled = false;
+          let timedOut = false;
+          let callbackError;
+          let spillError;
+          let child;
+          let timeoutId;
+          const spillPrefix = [];
+          let spillPath;
+          const spillQueue = [];
+          let spillStart;
+          let spillStream;
+          let spillBackpressured = false;
+          const onAbort = () => {
+            if (child?.pid)
+              killProcessTree(child.pid);
+          };
+          const failCallback = (error62) => {
+            if (callbackError !== void 0)
+              return;
+            const cause = toError(error62);
+            callbackError = new ExecutionError("callback_error", cause.message, cause);
+            onAbort();
+          };
+          const stdoutDecoder = new StreamDecoder();
+          const stderrDecoder = new StreamDecoder();
+          const emit = (text3, stream6) => {
+            if (settled || text3 === "" || options?.onOutput === void 0 || callbackError !== void 0)
+              return;
+            try {
+              options.onOutput(text3, context, { stream: stream6 });
+            } catch (error62) {
+              failCallback(error62);
+            }
+          };
+          let seenBytes = 0;
+          let seenNewlines = 0;
+          const settle4 = (result2) => {
+            if (settled)
+              return;
+            settled = true;
+            if (timeoutId)
+              clearTimeout(timeoutId);
+            if (signal)
+              signal.removeEventListener("abort", onAbort);
+            if (child?.pid)
+              this.activeChildPids.delete(child.pid);
+            resolvePromise(result2);
+          };
+          const pauseOutput = () => {
+            child?.stdout?.pause();
+            child?.stderr?.pause();
+          };
+          const resumeOutput = () => {
+            if (callbackError || spillError || timedOut || signal?.aborted || spillBackpressured)
+              return;
+            child?.stdout?.resume();
+            child?.stderr?.resume();
+          };
+          const failSpill = (error62) => {
+            if (spillError !== void 0)
+              return;
+            const cause = toError(error62);
+            spillError = new ExecutionError("unknown", `Failed to preserve complete shell output: ${cause.message}`, cause);
+            spillBackpressured = false;
+            onAbort();
+          };
+          const writeSpill = (chunk) => {
+            if (spillStream === void 0 || chunk.length === 0)
+              return;
+            if (spillStream.write(chunk) || spillBackpressured)
+              return;
+            spillBackpressured = true;
+            pauseOutput();
+            spillStream.once("drain", () => {
+              spillBackpressured = false;
+              resumeOutput();
+            });
+          };
+          const startSpill = (chunk) => {
+            if (spillStream !== void 0) {
+              writeSpill(chunk);
+              return;
+            }
+            spillQueue.push(chunk);
+            if (spillStart !== void 0)
+              return;
+            pauseOutput();
+            spillStart = (async () => {
+              const created = await this.createTempFile({ prefix: "pi-output-", suffix: ".log" }, context);
+              if (!created.ok)
+                throw created.error;
+              spillPath = created.value;
+              spillStream = createWriteStream2(spillPath, { flags: "a", highWaterMark: SPILL_HIGH_WATER_MARK });
+              spillStream.on("error", failSpill);
+              for (const queued of spillQueue)
+                writeSpill(queued);
+              spillQueue.length = 0;
+            })().catch(failSpill).finally(resumeOutput);
+          };
+          const finishSpill = async () => {
+            await spillStart;
+            const stream6 = spillStream;
+            if (stream6 === void 0 || spillError !== void 0 || stream6.destroyed)
+              return;
+            await new Promise((resolveFinish) => {
+              stream6.once("error", () => resolveFinish());
+              stream6.once("finish", resolveFinish);
+              stream6.end();
+            });
+          };
+          try {
+            child = spawn2(program, args, {
+              cwd,
+              detached: process.platform !== "win32",
+              env: getShellEnv(this.shellEnv, options?.env, options?.inheritEnv),
+              stdio: [stdinCommand === void 0 ? "ignore" : "pipe", "pipe", "pipe"],
+              windowsHide: true
+            });
+            if (child.pid)
+              this.activeChildPids.add(child.pid);
+            if (stdinCommand !== void 0) {
+              child.stdin?.on("error", () => {
+              });
+              child.stdin?.end(stdinCommand);
+            }
+          } catch (error62) {
+            const cause = toError(error62);
+            settle4(err(new ExecutionError("spawn_error", cause.message, cause)));
+            return;
+          }
+          timeoutId = timeoutMs === void 0 ? void 0 : setTimeout(() => {
+            timedOut = true;
+            onAbort();
+          }, timeoutMs);
+          if (signal) {
+            if (signal.aborted)
+              onAbort();
+            else
+              signal.addEventListener("abort", onAbort, { once: true });
+          }
+          const feed = (source, decoder2) => (chunk) => {
+            emit(decoder2.decode(chunk), source);
+            const spill = options?.spill;
+            if (spill === void 0 || chunk.length === 0)
+              return;
+            if (spillStart !== void 0) {
+              startSpill(chunk);
+              return;
+            }
+            seenBytes += chunk.length;
+            for (let index = chunk.indexOf(10); index !== -1; index = chunk.indexOf(10, index + 1))
+              seenNewlines++;
+            const lines2 = seenNewlines + (chunk[chunk.length - 1] === 10 ? 0 : 1);
+            if (seenBytes <= spill.afterBytes && lines2 <= spill.afterLines) {
+              spillPrefix.push(chunk);
+              return;
+            }
+            for (const prefix of spillPrefix)
+              startSpill(prefix);
+            spillPrefix.length = 0;
+            startSpill(chunk);
+          };
+          child.stdout?.on("data", feed("stdout", stdoutDecoder));
+          child.stderr?.on("data", feed("stderr", stderrDecoder));
+          void waitForChildProcess(child, () => spillError === void 0 && spillStart !== void 0 && (spillStream === void 0 || spillBackpressured)).then(async ({ code, signal: exitSignal }) => {
+            await finishSpill();
+            emit(stdoutDecoder.decode(), "stdout");
+            emit(stderrDecoder.decode(), "stderr");
+            if (callbackError) {
+              settle4(err(callbackError));
+              return;
+            }
+            const interrupted2 = timedOut ? new ExecutionError("timeout", `timeout:${options?.timeout}`) : signal?.aborted ? new ExecutionError("aborted", "aborted") : void 0;
+            if (interrupted2 !== void 0) {
+              if (spillPath !== void 0)
+                interrupted2.spillPath = spillPath;
+              settle4(err(interrupted2));
+              return;
+            }
+            if (spillError) {
+              settle4(err(spillError));
+              return;
+            }
+            const exitCode = code ?? (exitSignal ? 128 + (osConstants.signals[exitSignal] ?? 0) : 1);
+            settle4(ok({ exitCode, ...spillPath === void 0 ? {} : { spillPath } }));
+          }, (error62) => settle4(err(new ExecutionError("spawn_error", error62.message, error62))));
+        });
+      }
+      async openTextLineReader(path6, context) {
+        const resolved = resolvePath2(this.cwd, path6);
+        const aborted2 = abortResult(context.abortSignal, resolved);
+        if (aborted2)
+          return aborted2;
+        try {
+          const file2 = await openFile(resolved, "r");
+          const afterOpenAbort = abortResult(context.abortSignal, resolved);
+          if (afterOpenAbort) {
+            await file2.close().catch(() => void 0);
+            return afterOpenAbort;
+          }
+          return ok(new NodeTextLineReader(file2, resolved));
+        } catch (error62) {
+          return err(toFileError(error62, resolved));
+        }
+      }
+      async readTextFile(path6, context) {
+        const resolved = resolvePath2(this.cwd, path6);
+        const signal = context.abortSignal;
+        const aborted2 = abortResult(signal, resolved);
+        if (aborted2)
+          return aborted2;
+        try {
+          return ok(await readFile3(resolved, { encoding: "utf8", signal }));
+        } catch (error62) {
+          return err(toFileError(error62, resolved));
+        }
+      }
+      async readTextLines(path6, options, context) {
+        if (options?.maxLines !== void 0 && options.maxLines <= 0)
+          return ok([]);
+        const opened = await this.openTextLineReader(path6, context);
+        if (!opened.ok)
+          return opened;
+        const lines2 = [];
+        try {
+          while (options?.maxLines === void 0 || lines2.length < options.maxLines) {
+            const line = await opened.value.readLine(context);
+            if (!line.ok)
+              return line;
+            if (line.value === void 0)
+              break;
+            lines2.push(line.value.text);
+          }
+          return ok(lines2);
+        } finally {
+          await opened.value.close(context);
+        }
+      }
+      async readBinaryFile(path6, context) {
+        const resolved = resolvePath2(this.cwd, path6);
+        const signal = context.abortSignal;
+        const aborted2 = abortResult(signal, resolved);
+        if (aborted2)
+          return aborted2;
+        try {
+          return ok(await readFile3(resolved, { signal }));
+        } catch (error62) {
+          return err(toFileError(error62, resolved));
+        }
+      }
+      async openBinaryReader(path6, options, context) {
+        const resolved = resolvePath2(this.cwd, path6);
+        const aborted2 = abortResult(context.abortSignal, resolved);
+        if (aborted2)
+          return aborted2;
+        const noFollow = options?.noFollow === true;
+        let file2;
+        try {
+          let flags = constants2.O_RDONLY;
+          if (process.platform === "win32") {
+            if (noFollow && (await lstat2(resolved)).isSymbolicLink())
+              return err(symlinkRefused(resolved));
+          } else {
+            flags |= constants2.O_NONBLOCK;
+            if (noFollow)
+              flags |= constants2.O_NOFOLLOW;
+          }
+          file2 = await openFile(resolved, flags);
+          const stats = await file2.stat();
+          if (!stats.isFile()) {
+            await file2.close().catch(() => void 0);
+            return err(stats.isDirectory() ? new FileError("is_directory", "EISDIR: illegal operation on a directory, read", resolved) : new FileError("invalid", "Not a regular file", resolved));
+          }
+          const afterOpenAbort = abortResult(context.abortSignal, resolved);
+          if (afterOpenAbort) {
+            await file2.close().catch(() => void 0);
+            return afterOpenAbort;
+          }
+          return ok(new NodeBinaryReader(file2, resolved));
+        } catch (error62) {
+          await file2?.close().catch(() => void 0);
+          if (noFollow && isNodeError2(error62) && (error62.code === "ELOOP" || error62.code === "EMLINK")) {
+            return err(symlinkRefused(resolved, toError(error62)));
+          }
+          return err(toFileError(error62, resolved));
+        }
+      }
+      async writeFile(path6, content, context) {
+        const resolved = resolvePath2(this.cwd, path6);
+        const signal = context.abortSignal;
+        const aborted2 = abortResult(signal, resolved);
+        if (aborted2)
+          return aborted2;
+        try {
+          await mkdir2(resolve4(resolved, ".."), { recursive: true });
+          const afterMkdirAbort = abortResult(signal, resolved);
+          if (afterMkdirAbort)
+            return afterMkdirAbort;
+          await writeFile2(resolved, content, { signal });
+          return ok(void 0);
+        } catch (error62) {
+          return err(toFileError(error62, resolved));
+        }
+      }
+      async appendFile(path6, content, context) {
+        const resolved = resolvePath2(this.cwd, path6);
+        const signal = context.abortSignal;
+        const aborted2 = abortResult(signal, resolved);
+        if (aborted2)
+          return aborted2;
+        try {
+          await mkdir2(resolve4(resolved, ".."), { recursive: true });
+          const afterMkdirAbort = abortResult(signal, resolved);
+          if (afterMkdirAbort)
+            return afterMkdirAbort;
+          await appendFile(resolved, content);
+          const afterAppendAbort = abortResult(signal, resolved);
+          return afterAppendAbort ?? ok(void 0);
+        } catch (error62) {
+          return err(toFileError(error62, resolved));
+        }
+      }
+      async truncateFile(path6, size3, context) {
+        const resolved = resolvePath2(this.cwd, path6);
+        const signal = context.abortSignal;
+        const aborted2 = abortResult(signal, resolved);
+        if (aborted2)
+          return aborted2;
+        if (!Number.isSafeInteger(size3) || size3 < 0) {
+          return err(new FileError("invalid", "File size must be a non-negative safe integer", resolved));
+        }
+        let file2;
+        try {
+          file2 = await openFile(resolved, "r+");
+          await file2.truncate(size3);
+          const afterTruncateAbort = abortResult(signal, resolved);
+          return afterTruncateAbort ?? ok(void 0);
+        } catch (error62) {
+          return err(toFileError(error62, resolved));
+        } finally {
+          await file2?.close().catch(() => void 0);
+        }
+      }
+      async flushFile(path6, context) {
+        const resolved = resolvePath2(this.cwd, path6);
+        const signal = context.abortSignal;
+        const aborted2 = abortResult(signal, resolved);
+        if (aborted2)
+          return aborted2;
+        let file2;
+        try {
+          file2 = await openFile(resolved, "r+");
+          if ((await file2.stat()).isDirectory())
+            return err(new FileError("is_directory", "Is a directory", resolved));
+          await file2.sync();
+          const afterSyncAbort = abortResult(signal, resolved);
+          return afterSyncAbort ?? ok(void 0);
+        } catch (error62) {
+          return err(toFileError(error62, resolved));
+        } finally {
+          await file2?.close().catch(() => void 0);
+        }
+      }
+      async renameFile(sourcePath, destinationPath, context) {
+        const source = resolvePath2(this.cwd, sourcePath);
+        const destination = resolvePath2(this.cwd, destinationPath);
+        const aborted2 = abortResult(context.abortSignal, destination);
+        if (aborted2)
+          return aborted2;
+        try {
+          await rename(source, destination);
+          return ok(void 0);
+        } catch (error62) {
+          return err(toFileError(error62, source));
+        }
+      }
+      async fileInfo(path6, context) {
+        const resolved = resolvePath2(this.cwd, path6);
+        const aborted2 = abortResult(context.abortSignal, resolved);
+        if (aborted2)
+          return aborted2;
+        try {
+          return fileInfoFromStats(resolved, await lstat2(resolved));
+        } catch (error62) {
+          return err(toFileError(error62, resolved));
+        }
+      }
+      async listDir(path6, context) {
+        const resolved = resolvePath2(this.cwd, path6);
+        const signal = context.abortSignal;
+        const aborted2 = abortResult(signal, resolved);
+        if (aborted2)
+          return aborted2;
+        try {
+          const entries2 = await readdir3(resolved, { withFileTypes: true });
+          const infos = [];
+          for (const entry2 of entries2) {
+            const loopAbort = abortResult(signal, resolved);
+            if (loopAbort)
+              return loopAbort;
+            const entryPath = resolve4(resolved, entry2.name);
+            try {
+              const info = fileInfoFromStats(entryPath, await lstat2(entryPath));
+              if (info.ok)
+                infos.push(info.value);
+            } catch (error62) {
+              return err(toFileError(error62, entryPath));
+            }
+          }
+          return ok(infos);
+        } catch (error62) {
+          return err(toFileError(error62, resolved));
+        }
+      }
+      async openDirReader(path6, context) {
+        const resolved = resolvePath2(this.cwd, path6);
+        const aborted2 = abortResult(context.abortSignal, resolved);
+        if (aborted2)
+          return aborted2;
+        try {
+          const dir = await opendir(resolved);
+          const afterOpenAbort = abortResult(context.abortSignal, resolved);
+          if (afterOpenAbort) {
+            await dir.close().catch(() => void 0);
+            return afterOpenAbort;
+          }
+          return ok(new NodeDirReader(dir, resolved));
+        } catch (error62) {
+          return err(toFileError(error62, resolved));
+        }
+      }
+      async canonicalPath(path6, context) {
+        const resolved = resolvePath2(this.cwd, path6);
+        const aborted2 = abortResult(context.abortSignal, resolved);
+        if (aborted2)
+          return aborted2;
+        try {
+          return ok(await realpath2(resolved));
+        } catch (error62) {
+          return err(toFileError(error62, resolved));
+        }
+      }
+      async exists(path6, context) {
+        const result2 = await this.fileInfo(path6, context);
+        if (result2.ok)
+          return ok(true);
+        if (result2.error.code === "not_found")
+          return ok(false);
+        return err(result2.error);
+      }
+      async createDir(path6, options, context) {
+        const resolved = resolvePath2(this.cwd, path6);
+        const aborted2 = abortResult(context.abortSignal, resolved);
+        if (aborted2)
+          return aborted2;
+        try {
+          await mkdir2(resolved, { recursive: options?.recursive ?? true });
+          return ok(void 0);
+        } catch (error62) {
+          return err(toFileError(error62, resolved));
+        }
+      }
+      async remove(path6, options, context) {
+        const resolved = resolvePath2(this.cwd, path6);
+        const aborted2 = abortResult(context.abortSignal, resolved);
+        if (aborted2)
+          return aborted2;
+        try {
+          await rm(resolved, { recursive: options?.recursive ?? false, force: options?.force ?? false });
+          return ok(void 0);
+        } catch (error62) {
+          return err(toFileError(error62, resolved));
+        }
+      }
+      async createTempDir(prefix, context) {
+        const aborted2 = abortResult(context.abortSignal);
+        if (aborted2)
+          return aborted2;
+        try {
+          prefix ??= "tmp-";
+          return ok(await mkdtemp(join3(tmpdir(), prefix)));
+        } catch (error62) {
+          return err(toFileError(error62));
+        }
+      }
+      async createTempFile(options, context) {
+        const dir = await this.createTempDir("tmp-", context);
+        if (!dir.ok)
+          return dir;
+        const filePath = join3(dir.value, `${options?.prefix ?? ""}${randomUUID2()}${options?.suffix ?? ""}`);
+        try {
+          await writeFile2(filePath, "");
+          return ok(filePath);
+        } catch (error62) {
+          return err(toFileError(error62, filePath));
+        }
+      }
+      async cleanup(_context) {
+        for (const pid of this.activeChildPids)
+          killProcessTree(pid);
+        this.activeChildPids.clear();
+      }
+    };
+  }
+});
+
+// src/owned-shell.ts
+import { spawn as spawn3, execFileSync as execFileSync2, spawnSync as spawnSync2 } from "node:child_process";
+function cleanupWorkerGroup() {
+  const rows = execFileSync2("ps", ["-eo", "pid=,pgid=,stat="], { encoding: "utf8" }).trim().split("\n").map((row) => row.trim().split(/\s+/));
+  const me = rows.find((row) => Number(row[0]) === process.pid);
+  if (Number(me?.[1]) !== process.pid) return;
+  for (const row of rows) if (Number(row[1]) === process.pid && Number(row[0]) !== process.pid && !row[2]?.startsWith("Z")) {
+    try {
+      process.kill(Number(row[0]), "SIGKILL");
+    } catch (error62) {
+      if (error62.code !== "ESRCH") throw error62;
+    }
+  }
+}
+async function confirmWorkerGroupQuiet() {
+  const deadline2 = Date.now() + 5e3;
+  do {
+    cleanupWorkerGroup();
+    const probe = spawnSync2("ps", ["-eo", "pid=,pgid=,stat="], { encoding: "utf8" });
+    if (probe.error || probe.status !== 0) throw new Error("cannot confirm worker process group");
+    const rows = probe.stdout.trim().split("\n").map((row) => row.trim().split(/\s+/));
+    if (!rows.some((row) => Number(row[1]) === process.pid && Number(row[0]) !== process.pid && Number(row[0]) !== probe.pid && !row[2]?.startsWith("Z"))) return true;
+    await new Promise((resolve9) => setTimeout(resolve9, 25));
+  } while (Date.now() < deadline2);
+  return false;
+}
+async function ownedExec(command2, options, context, cwd, env2) {
+  if (context.abortSignal?.aborted) return err(new ExecutionError("aborted", "command aborted"));
+  const argv = typeof command2 === "string" ? ["/bin/bash", "--noprofile", "--norc", "-c", command2] : [...command2];
+  if (!argv.length) return err(new ExecutionError("spawn_error", "empty command"));
+  return new Promise((resolve9) => {
+    const child = spawn3(argv[0], argv.slice(1), { cwd, env: env2, detached: false, stdio: ["ignore", "pipe", "pipe"] });
+    let aborted2 = false;
+    let callbackError = null;
+    const stop2 = () => {
+      aborted2 = true;
+      cleanupWorkerGroup();
+      try {
+        const rows = execFileSync2("ps", ["-eo", "pid=,ppid="], { encoding: "utf8" }).trim().split("\n").map((row) => row.trim().split(/\s+/).map(Number));
+        const owned = /* @__PURE__ */ new Set([child.pid]);
+        for (let changed = true; changed; ) {
+          changed = false;
+          for (const [pid, parent] of rows)
+            if (parent && owned.has(parent) && pid && !owned.has(pid)) {
+              owned.add(pid);
+              changed = true;
+            }
+        }
+        for (const pid of [...owned].reverse()) {
+          try {
+            process.kill(pid, "SIGKILL");
+          } catch {
+          }
+        }
+      } catch {
+        child.kill("SIGKILL");
+      }
+    };
+    context.abortSignal?.addEventListener("abort", stop2, { once: true });
+    const timer = setTimeout(stop2, (options?.timeout ?? 1800) * 1e3);
+    for (const stream6 of ["stdout", "stderr"]) {
+      child[stream6].setEncoding("utf8");
+      child[stream6].on("data", (chunk) => {
+        try {
+          options?.onOutput?.(chunk, context, { stream: stream6 });
+        } catch (error62) {
+          callbackError = error62;
+          stop2();
+        }
+      });
+    }
+    let settled = false;
+    const finish = (result2) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      context.abortSignal?.removeEventListener("abort", stop2);
+      resolve9(result2);
+    };
+    child.once("error", (error62) => finish(err(new ExecutionError("spawn_error", error62.message))));
+    child.once("close", (code, signal) => finish(callbackError ? err(new ExecutionError("unknown", callbackError.message)) : aborted2 || signal ? err(new ExecutionError("aborted", "command interrupted; effects may be uncertain")) : code === null ? err(new ExecutionError("unknown", "command exit was not observed; effects may be uncertain")) : ok({ exitCode: code })));
+  });
+}
+var init_owned_shell = __esm({
+  "src/owned-shell.ts"() {
+    "use strict";
+    init_env3();
+  }
+});
+
+// src/pi-env.ts
+import { lstatSync as lstatSync2, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { dirname as dirname5, join as join4, resolve as resolve5, sep as sep3 } from "node:path";
+function checkedPath(policy, raw, write = false) {
+  if (raw.startsWith("~") || raw.startsWith("file:")) throw new Error("use an explicit filesystem path");
+  const path6 = resolve5(policy.workspace, raw);
+  let current = path6;
+  while (true) {
+    try {
+      if (lstatSync2(current).isSymbolicLink()) throw new Error(`symlink access is not permitted: ${current}`);
+    } catch (error62) {
+      if (error62.code !== "ENOENT") throw error62;
+    }
+    const parent = dirname5(current);
+    if (parent === current) break;
+    current = parent;
+  }
+  const roots = write ? [
+    { path: policy.reportPath, kind: "directory" },
+    ...policy.profile === "bounded-build" ? policy.writes : []
+  ] : [...policy.readRoots, ...policy.inputPaths ?? [], ...policy.profile === "bounded-build" ? policy.writes.map((w) => w.path) : [], policy.reportPath].map((path7) => ({ path: path7, kind: "directory" }));
+  if (!roots.some((r2) => r2.kind === "file" ? path6 === r2.path : inside2(path6, r2.path))) throw new Error("path is outside the frozen worker policy");
+  return path6;
+}
+function createShellEnvironment(reportPath, inherited = process.env) {
+  const safeEnv = {};
+  for (const key of ["PATH", "LANG", "LC_ALL", "TERM"]) if (inherited[key]) safeEnv[key] = inherited[key];
+  safeEnv.PATH ??= "";
+  safeEnv.HOME = join4(reportPath, ".home");
+  safeEnv.TMPDIR = join4(reportPath, ".tmp");
+  for (const path6 of [safeEnv.HOME, safeEnv.TMPDIR]) {
+    mkdirSync(path6, { recursive: true, mode: 448 });
+    const info = lstatSync2(path6);
+    if (!info.isDirectory() || info.isSymbolicLink() || info.mode & 63 || process.getuid && info.uid !== process.getuid()) throw new Error("worker private directory is not owned and private");
+  }
+  return safeEnv;
+}
+function createBoundedEnv(policy) {
+  const safeEnv = createShellEnvironment(policy.reportPath);
+  const base = new NodeExecutionEnv({ cwd: policy.workspace, shellEnv: safeEnv });
+  const writes = /* @__PURE__ */ new Set(["writeFile", "appendFile", "truncateFile", "flushFile", "remove", "createDir"]);
+  const reads = /* @__PURE__ */ new Set(["watch", "absolutePath", "openTextLineReader", "readTextFile", "readTextLines", "readBinaryFile", "openBinaryReader", "fileInfo", "listDir", "openDirReader", "canonicalPath", "exists"]);
+  return new Proxy(base, { get(target, prop) {
+    if (prop === "exec") return (command2, options, ctx) => {
+      if (policy.profile !== "bounded-build") throw new Error("shell is disabled for bounded-inspect");
+      const cwd = checkedPath(policy, options?.cwd ?? policy.workspace);
+      return ownedExec(command2, options, ctx, cwd, safeEnv);
+    };
+    if (prop === "createTempDir") return async () => ({ ok: true, value: mkdtempSync(join4(safeEnv.TMPDIR, "pi-")) });
+    if (prop === "createTempFile") return async (options) => {
+      const dir = mkdtempSync(join4(safeEnv.TMPDIR, "pi-"));
+      const file2 = join4(dir, `output${options?.suffix?.replace(/[^a-zA-Z0-9.]/g, "") ?? ""}`);
+      writeFileSync(file2, "", { mode: 384 });
+      return { ok: true, value: file2 };
+    };
+    const value2 = Reflect.get(target, prop);
+    if (typeof value2 !== "function") return value2;
+    return (...args) => {
+      if (prop === "exec" && policy.profile !== "bounded-build") throw new Error("shell execution is disabled for bounded-inspect");
+      if (prop === "watch") throw new Error("file watches are unavailable to worker tools");
+      if (prop === "renameFile") {
+        checkedPath(policy, String(args[0]), true);
+        checkedPath(policy, String(args[1]), true);
+      } else if (writes.has(String(prop)) || reads.has(String(prop))) checkedPath(policy, String(args[0]), writes.has(String(prop)));
+      return Reflect.apply(value2, target, args);
+    };
+  } });
+}
+var inside2;
+var init_pi_env = __esm({
+  "src/pi-env.ts"() {
+    "use strict";
+    init_node4();
+    init_owned_shell();
+    inside2 = (path6, root) => path6 === root || path6.startsWith(root + sep3);
+  }
+});
+
+// src/shell-preflight.ts
+var shell_preflight_exports = {};
+__export(shell_preflight_exports, {
+  shellPreflight: () => shellPreflight
+});
+import { spawn as spawn4 } from "node:child_process";
+import { mkdirSync as mkdirSync2, mkdtempSync as mkdtempSync2, realpathSync as realpathSync4, rmSync, writeFileSync as writeFileSync2, readFileSync as readFileSync3, statSync as statSync3 } from "node:fs";
+import { join as join5 } from "node:path";
+import { createServer, createConnection } from "node:net";
+function failure2(error62) {
+  const code = error62?.code;
+  return {
+    status: "failed",
+    exit_code: null,
+    error_code: typeof code === "string" && /^[A-Z0-9_]{1,40}$/.test(code) ? code : "PROBE_FAILED"
+  };
+}
+async function command(argv, cwd, env2) {
+  return new Promise((resolve9) => {
+    let output2 = "";
+    let settled = false;
+    const child = spawn4(argv[0], argv.slice(1), { cwd, env: env2, stdio: ["ignore", "pipe", "pipe"] });
+    const finish = (probe) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve9({ ...probe, output: output2 });
+    };
+    const timer = setTimeout(() => {
+      child.kill("SIGKILL");
+      finish({ status: "timeout", exit_code: null, error_code: "PROBE_TIMEOUT" });
+    }, 2e3);
+    child.stdout.on("data", (bytes2) => {
+      if (output2.length < 4096) output2 += String(bytes2).slice(0, 4096 - output2.length);
+    });
+    child.stderr.resume();
+    child.once("error", (error62) => finish({ ...failure2(error62), status: error62.code === "ENOENT" ? "missing" : "failed" }));
+    child.once("close", (code) => finish({ status: code === 0 ? "ready" : "failed", exit_code: code, error_code: code === 0 ? null : "PROBE_EXIT" }));
+  });
+}
+async function ipc(path6) {
+  if (Buffer.byteLength(path6) >= (process.platform === "darwin" ? 104 : 108))
+    return failure2({ code: "ENAMETOOLONG" });
+  const server = createServer((socket) => socket.end());
+  try {
+    await new Promise((resolve9, reject2) => {
+      const timer = setTimeout(() => reject2(Object.assign(new Error("timeout"), { code: "PROBE_TIMEOUT" })), 2e3);
+      server.once("error", (error62) => {
+        clearTimeout(timer);
+        reject2(error62);
+      });
+      server.listen(path6, () => {
+        clearTimeout(timer);
+        resolve9();
+      });
+    });
+    await new Promise((resolve9, reject2) => {
+      const socket = createConnection(path6);
+      const timer = setTimeout(() => {
+        socket.destroy();
+        reject2({ code: "PROBE_TIMEOUT" });
+      }, 2e3);
+      socket.once("error", (error62) => {
+        clearTimeout(timer);
+        socket.destroy();
+        reject2(error62);
+      });
+      socket.once("connect", () => {
+        clearTimeout(timer);
+        socket.destroy();
+        resolve9();
+      });
+    });
+    return ready();
+  } catch (error62) {
+    return failure2(error62);
+  } finally {
+    await new Promise((resolve9) => server.close(() => resolve9()));
+  }
+}
+async function shellPreflight(statePath, inherited = process.env) {
+  const result2 = {
+    shell_mode: "bash --noprofile --norc",
+    representative_environment: true,
+    shell: failure2(null),
+    node: { ...failure2(null), version: null, matches_supervisor: null },
+    private_temp: failure2(null),
+    local_ipc: failure2(null)
+  };
+  let directory;
+  try {
+    mkdirSync2(statePath, { recursive: true, mode: 448 });
+    directory = mkdtempSync2(join5(realpathSync4(statePath), "preflight-"));
+    const env2 = createShellEnvironment(directory, inherited);
+    const { output: shellOutput, ...shell } = await command(["/bin/bash", "--noprofile", "--norc", "-c", "command -v node"], directory, env2);
+    result2.shell = shell.status === "failed" && shell.exit_code === 1 ? ready() : shell;
+    const { output: output2, ...node2 } = await command(["node", "--version"], directory, env2);
+    const version2 = /^v(\d+\.\d+\.\d+)\s*$/.exec(output2)?.[1] ?? null;
+    const [major, minor] = (version2 ?? "").split(".").map(Number);
+    result2.node = { ...node2, version: version2, matches_supervisor: null };
+    if (node2.status === "ready" && (major !== 24 || minor < 15 || !version2)) result2.node.status = "unsupported";
+    if (node2.status === "ready" && shellOutput.trim()) {
+      try {
+        result2.node.matches_supervisor = realpathSync4(shellOutput.trim()) === realpathSync4(process.execPath);
+      } catch {
+      }
+    }
+    try {
+      const file2 = join5(env2.TMPDIR, "probe");
+      writeFileSync2(file2, "private", { flag: "wx", mode: 384 });
+      if (readFileSync3(file2, "utf8") !== "private" || statSync3(file2).mode & 63) throw new Error("private temp check failed");
+      result2.private_temp = ready();
+    } catch (error62) {
+      result2.private_temp = failure2(error62);
+    }
+    result2.local_ipc = await ipc(join5(env2.TMPDIR, "p.sock"));
+    return result2;
+  } catch (error62) {
+    result2.private_temp = failure2(error62);
+    return result2;
+  } finally {
+    if (directory) rmSync(directory, { recursive: true, force: true });
+  }
+}
+var ready;
+var init_shell_preflight = __esm({
+  "src/shell-preflight.ts"() {
+    "use strict";
+    init_pi_env();
+    ready = () => ({ status: "ready", exit_code: 0, error_code: null });
+  }
+});
+
+// src/request-feedback.ts
+function validateWorkerExplanation(reply, explanation) {
+  if (explanation === void 0) return;
+  WorkerExplanationSchema.parse(explanation);
+  if (reply !== "deny") throw new Error("worker_explanation is only valid for permission denial");
+}
+var WorkerExplanationSchema;
+var init_request_feedback = __esm({
+  "src/request-feedback.ts"() {
+    "use strict";
+    init_zod();
+    WorkerExplanationSchema = external_exports.string().min(1).refine(
+      (value2) => Buffer.byteLength(value2, "utf8") <= 4096,
+      "worker_explanation exceeds 4096 UTF-8 bytes"
+    ).describe("Optional worker-visible context for an exact permission denial only; at most 4096 UTF-8 bytes. Does not grant permission or change the assignment.");
+  }
+});
+
 // src/progress.ts
-import { createHash as createHash3, randomUUID as randomUUID2 } from "node:crypto";
+import { createHash as createHash4, randomUUID as randomUUID3 } from "node:crypto";
 var CheckpointInputSchema, Id, ProgressReadSchema, ReadOptions, CursorSchema2, size, sha, ProgressManager;
 var init_progress = __esm({
   "src/progress.ts"() {
@@ -111210,9 +113295,9 @@ var init_progress = __esm({
     ReadOptions = ProgressReadSchema.omit({ scope_id: true, task_id: true, execution_id: true });
     CursorSchema2 = external_exports.object({ v: external_exports.literal(1), e: Id, p: external_exports.string().uuid(), g: external_exports.string().uuid(), s: external_exports.number().int().min(0).max(Number.MAX_SAFE_INTEGER) }).strict();
     size = (value2) => Buffer.byteLength(JSON.stringify(value2), "utf8");
-    sha = (value2) => createHash3("sha256").update(value2).digest("hex");
+    sha = (value2) => createHash4("sha256").update(value2).digest("hex");
     ProgressManager = class {
-      processGeneration = randomUUID2();
+      processGeneration = randomUUID3();
       states = /* @__PURE__ */ new Map();
       evicted = /* @__PURE__ */ new Map();
       now;
@@ -111260,7 +113345,7 @@ var init_progress = __esm({
         const eviction = this.evicted.get(executionId);
         this.evicted.delete(executionId);
         this.states.set(executionId, {
-          generation: eviction?.generation ?? randomUUID2(),
+          generation: eviction?.generation ?? randomUUID3(),
           sequence: 0,
           availability,
           entries: [],
@@ -111289,13 +113374,13 @@ var init_progress = __esm({
           } : null,
           evidence_refs: checkpoint.evidence_refs
         });
-        const hash3 = sha(canonical4);
+        const hash4 = sha(canonical4);
         this.sweep();
         const state2 = this.states.get(executionId);
         if (!state2 || state2.availability !== "supported") return { accepted: false, duplicate: false };
         const prior = state2.dedup.get(sourceId);
         if (prior) {
-          if (prior !== hash3) throw new Error("checkpoint source ID has conflicting content");
+          if (prior !== hash4) throw new Error("checkpoint source ID has conflicting content");
           return { accepted: true, duplicate: true };
         }
         const now2 = this.now();
@@ -111323,7 +113408,7 @@ var init_progress = __esm({
         state2.sequence = sequence2;
         state2.entries.push(entry2);
         state2.latest = entry2;
-        state2.dedup.set(sourceId, hash3);
+        state2.dedup.set(sourceId, hash4);
         state2.rate.push({ at: now2, routine });
         state2.blocker = blocker;
         state2.lastActivity = now2;
@@ -111340,7 +113425,7 @@ var init_progress = __esm({
       reset(executionId, reason) {
         const state2 = this.states.get(executionId);
         if (!state2) return;
-        state2.generation = randomUUID2();
+        state2.generation = randomUUID3();
         state2.sequence = 0;
         state2.entries = [];
         state2.resetReason = reason;
@@ -111358,7 +113443,7 @@ var init_progress = __esm({
       }
       hint(executionId) {
         const state2 = this.states.get(executionId);
-        return { progress_cursor: this.cursor(executionId, state2), progress_available: state2?.availability ?? "not_enabled" };
+        return { progress_cursor: this.cursor(executionId, state2), progress_available: state2?.availability ?? "not_enabled", worker_checkpoint_observed: !!state2?.latest };
       }
       read(executionId, input2 = {}, runtime = {}, identity = {}) {
         Id.parse(executionId);
@@ -111376,6 +113461,7 @@ var init_progress = __esm({
         const page2 = {
           ...identity,
           availability: state2?.availability ?? "not_enabled",
+          worker_checkpoint_observed: !!state2?.latest,
           updates: [],
           next_cursor: reason ? this.cursor(executionId, state2) : options.after_cursor ?? this.cursor(executionId, state2, state2?.entries[0] ? state2.entries[0].sequence - 1 : 0),
           has_more: false,
@@ -111405,7 +113491,7 @@ var init_progress = __esm({
       evict(id, reason) {
         this.states.delete(id);
         this.evicted.delete(id);
-        this.evicted.set(id, { reason, generation: randomUUID2() });
+        this.evicted.set(id, { reason, generation: randomUUID3() });
         while (this.evicted.size > 256 || this.evicted.size * 256 > this.maxAggregateBytes / 4) this.evicted.delete(this.evicted.keys().next().value);
       }
       enforceAggregate() {
@@ -111525,7 +113611,7 @@ var init_contracts = __esm({
     ReviewCriterionSchema = external_exports.object({
       id: Id2,
       result: external_exports.enum(["satisfied", "unsatisfied", "not_checked"]),
-      evidence: external_exports.array(TextLine)
+      evidence: external_exports.array(TextLine).describe("For accepted reviews, every entry must be only artifact:<artifact_id>@sha256:<64 lowercase hexadecimal characters>, belonging to the reviewed execution. Put explanatory prose in review-level rationale, freshness, or integration_checks. Non-accepted reviews may use narrative evidence.")
     }).strict();
     ReviewSchema = external_exports.object({
       disposition: ReviewDispositionSchema,
@@ -111549,21 +113635,21 @@ __export(rpc_exports, {
   rpcSocketPath: () => rpcSocketPath,
   startRpcServer: () => startRpcServer
 });
-import { createHash as createHash4, randomBytes, randomUUID as randomUUID3, timingSafeEqual } from "node:crypto";
-import { createServer, createConnection } from "node:net";
-import { chmodSync, existsSync as existsSync4, mkdirSync, readFileSync as readFileSync3, realpathSync as realpathSync4, renameSync, rmSync, writeFileSync } from "node:fs";
-import { join as join3 } from "node:path";
+import { createHash as createHash5, randomBytes, randomUUID as randomUUID4, timingSafeEqual } from "node:crypto";
+import { createServer as createServer2, createConnection as createConnection2 } from "node:net";
+import { chmodSync, existsSync as existsSync4, mkdirSync as mkdirSync3, readFileSync as readFileSync4, realpathSync as realpathSync5, renameSync, rmSync as rmSync2, writeFileSync as writeFileSync3 } from "node:fs";
+import { join as join6 } from "node:path";
 function rpcSocketPath(stateDir) {
-  if (existsSync4(stateDir)) stateDir = realpathSync4(stateDir);
-  const socket = join3(stateDir, "supervisor.sock");
+  if (existsSync4(stateDir)) stateDir = realpathSync5(stateDir);
+  const socket = join6(stateDir, "supervisor.sock");
   if (Buffer.byteLength(socket) <= 100) return socket;
   const root = `/tmp/pi-agents-${process.getuid?.() ?? "user"}`;
-  mkdirSync(root, { recursive: true, mode: 448 });
+  mkdirSync3(root, { recursive: true, mode: 448 });
   chmodSync(root, 448);
-  return join3(root, createHash4("sha256").update(stateDir).digest("hex").slice(0, 32) + ".sock");
+  return join6(root, createHash5("sha256").update(stateDir).digest("hex").slice(0, 32) + ".sock");
 }
 function paths(stateDir) {
-  return { socket: rpcSocketPath(stateDir), connection: join3(stateDir, "connection.json") };
+  return { socket: rpcSocketPath(stateDir), connection: join6(stateDir, "connection.json") };
 }
 function equalToken(left, right) {
   const a = Buffer.from(left);
@@ -111571,7 +113657,7 @@ function equalToken(left, right) {
   return a.length === b.length && timingSafeEqual(a, b);
 }
 async function startRpcServer(stateDir, handler) {
-  mkdirSync(stateDir, { recursive: true, mode: 448 });
+  mkdirSync3(stateDir, { recursive: true, mode: 448 });
   chmodSync(stateDir, 448);
   const { socket, connection } = paths(stateDir);
   if (existsSync4(socket)) {
@@ -111585,12 +113671,12 @@ async function startRpcServer(stateDir, handler) {
       else throw e2;
     }
     if (!dead) throw new Error("socket already exists; reconcile the recorded supervisor before removal");
-    rmSync(socket);
-    rmSync(connection, { force: true });
+    rmSync2(socket);
+    rmSync2(connection, { force: true });
   }
-  const generation = randomUUID3();
+  const generation = randomUUID4();
   const token = randomBytes(32).toString("hex");
-  const server = createServer((client) => serveClient(client, token, handler));
+  const server = createServer2((client) => serveClient(client, token, handler));
   let bound = false;
   try {
     await new Promise((resolve9, reject2) => {
@@ -111603,13 +113689,13 @@ async function startRpcServer(stateDir, handler) {
     bound = true;
     chmodSync(socket, 384);
     const staged = `${connection}.${generation}.tmp`;
-    writeFileSync(staged, JSON.stringify({ pid: process.pid, generation, socket, token }), { mode: 384, flag: "wx" });
+    writeFileSync3(staged, JSON.stringify({ pid: process.pid, generation, socket, token }), { mode: 384, flag: "wx" });
     renameSync(staged, connection);
     chmodSync(connection, 384);
   } catch (error62) {
     if (bound) {
       await new Promise((resolve9) => server.close(() => resolve9()));
-      if (existsSync4(socket)) rmSync(socket);
+      if (existsSync4(socket)) rmSync2(socket);
     }
     throw error62;
   }
@@ -111619,8 +113705,8 @@ async function startRpcServer(stateDir, handler) {
       await new Promise((resolve9) => server.close(() => resolve9()));
       const current = readConnection(stateDir);
       if (current?.generation === generation) {
-        rmSync(connection, { force: true });
-        rmSync(socket, { force: true });
+        rmSync2(connection, { force: true });
+        rmSync2(socket, { force: true });
       }
     }
   };
@@ -111677,7 +113763,7 @@ function serveClient(client, token, handler) {
 function readConnection(stateDir) {
   const { connection } = paths(stateDir);
   if (!existsSync4(connection)) return null;
-  const value2 = JSON.parse(readFileSync3(connection, "utf8"));
+  const value2 = JSON.parse(readFileSync4(connection, "utf8"));
   if (!value2 || typeof value2.generation !== "string" || typeof value2.token !== "string" || value2.socket !== paths(stateDir).socket) {
     throw new Error("invalid supervisor connection record");
   }
@@ -111686,9 +113772,9 @@ function readConnection(stateDir) {
 async function rpcRequest(stateDir, method, params, timeoutMs = 3e4) {
   const connection = readConnection(stateDir);
   if (!connection) throw new Error("supervisor is not running");
-  const id = randomUUID3();
+  const id = randomUUID4();
   return await new Promise((resolve9, reject2) => {
-    const client = createConnection(connection.socket);
+    const client = createConnection2(connection.socket);
     let response = "";
     const timer = setTimeout(() => client.destroy(new Error("supervisor request timed out")), timeoutMs);
     client.setEncoding("utf8");
@@ -111790,9 +113876,9 @@ var init_pi_backend = __esm({
           await new Promise((resolve9) => setTimeout(resolve9, 100));
         }
       }
-      async replyToRequest(request2, reply, control) {
+      async replyToRequest(request2, reply, control, workerExplanation) {
         if (Array.isArray(reply)) throw new Error("native questions are unsupported");
-        await this.request("reply", { request: request2, reply }, control);
+        await this.request("reply", { request: request2, reply, ...workerExplanation === void 0 ? {} : { workerExplanation } }, control);
       }
       async abortSession(sessionId, control) {
         return await this.request("abort", { sessionId }, control) === true;
@@ -111805,14 +113891,14 @@ var init_pi_backend = __esm({
 });
 
 // src/managed-server.ts
-import { spawn as spawn2, execFileSync as execFileSync3 } from "node:child_process";
-import { existsSync as existsSync7, mkdirSync as mkdirSync3, readFileSync as readFileSync6, rmSync as rmSync3, writeFileSync as writeFileSync2 } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { join as join6 } from "node:path";
-import { randomUUID as randomUUID5 } from "node:crypto";
+import { spawn as spawn5, execFileSync as execFileSync4 } from "node:child_process";
+import { existsSync as existsSync7, mkdirSync as mkdirSync5, readFileSync as readFileSync7, rmSync as rmSync4, writeFileSync as writeFileSync4 } from "node:fs";
+import { fileURLToPath as fileURLToPath2 } from "node:url";
+import { join as join9 } from "node:path";
+import { randomUUID as randomUUID6 } from "node:crypto";
 function processBirth(pid) {
   try {
-    return execFileSync3("ps", ["-p", String(pid), "-o", "lstart="], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim() || null;
+    return execFileSync4("ps", ["-p", String(pid), "-o", "lstart="], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim() || null;
   } catch (error62) {
     try {
       process.kill(pid, 0);
@@ -111832,9 +113918,9 @@ function groupAlive(pid) {
   }
 }
 function readOwner(directory) {
-  const file2 = join6(directory, "owner", "record.json");
+  const file2 = join9(directory, "owner", "record.json");
   if (!existsSync7(file2)) return null;
-  const owner = JSON.parse(readFileSync6(file2, "utf8"));
+  const owner = JSON.parse(readFileSync7(file2, "utf8"));
   if (!Number.isSafeInteger(owner.pid) || owner.pid < 2 || !owner.birth || !owner.instanceId) throw new Error("invalid worker ownership record");
   return owner;
 }
@@ -111861,10 +113947,10 @@ async function terminateOwner(owner) {
 }
 async function recordedWorkerStopper(backendId, instanceId) {
   if (!/^backend_[A-Za-z0-9_-]+$/.test(backendId)) return null;
-  const directory = join6(stateDirectory(), "workers", backendId);
+  const directory = join9(stateDirectory(), "workers", backendId);
   const owner = readOwner(directory);
-  const stoppedFile = join6(directory, "stopped-owner.json");
-  const recorded = owner ?? (existsSync7(stoppedFile) ? JSON.parse(readFileSync6(stoppedFile, "utf8")) : null);
+  const stoppedFile = join9(directory, "stopped-owner.json");
+  const recorded = owner ?? (existsSync7(stoppedFile) ? JSON.parse(readFileSync7(stoppedFile, "utf8")) : null);
   if (!recorded || recorded.instanceId !== instanceId) return null;
   if (ownedAlive(recorded)) {
     try {
@@ -111880,22 +113966,22 @@ async function reconcileDeadOwner(directory) {
   const owner = readOwner(directory);
   if (owner && ownedAlive(owner)) throw new Error("worker owner is alive; reconnect instead of reopening storage");
   if (owner && !await terminateOwner(owner)) throw new Error("abandoned worker process group still exists");
-  rmSync3(join6(directory, "owner"), { recursive: true, force: true });
-  rmSync3(join6(directory, "connection.json"), { force: true });
+  rmSync4(join9(directory, "owner"), { recursive: true, force: true });
+  rmSync4(join9(directory, "connection.json"), { force: true });
   const { rpcSocketPath: rpcSocketPath2 } = await Promise.resolve().then(() => (init_rpc(), rpc_exports));
-  rmSync3(rpcSocketPath2(directory), { force: true });
+  rmSync4(rpcSocketPath2(directory), { force: true });
 }
 async function openManagedServer(options) {
   if (process.platform === "win32") throw new Error("Pi workers currently require POSIX process groups");
-  const directory = join6(stateDirectory(), "workers", options.backendId);
-  mkdirSync3(directory, { recursive: true, mode: 448 });
+  const directory = join9(stateDirectory(), "workers", options.backendId);
+  mkdirSync5(directory, { recursive: true, mode: 448 });
   let owner = readOwner(directory);
   if (!owner || !ownedAlive(owner)) {
-    if (existsSync7(join6(directory, "owner")) && !owner) throw new Error("worker ownership election is incomplete; observe before retrying");
+    if (existsSync7(join9(directory, "owner")) && !owner) throw new Error("worker ownership election is incomplete; observe before retrying");
     await reconcileDeadOwner(directory);
-    const temp = join6(directory, `launch-${randomUUID5()}.json`);
-    writeFileSync2(temp, JSON.stringify({ backendId: options.backendId, contract: options.launchContract, suspendScheduling: options.suspendScheduling ?? false }), { mode: 384, flag: "wx" });
-    const child = spawn2(process.execPath, [existsSync7(fileURLToPath(new URL("./cli.js", import.meta.url))) ? fileURLToPath(new URL("./cli.js", import.meta.url)) : fileURLToPath(import.meta.url), "worker", "run", directory, temp], {
+    const temp = join9(directory, `launch-${randomUUID6()}.json`);
+    writeFileSync4(temp, JSON.stringify({ backendId: options.backendId, contract: options.launchContract, suspendScheduling: options.suspendScheduling ?? false }), { mode: 384, flag: "wx" });
+    const child = spawn5(process.execPath, [existsSync7(fileURLToPath2(new URL("./cli.js", import.meta.url))) ? fileURLToPath2(new URL("./cli.js", import.meta.url)) : fileURLToPath2(import.meta.url), "worker", "run", directory, temp], {
       cwd: options.workspace,
       detached: true,
       stdio: "ignore",
@@ -111949,23 +114035,23 @@ async function openManagedServer(options) {
   };
 }
 async function startManagedServer(options) {
-  const directory = join6(stateDirectory(), "workers", options.backendId);
-  mkdirSync3(directory, { recursive: true, mode: 448 });
-  const lock = join6(directory, "launch-lock");
+  const directory = join9(stateDirectory(), "workers", options.backendId);
+  mkdirSync5(directory, { recursive: true, mode: 448 });
+  const lock = join9(directory, "launch-lock");
   const deadline2 = Date.now() + (options.startupTimeoutMs ?? 15e3);
   let acquired = false;
   while (Date.now() < deadline2) {
     try {
-      mkdirSync3(lock, { mode: 448 });
+      mkdirSync5(lock, { mode: 448 });
       acquired = true;
       break;
     } catch (error62) {
       if (error62.code !== "EEXIST") throw error62;
-      const record2 = join6(lock, "record.json");
+      const record2 = join9(lock, "record.json");
       if (existsSync7(record2)) {
-        const previous = JSON.parse(readFileSync6(record2, "utf8"));
+        const previous = JSON.parse(readFileSync7(record2, "utf8"));
         if (!ownedAlive(previous)) {
-          rmSync3(lock, { recursive: true });
+          rmSync4(lock, { recursive: true });
           continue;
         }
       }
@@ -111975,11 +114061,11 @@ async function startManagedServer(options) {
   if (!acquired) throw new Error("Pi worker launch election timed out");
   const birth = processBirth(process.pid);
   if (!birth) throw new Error("cannot establish launcher identity");
-  writeFileSync2(join6(lock, "record.json"), JSON.stringify({ pid: process.pid, birth, instanceId: randomUUID5() }), { mode: 384, flag: "wx" });
+  writeFileSync4(join9(lock, "record.json"), JSON.stringify({ pid: process.pid, birth, instanceId: randomUUID6() }), { mode: 384, flag: "wx" });
   try {
     return await openManagedServer(options);
   } finally {
-    rmSync3(lock, { recursive: true, force: true });
+    rmSync4(lock, { recursive: true, force: true });
   }
 }
 var init_managed_server = __esm({
@@ -111990,314 +114076,6 @@ var init_managed_server = __esm({
     init_pi_backend();
     init_rpc();
     init_launch_config();
-  }
-});
-
-// node_modules/@earendil-works/pi-durable/dist/env/decode.js
-function rangeDecoder() {
-  return new TextDecoder("utf-8", { ignoreBOM: true });
-}
-function startsWithBom(firstBytes) {
-  return firstBytes[0] === 239 && firstBytes[1] === 187 && firstBytes[2] === 191;
-}
-var StreamDecoder;
-var init_decode = __esm({
-  "node_modules/@earendil-works/pi-durable/dist/env/decode.js"() {
-    StreamDecoder = class {
-      #decoder = rangeDecoder();
-      #started = false;
-      /** Text for `bytes`, holding back an incomplete character; without `bytes`, the end of the stream. */
-      decode(bytes2) {
-        const text3 = bytes2 === void 0 ? this.#decoder.decode() : this.#decoder.decode(bytes2, { stream: true });
-        if (this.#started || text3 === "")
-          return text3;
-        this.#started = true;
-        return text3.startsWith("\uFEFF") ? text3.slice(1) : text3;
-      }
-    };
-  }
-});
-
-// node_modules/@earendil-works/pi-durable/dist/env/line-scan.js
-function decodedBytes(text3) {
-  return text3 === "" ? 0 : encoder.encode(text3).length;
-}
-var NEWLINE2, encoder, LineScanner;
-var init_line_scan = __esm({
-  "node_modules/@earendil-works/pi-durable/dist/env/line-scan.js"() {
-    init_decode();
-    NEWLINE2 = 10;
-    encoder = new TextEncoder();
-    LineScanner = class {
-      #startLine;
-      #endLine;
-      #position = 0;
-      #newlines = 0;
-      #lineStart = 0;
-      #start;
-      #end;
-      #firstLineEnd;
-      #lastLineStart;
-      #selectedBytes = 0;
-      #firstLineBytes = 0;
-      #selection;
-      #firstLine;
-      /** The first bytes, held until it is known whether they are a byte-order mark. */
-      #head = [];
-      #bom = false;
-      /** `startLine` and `endLine` must be non-negative integers with `endLine > startLine`; `endLine` absent: to the end. */
-      constructor(startLine, endLine = Number.POSITIVE_INFINITY) {
-        if (!Number.isSafeInteger(startLine) || startLine < 0 || !(endLine > startLine)) {
-          throw new RangeError("Invalid line range");
-        }
-        if (endLine !== Number.POSITIVE_INFINITY && !Number.isSafeInteger(endLine))
-          throw new RangeError("Invalid line range");
-        this.#startLine = startLine;
-        this.#endLine = endLine;
-        if (startLine === 0)
-          this.#begin(0);
-      }
-      push(chunk) {
-        if (this.#head !== void 0) {
-          const take = Math.min(3 - this.#head.length, chunk.length);
-          this.#head.push(...chunk.subarray(0, take));
-          if (this.#head.length < 3)
-            return;
-          this.#releaseHead();
-          chunk = chunk.subarray(take);
-        }
-        this.#process(chunk);
-      }
-      #releaseHead() {
-        const head = Uint8Array.from(this.#head ?? []);
-        this.#head = void 0;
-        this.#bom = startsWithBom(head);
-        this.#process(head);
-      }
-      #process(chunk) {
-        const base = this.#position;
-        let from = 0;
-        for (let index = chunk.indexOf(NEWLINE2); index !== -1; index = chunk.indexOf(NEWLINE2, index + 1)) {
-          this.#feed(chunk, base, from, index);
-          const line = this.#newlines;
-          const position = base + index;
-          if (line === this.#startLine)
-            this.#endFirstLine(position);
-          if (line === this.#endLine - 1)
-            this.#endSelection(position);
-          this.#feed(chunk, base, index, index + 1);
-          from = index + 1;
-          this.#newlines++;
-          this.#lineStart = position + 1;
-          if (this.#newlines === this.#startLine)
-            this.#begin(this.#lineStart);
-          if (this.#newlines === this.#endLine - 1)
-            this.#lastLineStart = this.#lineStart;
-        }
-        this.#feed(chunk, base, from, chunk.length);
-        this.#position += chunk.length;
-      }
-      finish() {
-        if (this.#head !== void 0)
-          this.#releaseHead();
-        const size2 = this.#position;
-        if (this.#start === void 0) {
-          return {
-            newlines: this.#newlines,
-            start: size2,
-            end: size2,
-            firstLineEnd: size2,
-            lastLineStart: size2,
-            selectedBytes: 0,
-            firstLineBytes: 0
-          };
-        }
-        if (this.#firstLineEnd === void 0)
-          this.#endFirstLine(size2);
-        if (this.#end === void 0)
-          this.#endSelection(size2);
-        return {
-          newlines: this.#newlines,
-          start: this.#start,
-          end: this.#end ?? size2,
-          firstLineEnd: this.#firstLineEnd ?? size2,
-          // A selection that reaches past the last line ends with the last line.
-          lastLineStart: this.#lastLineStart ?? this.#lineStart,
-          selectedBytes: this.#selectedBytes,
-          firstLineBytes: this.#firstLineBytes
-        };
-      }
-      #begin(start) {
-        this.#start = start;
-        if (this.#startLine === this.#endLine - 1)
-          this.#lastLineStart = start;
-        this.#selection = rangeDecoder();
-        this.#firstLine = rangeDecoder();
-      }
-      #endFirstLine(position) {
-        this.#firstLineEnd = position;
-        if (this.#firstLine !== void 0)
-          this.#firstLineBytes += decodedBytes(this.#firstLine.decode());
-        this.#firstLine = void 0;
-      }
-      #endSelection(position) {
-        this.#end = position;
-        if (this.#selection !== void 0)
-          this.#selectedBytes += decodedBytes(this.#selection.decode());
-        this.#selection = void 0;
-      }
-      /** Feed `chunk[from, to)`, which starts at file offset `base`, to the decoders of the ranges still open. */
-      #feed(chunk, base, from, to) {
-        if (this.#bom && base + from < 3)
-          from = Math.min(to, 3 - base);
-        if (to <= from)
-          return;
-        const bytes2 = chunk.subarray(from, to);
-        if (this.#selection !== void 0) {
-          this.#selectedBytes += decodedBytes(this.#selection.decode(bytes2, { stream: true }));
-        }
-        if (this.#firstLine !== void 0) {
-          this.#firstLineBytes += decodedBytes(this.#firstLine.decode(bytes2, { stream: true }));
-        }
-      }
-    };
-  }
-});
-
-// node_modules/@earendil-works/pi-durable/dist/env/index.js
-function ok(value2) {
-  return { ok: true, value: value2 };
-}
-function err(error62) {
-  return { ok: false, error: error62 };
-}
-function getOrThrow(result2) {
-  if (!result2.ok)
-    throw result2.error;
-  return result2.value;
-}
-function toError(error62) {
-  if (error62 instanceof Error)
-    return error62;
-  if (typeof error62 === "string")
-    return new Error(error62);
-  try {
-    return new Error(JSON.stringify(error62));
-  } catch {
-    return new Error(String(error62));
-  }
-}
-var FileError, ExecutionError;
-var init_env3 = __esm({
-  "node_modules/@earendil-works/pi-durable/dist/env/index.js"() {
-    init_decode();
-    FileError = class extends Error {
-      code;
-      path;
-      constructor(code, message, path6, cause) {
-        super(message, cause === void 0 ? void 0 : { cause });
-        this.name = "FileError";
-        this.code = code;
-        this.path = path6;
-      }
-    };
-    ExecutionError = class extends Error {
-      code;
-      /** Spill file of a command that timed out or was aborted after its output crossed the spill thresholds. */
-      spillPath;
-      constructor(code, message, cause) {
-        super(message, cause === void 0 ? void 0 : { cause });
-        this.name = "ExecutionError";
-        this.code = code;
-      }
-    };
-  }
-});
-
-// src/owned-shell.ts
-import { spawn as spawn4, execFileSync as execFileSync4, spawnSync as spawnSync2 } from "node:child_process";
-function cleanupWorkerGroup() {
-  const rows = execFileSync4("ps", ["-eo", "pid=,pgid=,stat="], { encoding: "utf8" }).trim().split("\n").map((row) => row.trim().split(/\s+/));
-  const me = rows.find((row) => Number(row[0]) === process.pid);
-  if (Number(me?.[1]) !== process.pid) return;
-  for (const row of rows) if (Number(row[1]) === process.pid && Number(row[0]) !== process.pid && !row[2]?.startsWith("Z")) {
-    try {
-      process.kill(Number(row[0]), "SIGKILL");
-    } catch (error62) {
-      if (error62.code !== "ESRCH") throw error62;
-    }
-  }
-}
-async function confirmWorkerGroupQuiet() {
-  const deadline2 = Date.now() + 5e3;
-  do {
-    cleanupWorkerGroup();
-    const probe = spawnSync2("ps", ["-eo", "pid=,pgid=,stat="], { encoding: "utf8" });
-    if (probe.error || probe.status !== 0) throw new Error("cannot confirm worker process group");
-    const rows = probe.stdout.trim().split("\n").map((row) => row.trim().split(/\s+/));
-    if (!rows.some((row) => Number(row[1]) === process.pid && Number(row[0]) !== process.pid && Number(row[0]) !== probe.pid && !row[2]?.startsWith("Z"))) return true;
-    await new Promise((resolve9) => setTimeout(resolve9, 25));
-  } while (Date.now() < deadline2);
-  return false;
-}
-async function ownedExec(command, options, context, cwd, env2) {
-  if (context.abortSignal?.aborted) return err(new ExecutionError("aborted", "command aborted"));
-  const argv = typeof command === "string" ? ["/bin/bash", "--noprofile", "--norc", "-c", command] : [...command];
-  if (!argv.length) return err(new ExecutionError("spawn_error", "empty command"));
-  return new Promise((resolve9) => {
-    const child = spawn4(argv[0], argv.slice(1), { cwd, env: env2, detached: false, stdio: ["ignore", "pipe", "pipe"] });
-    let aborted2 = false;
-    let callbackError = null;
-    const stop2 = () => {
-      aborted2 = true;
-      cleanupWorkerGroup();
-      try {
-        const rows = execFileSync4("ps", ["-eo", "pid=,ppid="], { encoding: "utf8" }).trim().split("\n").map((row) => row.trim().split(/\s+/).map(Number));
-        const owned = /* @__PURE__ */ new Set([child.pid]);
-        for (let changed = true; changed; ) {
-          changed = false;
-          for (const [pid, parent] of rows)
-            if (parent && owned.has(parent) && pid && !owned.has(pid)) {
-              owned.add(pid);
-              changed = true;
-            }
-        }
-        for (const pid of [...owned].reverse()) {
-          try {
-            process.kill(pid, "SIGKILL");
-          } catch {
-          }
-        }
-      } catch {
-        child.kill("SIGKILL");
-      }
-    };
-    context.abortSignal?.addEventListener("abort", stop2, { once: true });
-    const timer = setTimeout(stop2, (options?.timeout ?? 1800) * 1e3);
-    for (const stream6 of ["stdout", "stderr"]) {
-      child[stream6].setEncoding("utf8");
-      child[stream6].on("data", (chunk) => {
-        try {
-          options?.onOutput?.(chunk, context, { stream: stream6 });
-        } catch (error62) {
-          callbackError = error62;
-          stop2();
-        }
-      });
-    }
-    const finish = (result2) => {
-      clearTimeout(timer);
-      context.abortSignal?.removeEventListener("abort", stop2);
-      resolve9(result2);
-    };
-    child.once("error", (error62) => finish(err(new ExecutionError("spawn_error", error62.message))));
-    child.once("close", (code) => finish(callbackError ? err(new ExecutionError("unknown", callbackError.message)) : aborted2 ? err(new ExecutionError("aborted", "command interrupted; effects may be uncertain")) : ok({ exitCode: code ?? 1 })));
-  });
-}
-var init_owned_shell = __esm({
-  "src/owned-shell.ts"() {
-    "use strict";
-    init_env3();
   }
 });
 
@@ -112367,8 +114145,8 @@ function resolveUri(ref, base) {
   }
 }
 function documentOf(uri) {
-  const hash3 = uri.indexOf("#");
-  return hash3 < 0 ? uri : uri.slice(0, hash3);
+  const hash4 = uri.indexOf("#");
+  return hash4 < 0 ? uri : uri.slice(0, hash4);
 }
 var DEFAULT_BASE, Resolver, SCHEMA_KEYWORDS2, MAP_KEYWORDS, ARRAY_KEYWORDS;
 var init_resolver = __esm({
@@ -115857,7 +117635,7 @@ function emitOperations(context) {
   }
   const denseRegions = /* @__PURE__ */ new Map();
   for (const [array2, candidates] of denseIndices) {
-    const path6 = resolvePath2(array2);
+    const path6 = resolvePath3(array2);
     if (path6 === void 0 || path6.some((segment) => typeof segment === "string" && RESERVED_SEGMENTS.has(segment))) {
       continue;
     }
@@ -115866,7 +117644,7 @@ function emitOperations(context) {
       denseRegions.set(array2, regions);
   }
   for (const node2 of context.dirty) {
-    const path6 = resolvePath2(node2);
+    const path6 = resolvePath3(node2);
     if (path6 === void 0)
       continue;
     if (hasCoveringDenseRegion(node2, path6, denseRegions))
@@ -115885,7 +117663,7 @@ function emitOperations(context) {
   for (const [node2, path6] of forcedFolds)
     emissionPaths.set(node2, path6);
   for (const node2 of denseRegions.keys()) {
-    const path6 = resolvePath2(node2);
+    const path6 = resolvePath3(node2);
     if (path6 !== void 0 && !hasCoveringDenseRegion(node2, path6, denseRegions))
       emissionPaths.set(node2, path6);
   }
@@ -115928,7 +117706,7 @@ function emitSimpleObjectOperations(context) {
       if (Array.isArray(nodeBase(parent)))
         return void 0;
     }
-    const path6 = resolvePath2(node2);
+    const path6 = resolvePath3(node2);
     if (path6 === void 0)
       continue;
     for (const segment of path6) {
@@ -115985,7 +117763,7 @@ function hasCoveringDenseRegion(node2, path6, denseRegions) {
     const regions = denseRegions.get(parent);
     if (regions === void 0)
       continue;
-    const parentPath = resolvePath2(parent);
+    const parentPath = resolvePath3(parent);
     if (parentPath === void 0 || path6.length <= parentPath.length)
       continue;
     let matches = true;
@@ -116306,7 +118084,7 @@ function emitSet(operations, path6, value2) {
   else
     operations.push(["s", path6, value2]);
 }
-function resolvePath2(node2) {
+function resolvePath3(node2) {
   if (node2.preparedPath !== void 0)
     return node2.preparedPath;
   const parent = nodeParent(node2);
@@ -116314,7 +118092,7 @@ function resolvePath2(node2) {
     node2.preparedPath = [];
     return node2.preparedPath;
   }
-  const parentPath = resolvePath2(parent);
+  const parentPath = resolvePath3(parent);
   if (parentPath === void 0)
     return void 0;
   if (node2.parentKind === 0) {
@@ -117142,7 +118920,7 @@ function applyOps(target, ops) {
     const path6 = op[1];
     assertSafePath(path6);
     if (op[0] === "p") {
-      const target_ = path6.length === 0 ? root : resolve6(root, path6);
+      const target_ = path6.length === 0 ? root : resolve8(root, path6);
       if (!Array.isArray(target_))
         throw new PathError(path6);
       target_.splice(op[2], op[3]);
@@ -117153,7 +118931,7 @@ function applyOps(target, ops) {
       continue;
     }
     if (op[0] === "m") {
-      const target_ = path6.length === 0 ? root : resolve6(root, path6);
+      const target_ = path6.length === 0 ? root : resolve8(root, path6);
       if (!Array.isArray(target_) || target_.length !== op[2].length)
         throw new PathError(path6);
       const previous = target_.slice();
@@ -117161,7 +118939,7 @@ function applyOps(target, ops) {
         target_[index] = previous[op[2][index]];
       continue;
     }
-    const parent = resolve6(root, path6.slice(0, -1));
+    const parent = resolve8(root, path6.slice(0, -1));
     const key = path6[path6.length - 1];
     if (Array.isArray(parent)) {
       if (typeof key !== "number")
@@ -117247,7 +119025,7 @@ function appendCopy(root, op, owned) {
     return appended;
   const parentPath = path6.slice(0, -1);
   const copiedRoot = copyContainers(root, parentPath, owned);
-  Object.defineProperty(resolve6(copiedRoot, parentPath), path6[path6.length - 1], {
+  Object.defineProperty(resolve8(copiedRoot, parentPath), path6[path6.length - 1], {
     value: appended,
     writable: true,
     enumerable: true,
@@ -117310,7 +119088,7 @@ function resolveValue(root, path6) {
   }
   return node2;
 }
-function resolve6(root, path6) {
+function resolve8(root, path6) {
   const node2 = resolveValue(root, path6);
   if (!isObj3(node2))
     throw new PathError(path6);
@@ -117682,11 +119460,11 @@ var init_watch = __esm({
       }
       /** The pending failure, or the value after one as a root replacement (no ops were kept since the failure). */
       #nextAfterFailure() {
-        const failure2 = this.#failure;
+        const failure3 = this.#failure;
         this.#newestContext = void 0;
-        if (failure2 !== void 0) {
+        if (failure3 !== void 0) {
           this.#failure = void 0;
-          return failure2;
+          return failure3;
         }
         const value2 = this.#newestValue;
         const retired = this.#retired;
@@ -119594,7 +121372,7 @@ var init_writer = __esm({
           }
           if (published++ > 0)
             await hop();
-          let failure3;
+          let failure4;
           let external;
           const publication = this.#host.publishing(() => {
             external = this.#host.failure();
@@ -119604,9 +121382,9 @@ var init_writer = __esm({
             try {
               if (part.writes !== void 0)
                 this.#host.stored(part.writes);
-              failure3 = part.publish(seq);
+              failure4 = part.publish(seq);
             } catch (error62) {
-              failure3 = { kind: "adoption", error: error62 };
+              failure4 = { kind: "adoption", error: error62 };
             }
           }, part.context);
           if (publication !== void 0)
@@ -119616,21 +121394,21 @@ var init_writer = __esm({
             failing.push({ part, outcome: SESSION_FAILED, published: false });
             continue;
           }
-          if (failure3?.kind === "adoption") {
-            failing.push({ part, outcome: { kind: "own", error: failure3.error }, published: true });
-            stop2 = { error: failure3.error, at: part.index };
+          if (failure4?.kind === "adoption") {
+            failing.push({ part, outcome: { kind: "own", error: failure4.error }, published: true });
+            stop2 = { error: failure4.error, at: part.index };
             continue;
           }
           if (rejected !== void 0) {
-            if (failure3 !== void 0)
-              this.#host.report(failure3.error, part.context);
+            if (failure4 !== void 0)
+              this.#host.report(failure4.error, part.context);
             failing.push({ part, outcome: { kind: "own", error: rejected.error }, published: true });
             continue;
           }
-          if (failure3 !== void 0)
-            stop2 = { error: failure3.error, at: part.index };
+          if (failure4 !== void 0)
+            stop2 = { error: failure4.error, at: part.index };
           const failedMeanwhile = this.#host.failure();
-          if (failedMeanwhile !== void 0 && failure3 === void 0) {
+          if (failedMeanwhile !== void 0 && failure4 === void 0) {
             part.settle.reject(new SessionFailed(failedMeanwhile.error));
           } else
             part.settle.resolve();
@@ -119652,12 +121430,12 @@ var init_writer = __esm({
           } else
             this.#unpublish(part, error62);
         }
-        const failure2 = this.#host.failure();
-        if (failure2 !== void 0) {
+        const failure3 = this.#host.failure();
+        if (failure3 !== void 0) {
           const queued = this.#queue;
           this.#queue = [];
           for (const part of queued)
-            this.#unpublish(part, new SessionFailed(failure2.error));
+            this.#unpublish(part, new SessionFailed(failure3.error));
         }
       }
       /**
@@ -119675,8 +121453,8 @@ var init_writer = __esm({
       }
       /** `SessionFailed` with the Session's failure, or with `error` until the Session records it. */
       #failed(error62) {
-        const failure2 = this.#host.failure();
-        return new SessionFailed(failure2 !== void 0 ? failure2.error : error62);
+        const failure3 = this.#host.failure();
+        return new SessionFailed(failure3 !== void 0 ? failure3.error : error62);
       }
       /** Settle a part that will never be published: discard it, reject it with `error`, and open its gate. */
       #unpublish(part, error62) {
@@ -119765,9 +121543,9 @@ function toError3(error62) {
     return new Error(Object.prototype.toString.call(error62));
   }
 }
-function closeEnds(failure2) {
-  if (failure2 !== void 0) {
-    const failed = { kind: "failed", error: failure2.error };
+function closeEnds(failure3) {
+  if (failure3 !== void 0) {
+    const failed = { kind: "failed", error: failure3.error };
     return { watch: failed, observer: failed };
   }
   return { watch: ENDED2, observer: { kind: "failed", error: new Error("session closed") } };
@@ -120265,8 +122043,8 @@ var init_session = __esm({
             if (unstored !== void 0)
               throw unstored.error;
           })).finally(() => {
-            const failure2 = this.#failure;
-            this.#closed.resolve(failure2 === void 0 ? { kind: "closed" } : { kind: "failed", error: failure2.error });
+            const failure3 = this.#failure;
+            this.#closed.resolve(failure3 === void 0 ? { kind: "closed" } : { kind: "failed", error: failure3.error });
           });
           this.#notifyClose();
         }
@@ -120583,12 +122361,12 @@ var init_session = __esm({
           return { kind: "adoption", error: error62 };
         }
         this.#indexTaskDocuments(tx, writes, documents, seq);
-        const failure2 = this.#publish(seq, writes, documents, context);
+        const failure3 = this.#publish(seq, writes, documents, context);
         if (taken.length > 0)
           this.#release(taken);
         for (const document2 of documents.stored)
           this.#touchDocument(addressId(document2.record));
-        return failure2 === void 0 ? void 0 : { kind: "listener", error: failure2.error };
+        return failure3 === void 0 ? void 0 : { kind: "listener", error: failure3.error };
       }
       /**
        * At publication: keep `#taskDocuments` in step with a stored commit: the tasks it creates start with no documents,
@@ -120643,15 +122421,15 @@ var init_session = __esm({
         }
         this.#armHoldTimer();
         const publication = { kind: "memory", changes: documents };
-        let failure2;
+        let failure3;
         for (const listener of [...this.#internalListeners]) {
           try {
             listener(publication, context);
           } catch (error62) {
-            failure2 ??= { kind: "listener", error: error62 };
+            failure3 ??= { kind: "listener", error: error62 };
           }
         }
-        return failure2;
+        return failure3;
       }
       /**
        * Store the held changes `select` returns in one storage transaction, through the writer, from a job on the line. A
@@ -120772,15 +122550,15 @@ var init_session = __esm({
           const stored = documents.stored === documents.observed ? observed : { seq, changes: [...changes.slice(0, tables), ...documents.stored] };
           this.#notifyHosts(stored, context);
         }
-        let failure2;
+        let failure3;
         for (const listener of [...this.#internalListeners]) {
           try {
             listener(observed, context);
           } catch (error62) {
-            failure2 ??= { error: error62 };
+            failure3 ??= { error: error62 };
           }
         }
-        return failure2;
+        return failure3;
       }
       /** At publication: record a commit's telemetry event. A throwing adapter is reported, as publication must not throw. */
       #event(name, attributes, context) {
@@ -121210,9 +122988,9 @@ var init_session = __esm({
         return result2;
       }
       #assertHealthy() {
-        const failure2 = this.#latch.failure;
-        if (failure2 !== void 0)
-          throw new SessionFailed(failure2.error);
+        const failure3 = this.#latch.failure;
+        if (failure3 !== void 0)
+          throw new SessionFailed(failure3.error);
       }
     };
   }
@@ -122589,8 +124367,8 @@ async function scanAll(scan) {
   return items;
 }
 function closedError(session) {
-  const failure2 = session.failure;
-  return failure2 === void 0 ? new Error("Harness is closed") : new SessionFailed(failure2.error);
+  const failure3 = session.failure;
+  return failure3 === void 0 ? new Error("Harness is closed") : new SessionFailed(failure3.error);
 }
 function optionalExtension(extension2) {
   return extension2 === void 0 ? {} : { extension: extension2 };
@@ -124464,7 +126242,7 @@ var init_scheduler = __esm({
        */
       #planReservation() {
         const dropped = [];
-        const ready = [];
+        const ready2 = [];
         let cascade = false;
         for (const id of this.#runnable) {
           if (this.#invocations.has(id)) {
@@ -124480,9 +126258,9 @@ var init_scheduler = __esm({
             cascade = true;
             continue;
           }
-          ready.push(record2);
+          ready2.push(record2);
         }
-        return { dropped, cascade, ready };
+        return { dropped, cascade, ready: ready2 };
       }
       /**
        * Live tasks a task waits for before its next invocation: its live ordinary owned work when abort-marked, since
@@ -124771,7 +126549,7 @@ var init_scheduler = __esm({
         if (current === void 0 || this.#closing)
           return;
         await this.#phase(invocation, current, async () => {
-          let failure2;
+          let failure3;
           try {
             const phase = {
               snapshot: () => reservation.snapshot,
@@ -124781,10 +126559,10 @@ var init_scheduler = __esm({
             const runtime = this.#runtime(invocation, phase);
             await erased(reservation.task).abort(current, runtime, invocation.context);
           } catch (error62) {
-            failure2 = { error: error62 };
+            failure3 = { error: error62 };
           }
           const message = `Abort handler of task ${invocation.taskId} returned without a terminal outcome`;
-          await this.#step(invocation, () => ({ kind: "fault", error: failure2?.error ?? new Error(message) }));
+          await this.#step(invocation, () => ({ kind: "fault", error: failure3?.error ?? new Error(message) }));
         });
       }
       /**
@@ -127244,9 +129022,9 @@ function compactionFailure(outcome) {
 }
 async function failModelError(runtime, text3, context) {
   await runtime.commit(async (tx) => {
-    const failure2 = await prepareFailure(tx, runtime);
+    const failure3 = await prepareFailure(tx, runtime);
     const live = await tx.doc(LiveDoc, runtime.conversationId);
-    await endFailedRun(tx, runtime, live, failure2, { status: "unanswered", reason: "model_error", detail: text3 });
+    await endFailedRun(tx, runtime, live, failure3, { status: "unanswered", reason: "model_error", detail: text3 });
     return {
       status: "terminal",
       outcome: { status: "failed", error: { message: text3, detail: { reason: "model_error" } } }
@@ -127263,10 +129041,10 @@ async function interrupted(runtime, checkpoint, context) {
   if (!retry2 && polled !== void 0)
     await cancelDeferred(runtime, polled, context);
   await runtime.commit(async (tx) => {
-    const failure2 = retry2 ? void 0 : await prepareFailure(tx, runtime);
+    const failure3 = retry2 ? void 0 : await prepareFailure(tx, runtime);
     const live = await tx.doc(LiveDoc, runtime.conversationId);
     await convertPartial(tx, live, runtime.conversationId);
-    if (failure2 === void 0) {
+    if (failure3 === void 0) {
       live.generation = { attempt, retry: { at: until, error: text3 } };
       const poll = polled === void 0 ? {} : {
         poll: {
@@ -127279,7 +129057,7 @@ async function interrupted(runtime, checkpoint, context) {
       const next = { phase: "retry", attempt, ...compacted === void 0 ? {} : { compacted }, until, ...poll };
       return { status: "sleeping", checkpoint: next, until };
     }
-    await endFailedRun(tx, runtime, live, failure2, { status: "unanswered", reason: "interrupted", detail: text3 });
+    await endFailedRun(tx, runtime, live, failure3, { status: "unanswered", reason: "interrupted", detail: text3 });
     return {
       status: "terminal",
       outcome: { status: "failed", error: { message: text3, detail: { reason: "interrupted" } } }
@@ -127294,11 +129072,11 @@ async function endCutOff2(runtime, task, context) {
   if (salvage && polled !== void 0)
     await cancelDeferred(runtime, polled, context);
   await runtime.commit(async (tx) => {
-    const failure2 = await prepareFailure(tx, runtime);
+    const failure3 = await prepareFailure(tx, runtime);
     const live = await tx.doc(LiveDoc, runtime.conversationId);
     if (salvage)
       await convertPartial(tx, live, runtime.conversationId);
-    await endFailedRun(tx, runtime, live, failure2, { status: "unanswered", reason: "restart_limit", detail: text3 });
+    await endFailedRun(tx, runtime, live, failure3, { status: "unanswered", reason: "restart_limit", detail: text3 });
     return {
       status: "terminal",
       outcome: { status: "failed", error: { message: text3, detail: { reason: "restart_limit" } } }
@@ -127326,9 +129104,9 @@ async function cancelDeferred(runtime, checkpoint, context) {
 async function failNoModel(runtime, ref, context) {
   const message = ref === void 0 ? "No model is configured" : `Model ${ref.provider}/${ref.modelId} is not available`;
   await runtime.commit(async (tx) => {
-    const failure2 = await prepareFailure(tx, runtime);
+    const failure3 = await prepareFailure(tx, runtime);
     const live = await tx.doc(LiveDoc, runtime.conversationId);
-    await endFailedRun(tx, runtime, live, failure2, {
+    await endFailedRun(tx, runtime, live, failure3, {
       status: "unanswered",
       reason: "no_model",
       detail: message,
@@ -127340,9 +129118,9 @@ async function failNoModel(runtime, ref, context) {
 async function failNothingToAnswer(runtime, context) {
   const message = "The conversation has nothing to answer";
   await runtime.commit(async (tx) => {
-    const failure2 = await prepareFailure(tx, runtime);
+    const failure3 = await prepareFailure(tx, runtime);
     const live = await tx.doc(LiveDoc, runtime.conversationId);
-    await endFailedRun(tx, runtime, live, failure2, { status: "unanswered", reason: "nothing_to_answer" });
+    await endFailedRun(tx, runtime, live, failure3, { status: "unanswered", reason: "nothing_to_answer" });
     const error62 = { message, detail: { reason: "nothing_to_answer" } };
     return { status: "terminal", outcome: { status: "failed", error: error62 } };
   }, context);
@@ -127354,14 +129132,14 @@ async function prepareFailure(tx, runtime) {
     return { policy };
   return { policy, boundary: await prepareBoundary(tx, runtime.conversationId, settings) };
 }
-async function endFailedRun(tx, runtime, live, failure2, end) {
+async function endFailedRun(tx, runtime, live, failure3, end) {
   const conversationId = runtime.conversationId;
   endRun(tx, live, runtime.taskId, end);
-  if (failure2.policy === "withdraw")
+  if (failure3.policy === "withdraw")
     await withdrawQueuedInputs(tx, conversationId, "run_failed");
-  if (failure2.boundary === void 0)
+  if (failure3.boundary === void 0)
     return;
-  const { users, first } = await applyBoundary(tx, failure2.boundary, "final", runtime.now());
+  const { users, first } = await applyBoundary(tx, failure3.boundary, "final", runtime.now());
   if (users.length > 0)
     await startRun(tx, conversationId, live, { inputs: users, first }, { keepFailure: true });
 }
@@ -127489,10 +129267,10 @@ async function classify3(runtime, request2, message, context) {
   const retry2 = message.stopReason === "error" && !overflow && isRetryableAssistantError(message) && policy.enabled && attempt <= policy.maxRetries;
   const until = retry2 ? runtime.now() + retryDelayMs(policy, attempt) : 0;
   await runtime.commit(async (tx) => {
-    const failure2 = retry2 ? void 0 : await prepareFailure(tx, runtime);
+    const failure3 = retry2 ? void 0 : await prepareFailure(tx, runtime);
     const live = await tx.doc(LiveDoc, conversationId);
     await appendAssistant(tx, conversationId, message);
-    if (failure2 === void 0) {
+    if (failure3 === void 0) {
       live.generation = { attempt, retry: { at: until, error: message.errorMessage ?? "" } };
       const checkpoint = {
         phase: "retry",
@@ -127503,7 +129281,7 @@ async function classify3(runtime, request2, message, context) {
       return { status: "sleeping", checkpoint, until };
     }
     const text3 = message.errorMessage ?? `Model response ended with stop reason ${message.stopReason}`;
-    await endFailedRun(tx, runtime, live, failure2, { status: "unanswered", reason: "model_error", detail: text3 });
+    await endFailedRun(tx, runtime, live, failure3, { status: "unanswered", reason: "model_error", detail: text3 });
     return {
       status: "terminal",
       outcome: { status: "failed", error: { message: text3, detail: { reason: "model_error" } } }
@@ -127689,8 +129467,8 @@ async function finishToolRound(runtime, assistant, tools, context) {
         await startRun(tx, conversationId, live, { inputs: users, first });
     } else if (maxTurns !== void 0 && turns >= maxTurns) {
       const policy = runtime.settings.afterFailedRun;
-      const failure2 = { policy, ...policy === "continue" ? { boundary } : {} };
-      await endFailedRun(tx, runtime, live, failure2, {
+      const failure3 = { policy, ...policy === "continue" ? { boundary } : {} };
+      await endFailedRun(tx, runtime, live, failure3, {
         status: "unanswered",
         reason: "turn_limit",
         detail: turns === 1 ? "1 turn" : `${turns} turns`
@@ -129846,14 +131624,14 @@ var init_sqlite = __esm({
 });
 
 // node_modules/@earendil-works/chord/dist/sqlite/node.js
-import { mkdir as mkdir2 } from "node:fs/promises";
-import { dirname as dirname5 } from "node:path";
+import { mkdir as mkdir3 } from "node:fs/promises";
+import { dirname as dirname7 } from "node:path";
 import { DatabaseSync as DatabaseSync2 } from "node:sqlite";
 async function openNodeSqliteDatabase(path6, options = {}) {
   const checkpointPages = options.walAutoCheckpointPages ?? DEFAULT_WAL_AUTO_CHECKPOINT_PAGES;
   const timeout = options.busyTimeoutMs ?? DEFAULT_BUSY_TIMEOUT_MS;
   if (path6 !== ":memory:")
-    await mkdir2(dirname5(path6), { recursive: true });
+    await mkdir3(dirname7(path6), { recursive: true });
   const database = new DatabaseSync2(path6, { timeout });
   const adapter = new NodeSqliteDatabase(database);
   try {
@@ -129870,7 +131648,7 @@ async function openNodeSqliteDatabase(path6, options = {}) {
   }
 }
 var DEFAULT_WAL_AUTO_CHECKPOINT_PAGES, DEFAULT_BUSY_TIMEOUT_MS, ignore2, SerialOperationQueue, STATEMENT_CACHE_LIMIT, NodeSqliteExecutor, NodeSqliteTransaction, NodeSqliteDatabase;
-var init_node4 = __esm({
+var init_node5 = __esm({
   "node_modules/@earendil-works/chord/dist/sqlite/node.js"() {
     DEFAULT_WAL_AUTO_CHECKPOINT_PAGES = 1e3;
     DEFAULT_BUSY_TIMEOUT_MS = 5e3;
@@ -130907,10 +132685,10 @@ async function openNodeSqliteStorage(path6, options = {}) {
     validateSqliteSchemaPrefix(prefix);
   return SqliteStorage.open(await openNodeSqliteDatabase(path6, databaseOptions), { prefix });
 }
-var init_node5 = __esm({
+var init_node6 = __esm({
   "node_modules/@earendil-works/pi-durable/dist/storage/sqlite/node.js"() {
     init_sqlite();
-    init_node4();
+    init_node5();
     init_storage();
   }
 });
@@ -130933,14 +132711,14 @@ function validateTimeout(timeout) {
   if (!Number.isFinite(timeout) || timeout <= 0) {
     throw new Error("Invalid timeout: must be a finite number of seconds");
   }
-  if (timeout > MAX_TIMEOUT_SECONDS) {
-    throw new Error(`Invalid timeout: maximum is ${MAX_TIMEOUT_SECONDS} seconds`);
+  if (timeout > MAX_TIMEOUT_SECONDS2) {
+    throw new Error(`Invalid timeout: maximum is ${MAX_TIMEOUT_SECONDS2} seconds`);
   }
 }
-async function prepareExecution(command, options, api, context) {
+async function prepareExecution(command2, options, api, context) {
   const execution = {
     command: options?.commandPrefix ? `${options.commandPrefix}
-${command}` : command,
+${command2}` : command2,
     cwd: requireEnv(api).cwd,
     env: {},
     inheritEnv: true
@@ -130948,11 +132726,11 @@ ${command}` : command,
   await options?.prepare?.(execution, api, context);
   return execution;
 }
-async function runCommand(commands, execution, timeout, api, context) {
+async function runCommand2(commands, execution, timeout, api, context) {
   const env2 = requireEnv(api);
   let result2;
-  for (const command of commands) {
-    result2 = await env2.exec(command, {
+  for (const command2 of commands) {
+    result2 = await env2.exec(command2, {
       cwd: execution.cwd,
       env: execution.env,
       inheritEnv: execution.inheritEnv,
@@ -131003,18 +132781,18 @@ function createBashTool(options) {
     async execute(args, api, context) {
       validateTimeout(args.timeout);
       const execution = await prepareExecution(args.command, options, api, context);
-      return runCommand([execution.command], execution, args.timeout, api, context);
+      return runCommand2([execution.command], execution, args.timeout, api, context);
     }
   });
 }
-var MAX_TIMEOUT_SECONDS, bashSchema, powershellSchema, shellStructuredOutputSchema;
+var MAX_TIMEOUT_SECONDS2, bashSchema, powershellSchema, shellStructuredOutputSchema;
 var init_bash = __esm({
   "node_modules/@earendil-works/pi-durable/dist/tools/bash.js"() {
     init_dist3();
     init_define();
     init_truncate();
     init_env4();
-    MAX_TIMEOUT_SECONDS = 2147483647 / 1e3;
+    MAX_TIMEOUT_SECONDS2 = 2147483647 / 1e3;
     bashSchema = obj({
       command: str({ description: "Bash command to execute" }),
       timeout: opt(num({ description: "Timeout in seconds (optional, no default timeout)" }))
@@ -132263,11 +134041,11 @@ async function readImage(reader, info, path6, mimeType, processor, { vision, lim
       return imageError(`${path6} is an image (${mimeType}) of ${formatSize(info.size)}, too large to send, ${unshrinkable}`);
     }
     const bytes2 = getOrThrow(await reader.read(0, info.size, context));
-    const size2 = imageDimensions(bytes2, mimeType);
-    if (size2 === void 0)
+    const size3 = imageDimensions(bytes2, mimeType);
+    if (size3 === void 0)
       return imageError(`${path6} is an image (${mimeType}) whose size cannot be read`);
-    if (size2.width > limits.maxWidth || size2.height > limits.maxHeight) {
-      return imageError(`${path6} is an image (${mimeType}) of ${size2.width}x${size2.height}, larger than ${limits.maxWidth}x${limits.maxHeight}, ${unshrinkable}`);
+    if (size3.width > limits.maxWidth || size3.height > limits.maxHeight) {
+      return imageError(`${path6} is an image (${mimeType}) of ${size3.width}x${size3.height}, larger than ${limits.maxWidth}x${limits.maxHeight}, ${unshrinkable}`);
     }
     image = { data: toBase64(bytes2), mimeType };
   }
@@ -132453,1624 +134231,9 @@ var init_tools = __esm({
   }
 });
 
-// node_modules/@earendil-works/pi-durable/dist/env/node-watch.js
-import { createHash as createHash10 } from "node:crypto";
-import { watch as fsWatch } from "node:fs";
-import { lstat, readdir as readdir2, readFile as readFile2, stat as stat4, statfs } from "node:fs/promises";
-import { dirname as dirname6, relative as relative3, sep as sep3 } from "node:path";
-function isNodeError(error62) {
-  return error62 instanceof Error && "code" in error62;
-}
-function isDenied(error62) {
-  return isNodeError(error62) && (error62.code === "EACCES" || error62.code === "EPERM");
-}
-function entryOf(stats, hash3) {
-  const kind = stats.isFile() ? "file" : stats.isDirectory() ? "directory" : stats.isSymbolicLink() ? "symlink" : "other";
-  return {
-    kind,
-    dev: stats.dev,
-    ino: stats.ino,
-    size: kind === "directory" ? 0 : stats.size,
-    mtimeMs: kind === "directory" ? 0 : stats.mtimeMs,
-    ...hash3 === void 0 ? {} : { hash: hash3 }
-  };
-}
-function sameEntry2(a, b) {
-  return a.kind === b.kind && a.dev === b.dev && a.ino === b.ino && a.size === b.size && a.mtimeMs === b.mtimeMs && a.hash === b.hash;
-}
-function ancestorsOf(path6) {
-  const result2 = [];
-  for (let current = dirname6(path6); ; current = dirname6(current)) {
-    result2.push(current);
-    if (dirname6(current) === current)
-      return result2;
-  }
-}
-function isWithin2(path6, ancestor) {
-  return path6 === ancestor || path6.startsWith(ancestor.endsWith(sep3) ? ancestor : ancestor + sep3);
-}
-function excluded(target, name) {
-  return target.hidden && name.startsWith(".") || target.names.has(name);
-}
-async function anyUnreliable(paths2) {
-  if (process.platform !== "linux" && process.platform !== "android")
-    return false;
-  for (const path6 of paths2) {
-    for (const candidate of [path6, ...ancestorsOf(path6)]) {
-      const info = await statfs(candidate).catch(() => void 0);
-      if (info === void 0)
-        continue;
-      if (UNRELIABLE_FILE_SYSTEMS.has(info.type))
-        return true;
-      break;
-    }
-  }
-  return false;
-}
-var DEBOUNCE_MS, FSEVENTS_SETTLE_MS, DEFAULT_POLL_MS, DEFAULT_MAX_DIRECTORIES, OVERFLOW, HASH_MAX_BYTES, HASH_RECENT_MS, UNRELIABLE_FILE_SYSTEMS, BudgetExceeded, NodeFileWatcher;
-var init_node_watch = __esm({
-  "node_modules/@earendil-works/pi-durable/dist/env/node-watch.js"() {
-    init_env3();
-    DEBOUNCE_MS = 50;
-    FSEVENTS_SETTLE_MS = 500;
-    DEFAULT_POLL_MS = 2e3;
-    DEFAULT_MAX_DIRECTORIES = 1e4;
-    OVERFLOW = { kind: "overflow" };
-    HASH_MAX_BYTES = 256 * 1024;
-    HASH_RECENT_MS = 5e3;
-    UNRELIABLE_FILE_SYSTEMS = /* @__PURE__ */ new Set([
-      26985,
-      // NFS
-      20859,
-      // SMB
-      4283649346,
-      // CIFS
-      4266872130,
-      // SMB2
-      1702057286,
-      // FUSE (sshfs, Android shared storage)
-      16914839,
-      // 9P (WSL2 Windows drives)
-      198183888,
-      // Lustre
-      1196443219,
-      // GPFS
-      12805120,
-      // Ceph
-      1397113167,
-      // OpenAFS
-      1799439955,
-      // kAFS
-      1573531125
-      // sdcardfs
-    ]);
-    BudgetExceeded = class extends Error {
-    };
-    NodeFileWatcher = class _NodeFileWatcher {
-      #targets;
-      #onChange;
-      #pollIntervalMs;
-      #maxDirectories;
-      #watchers = /* @__PURE__ */ new Map();
-      #events = /* @__PURE__ */ new Set();
-      #mode;
-      #snapshot = /* @__PURE__ */ new Map();
-      #timer;
-      #settleTimer;
-      #running;
-      #dirty = false;
-      #stopped = false;
-      constructor(targets, onChange, mode, options) {
-        this.#targets = targets;
-        this.#onChange = onChange;
-        this.#mode = mode;
-        this.#pollIntervalMs = options.pollIntervalMs ?? DEFAULT_POLL_MS;
-        this.#maxDirectories = options.maxDirectories ?? DEFAULT_MAX_DIRECTORIES;
-      }
-      /** Establish coverage: watchers first, then the snapshot later changes are compared with. */
-      static async open(targets, resolvePath4, onChange, options) {
-        const resolved = targets.map((target) => ({
-          path: resolvePath4(target.path),
-          recursive: target.recursive === true,
-          hidden: target.exclude?.hidden === true,
-          names: new Set(target.exclude?.names ?? [])
-        }));
-        const mode = options.mode ?? (process.platform === "win32" || await anyUnreliable(resolved.map((target) => target.path)) ? "polling" : "native");
-        const watcher = new _NodeFileWatcher(resolved, onChange, mode, options);
-        try {
-          await watcher.#sync(false);
-        } catch (error62) {
-          watcher.#stop();
-          if (error62 instanceof BudgetExceeded)
-            throw new FileError("invalid", error62.message);
-          throw error62;
-        }
-        watcher.#schedulePoll();
-        return watcher;
-      }
-      get mode() {
-        return this.#mode;
-      }
-      async stop(_context) {
-        if (this.#stopped)
-          return;
-        this.#stop();
-        await this.#running;
-      }
-      #stop() {
-        this.#stopped = true;
-        clearTimeout(this.#timer);
-        this.#timer = void 0;
-        clearTimeout(this.#settleTimer);
-        this.#settleTimer = void 0;
-        for (const { watcher } of this.#watchers.values())
-          watcher.close();
-        this.#watchers.clear();
-      }
-      #deliver(change) {
-        if (this.#stopped)
-          return;
-        try {
-          this.#onChange(change);
-        } catch {
-        }
-      }
-      #schedulePoll() {
-        if (this.#stopped || this.#mode !== "polling")
-          return;
-        this.#timer = setTimeout(() => {
-          this.#timer = void 0;
-          void this.#flush().finally(() => this.#schedulePoll());
-        }, this.#pollIntervalMs);
-      }
-      #scheduleFlush() {
-        if (this.#stopped || this.#timer !== void 0)
-          return;
-        this.#timer = setTimeout(() => {
-          this.#timer = void 0;
-          void this.#flush();
-        }, DEBOUNCE_MS);
-      }
-      #scheduleSettle() {
-        if (this.#stopped)
-          return;
-        clearTimeout(this.#settleTimer);
-        this.#settleTimer = setTimeout(() => {
-          this.#settleTimer = void 0;
-          void this.#flush();
-        }, FSEVENTS_SETTLE_MS);
-      }
-      #flush() {
-        if (this.#running !== void 0) {
-          this.#dirty = true;
-          return this.#running;
-        }
-        this.#running = (async () => {
-          try {
-            do {
-              this.#dirty = false;
-              const events = [...this.#events];
-              this.#events.clear();
-              const changed = await this.#sync(true);
-              for (const path6 of events)
-                changed.add(path6);
-              if (changed.size > 0)
-                this.#deliver({ kind: "paths", paths: [...changed].sort() });
-            } while (this.#dirty && !this.#stopped);
-          } catch (error62) {
-            const message = error62 instanceof Error ? error62.message : String(error62);
-            const fileError = error62 instanceof FileError ? error62 : new FileError(isDenied(error62) ? "permission_denied" : "invalid", message);
-            this.#deliver({ kind: "failed", error: fileError });
-            this.#stop();
-          } finally {
-            this.#running = void 0;
-          }
-        })();
-        return this.#running;
-      }
-      /** Rescan, report differences, and install watchers for new directories, rescanning until none are new. */
-      async #sync(report2) {
-        const changed = /* @__PURE__ */ new Set();
-        for (let round = 0; round < 10 && !this.#stopped; round++) {
-          const scan = await this.#scan();
-          if (this.#stopped)
-            break;
-          const next = scan.snapshot;
-          if (report2)
-            for (const path6 of this.#diff(this.#snapshot, next))
-              changed.add(path6);
-          this.#snapshot = next;
-          if (this.#mode === "polling" || !this.#reconcileWatchers(scan))
-            break;
-          if (process.platform === "darwin")
-            this.#scheduleSettle();
-          report2 = true;
-        }
-        return changed;
-      }
-      #diff(previous, next) {
-        const changed = [];
-        for (const [path6, entry2] of next) {
-          const before = previous.get(path6);
-          if (before === void 0 || !sameEntry2(before, entry2))
-            changed.push(this.#reported(path6));
-        }
-        for (const path6 of previous.keys())
-          if (!next.has(path6))
-            changed.push(this.#reported(path6));
-        return changed;
-      }
-      /** An ancestor that changed identity moved every target below it; report those targets. */
-      #reported(path6) {
-        if (this.#targets.some((target) => isWithin2(path6, target.path)))
-          return path6;
-        return this.#targets.find((target) => isWithin2(target.path, path6))?.path ?? path6;
-      }
-      async #scan() {
-        const snapshot = /* @__PURE__ */ new Map();
-        const linkedFiles = /* @__PURE__ */ new Set();
-        const counted = /* @__PURE__ */ new Set();
-        const traversed = /* @__PURE__ */ new Set();
-        const listed = /* @__PURE__ */ new Map();
-        const countDirectory = (path6) => {
-          counted.add(path6);
-          if (counted.size > this.#maxDirectories) {
-            throw new BudgetExceeded(`Watched paths exceed ${this.#maxDirectories} directories`);
-          }
-        };
-        const record2 = async (path6, stats) => {
-          let hash3;
-          if (this.#mode === "polling" && stats.isFile() && stats.size <= HASH_MAX_BYTES && Date.now() - stats.mtimeMs < HASH_RECENT_MS) {
-            hash3 = await readFile2(path6).then((content) => createHash10("sha256").update(content).digest("hex"), () => void 0);
-          }
-          snapshot.set(path6, entryOf(stats, hash3));
-        };
-        const scanDirectory = async (index, target, directory) => {
-          const key = `${index}\0${directory}`;
-          if (traversed.has(key))
-            return;
-          traversed.add(key);
-          let names2;
-          try {
-            names2 = await readdir2(directory);
-          } catch (error62) {
-            if (directory === target.path && isDenied(error62))
-              throw error62;
-            if (isNodeError(error62) && ["ENOENT", "EACCES", "EPERM", "ENOTDIR"].includes(error62.code ?? ""))
-              return;
-            throw error62;
-          }
-          for (const name of names2) {
-            if (excluded(target, name))
-              continue;
-            const path6 = `${directory.endsWith(sep3) ? directory : directory + sep3}${name}`;
-            let kind = listed.get(path6);
-            if (kind === void 0) {
-              const stats = await lstat(path6).catch(() => void 0);
-              if (stats === void 0)
-                continue;
-              kind = entryOf(stats).kind;
-              listed.set(path6, kind);
-              if (!snapshot.has(path6))
-                await record2(path6, stats);
-            }
-            if (target.recursive && kind === "directory") {
-              countDirectory(path6);
-              await scanDirectory(index, target, path6);
-            }
-          }
-        };
-        for (const [index, target] of this.#targets.entries()) {
-          for (const ancestor of ancestorsOf(target.path)) {
-            if (snapshot.has(ancestor))
-              continue;
-            const stats2 = await lstat(ancestor).catch(() => void 0);
-            if (stats2 !== void 0)
-              snapshot.set(ancestor, { ...entryOf(stats2), size: 0, mtimeMs: 0 });
-          }
-          let stats;
-          try {
-            stats = await stat4(target.path);
-          } catch (error62) {
-            if (isDenied(error62))
-              throw error62;
-            continue;
-          }
-          await record2(target.path, stats);
-          if (stats.isFile() && (await lstat(target.path).catch(() => void 0))?.isSymbolicLink()) {
-            linkedFiles.add(target.path);
-          }
-          if (stats.isDirectory()) {
-            countDirectory(target.path);
-            await scanDirectory(index, target, target.path);
-          }
-        }
-        return { snapshot, linkedFiles };
-      }
-      /**
-       * Watch every existing ancestor of each target, each target directory, each target that is a symbolic link to a file
-       * (changes to that file are not events of the link's directory), and on Linux each directory below a recursive target
-       * (elsewhere one recursive watcher per target). Returns whether a watcher was added.
-       */
-      #reconcileWatchers({ snapshot, linkedFiles }) {
-        const wanted = /* @__PURE__ */ new Map();
-        for (const path6 of linkedFiles)
-          wanted.set(path6, false);
-        const perDirectory = process.platform === "linux" || process.platform === "android";
-        for (const target of this.#targets) {
-          for (const ancestor of ancestorsOf(target.path)) {
-            if (snapshot.get(ancestor)?.kind === "directory" && !wanted.has(ancestor))
-              wanted.set(ancestor, false);
-          }
-          if (snapshot.get(target.path)?.kind !== "directory")
-            continue;
-          const recursiveRoot = target.recursive && !perDirectory;
-          wanted.set(target.path, recursiveRoot);
-          if (target.recursive && perDirectory) {
-            for (const [path6, entry2] of snapshot) {
-              if (entry2.kind === "directory" && path6 !== target.path && isWithin2(path6, target.path)) {
-                wanted.set(path6, false);
-              }
-            }
-          }
-        }
-        for (const [path6, installed] of this.#watchers) {
-          const entry2 = snapshot.get(path6);
-          if (!wanted.has(path6) || entry2 === void 0 || entry2.dev !== installed.dev || entry2.ino !== installed.ino) {
-            installed.watcher.close();
-            this.#watchers.delete(path6);
-          }
-        }
-        let added = false;
-        for (const [path6, recursive2] of wanted) {
-          const entry2 = snapshot.get(path6);
-          if (this.#watchers.has(path6) || entry2 === void 0)
-            continue;
-          const linked = linkedFiles.has(path6);
-          try {
-            const watcher = fsWatch(path6, { recursive: recursive2, persistent: false }, (_event, filename) => linked ? this.#onLinkedFileEvent(path6) : this.#onEvent(path6, filename === null ? void 0 : String(filename)));
-            watcher.on("error", () => {
-              watcher.close();
-              if (this.#watchers.get(path6)?.watcher === watcher)
-                this.#watchers.delete(path6);
-              this.#scheduleFlush();
-            });
-            this.#watchers.set(path6, { watcher, dev: entry2.dev, ino: entry2.ino });
-            added = true;
-          } catch (error62) {
-            if (isNodeError(error62) && error62.code !== "ENOENT" && error62.code !== "EACCES" && error62.code !== "EPERM") {
-              this.#switchToPolling();
-              return false;
-            }
-          }
-        }
-        return added;
-      }
-      #switchToPolling() {
-        if (this.#mode === "polling")
-          return;
-        this.#mode = "polling";
-        for (const { watcher } of this.#watchers.values())
-          watcher.close();
-        this.#watchers.clear();
-        this.#deliver(OVERFLOW);
-        clearTimeout(this.#timer);
-        this.#timer = void 0;
-        this.#schedulePoll();
-      }
-      #onEvent(directory, filename) {
-        if (this.#stopped)
-          return;
-        const path6 = filename === void 0 ? directory : `${directory.endsWith(sep3) ? directory : directory + sep3}${filename}`;
-        const relevant = this.#inScope(path6);
-        if (relevant)
-          this.#events.add(this.#reported(path6));
-        if (relevant || filename === void 0)
-          this.#scheduleFlush();
-      }
-      /** The file a target links to changed: report the target. */
-      #onLinkedFileEvent(target) {
-        if (this.#stopped)
-          return;
-        this.#events.add(target);
-        this.#scheduleFlush();
-      }
-      #inScope(path6) {
-        for (const target of this.#targets) {
-          if (isWithin2(target.path, path6))
-            return true;
-          if (!isWithin2(path6, target.path) || path6 === target.path)
-            continue;
-          const components = relative3(target.path, path6).split(sep3);
-          if (!target.recursive && components.length > 1)
-            continue;
-          if (components.some((name) => excluded(target, name)))
-            continue;
-          return true;
-        }
-        return false;
-      }
-    };
-  }
-});
-
-// node_modules/@earendil-works/pi-durable/dist/env/node.js
-import { spawn as spawn5 } from "node:child_process";
-import { randomUUID as randomUUID9 } from "node:crypto";
-import { constants as constants4, createWriteStream as createWriteStream2 } from "node:fs";
-import { access as access2, appendFile, lstat as lstat2, mkdir as mkdir3, mkdtemp, opendir, open as openFile, readdir as readdir3, readFile as readFile3, realpath as realpath2, rename, rm, writeFile as writeFile2 } from "node:fs/promises";
-import { homedir as homedir2, constants as osConstants, tmpdir } from "node:os";
-import { basename as basename5, isAbsolute as isAbsolute4, join as join10, resolve as resolve7, win32 } from "node:path";
-import { fileURLToPath as fileURLToPath4 } from "node:url";
-function resolveTimeoutMs(timeout) {
-  if (timeout === void 0)
-    return ok(void 0);
-  if (!Number.isFinite(timeout) || timeout <= 0) {
-    return err(new ExecutionError("timeout", "Invalid timeout: must be a finite number of seconds"));
-  }
-  const timeoutMs = timeout * 1e3;
-  if (timeoutMs > MAX_TIMEOUT_MS) {
-    return err(new ExecutionError("timeout", `Invalid timeout: maximum is ${MAX_TIMEOUT_SECONDS2} seconds`));
-  }
-  return ok(timeoutMs);
-}
-function resolvePath3(cwd, path6) {
-  let normalized = path6;
-  if (normalized === "~") {
-    normalized = homedir2();
-  } else if (normalized.startsWith("~/") || process.platform === "win32" && normalized.startsWith("~\\")) {
-    normalized = join10(homedir2(), normalized.slice(2));
-  } else if (normalized.startsWith("file://")) {
-    try {
-      normalized = fileURLToPath4(normalized);
-    } catch {
-    }
-  }
-  return isAbsolute4(normalized) ? resolve7(normalized) : resolve7(cwd, normalized);
-}
-function fileKindFromStats(stats) {
-  if (stats.isFile())
-    return "file";
-  if (stats.isDirectory())
-    return "directory";
-  if (stats.isSymbolicLink())
-    return "symlink";
-  return void 0;
-}
-function fileInfoFromStats(path6, stats) {
-  const kind = fileKindFromStats(stats);
-  if (!kind)
-    return err(new FileError("invalid", "Unsupported file type", path6));
-  return ok({
-    name: basename5(path6),
-    path: path6,
-    kind,
-    size: stats.size,
-    mtimeMs: stats.mtimeMs
-  });
-}
-function isNodeError2(error62) {
-  return error62 instanceof Error && "code" in error62;
-}
-function toFileError(error62, fallbackPath) {
-  if (error62 instanceof FileError)
-    return error62;
-  const cause = toError(error62);
-  const nodeError = isNodeError2(error62) ? error62 : void 0;
-  const path6 = typeof nodeError?.path === "string" ? nodeError.path : fallbackPath;
-  if (nodeError) {
-    const message = nodeError.message;
-    switch (nodeError.code) {
-      case "ABORT_ERR":
-        return new FileError("aborted", message, path6, cause);
-      case "ENOENT":
-        return new FileError("not_found", message, path6, cause);
-      case "EACCES":
-      case "EPERM":
-        return new FileError("permission_denied", message, path6, cause);
-      case "ENOTDIR":
-        return new FileError("not_directory", message, path6, cause);
-      case "EISDIR":
-        return new FileError("is_directory", message, path6, cause);
-      case "EINVAL":
-        return new FileError("invalid", message, path6, cause);
-    }
-  }
-  return new FileError("unknown", cause.message, path6, cause);
-}
-function abortResult(signal, path6) {
-  return signal?.aborted ? err(new FileError("aborted", "aborted", path6)) : void 0;
-}
-async function pathExists(path6) {
-  try {
-    await access2(path6, constants4.F_OK);
-    return true;
-  } catch {
-    return false;
-  }
-}
-async function runCommand2(command, args, timeoutMs) {
-  return await new Promise((resolve9) => {
-    let stdout = "";
-    let child;
-    try {
-      child = spawn5(command, args, {
-        stdio: ["ignore", "pipe", "ignore"],
-        windowsHide: true
-      });
-    } catch {
-      resolve9({ stdout: "", status: null });
-      return;
-    }
-    const timeout = setTimeout(() => {
-      if (child.pid)
-        killProcessTree(child.pid);
-    }, timeoutMs);
-    child.stdout?.setEncoding("utf8");
-    child.stdout?.on("data", (chunk) => {
-      stdout += chunk;
-    });
-    child.on("error", () => {
-      clearTimeout(timeout);
-      resolve9({ stdout: "", status: null });
-    });
-    child.on("close", (status) => {
-      clearTimeout(timeout);
-      resolve9({ stdout, status });
-    });
-  });
-}
-async function findBashOnPath() {
-  const result2 = process.platform === "win32" ? await runCommand2("where", ["bash.exe"], 5e3) : await runCommand2("which", ["bash"], 5e3);
-  if (result2.status !== 0 || !result2.stdout)
-    return null;
-  const firstMatch = result2.stdout.trim().split(/\r?\n/)[0];
-  return firstMatch && await pathExists(firstMatch) ? firstMatch : null;
-}
-function isLegacyWslBashPath(path6) {
-  const normalized = win32.normalize(path6).toLowerCase();
-  const systemRoot = process.env.SystemRoot;
-  if (systemRoot) {
-    if (!/^[a-z]:[\\/]/i.test(systemRoot))
-      return false;
-    return ["System32", "Sysnative"].some((directory) => normalized === win32.join(systemRoot, directory, "bash.exe").toLowerCase());
-  }
-  return /^[a-z]:\\windows\\(?:system32|sysnative)\\bash\.exe$/.test(normalized);
-}
-function getBashShellConfig(shell) {
-  return isLegacyWslBashPath(shell) ? { shell, args: ["-s"], commandTransport: "stdin" } : { shell, args: ["-c"] };
-}
-async function getShellConfig(customShellPath) {
-  if (customShellPath) {
-    if (await pathExists(customShellPath)) {
-      return ok(getBashShellConfig(customShellPath));
-    }
-    return err(new ExecutionError("shell_unavailable", `Custom shell path not found: ${customShellPath}`));
-  }
-  if (process.platform === "win32") {
-    const candidates = [];
-    const programFiles = process.env.ProgramFiles;
-    if (programFiles)
-      candidates.push(`${programFiles}\\Git\\bin\\bash.exe`);
-    const programFilesX86 = process.env["ProgramFiles(x86)"];
-    if (programFilesX86)
-      candidates.push(`${programFilesX86}\\Git\\bin\\bash.exe`);
-    for (const candidate of candidates) {
-      if (await pathExists(candidate)) {
-        return ok(getBashShellConfig(candidate));
-      }
-    }
-    const bashOnPath2 = await findBashOnPath();
-    if (bashOnPath2) {
-      return ok(getBashShellConfig(bashOnPath2));
-    }
-    return err(new ExecutionError("shell_unavailable", `No bash shell found. Options:
-  1. Install Git for Windows: https://git-scm.com/download/win
-  2. Add your bash to PATH (Cygwin, MSYS2, etc.)
-  3. Configure an explicit shellPath
-
-Searched Git Bash in:
-${candidates.map((path6) => `  ${path6}`).join("\n")}`));
-  }
-  if (await pathExists("/bin/bash")) {
-    return ok(getBashShellConfig("/bin/bash"));
-  }
-  const bashOnPath = await findBashOnPath();
-  if (bashOnPath) {
-    return ok(getBashShellConfig(bashOnPath));
-  }
-  return ok({ shell: "sh", args: ["-c"] });
-}
-function getShellEnv(baseEnv, extraEnv, inheritEnv = true) {
-  if (!inheritEnv)
-    return { ...extraEnv };
-  return {
-    ...process.env,
-    ...baseEnv,
-    ...extraEnv
-  };
-}
-function killProcessTree(pid) {
-  if (process.platform === "win32") {
-    try {
-      const child = spawn5(join10(process.env.SystemRoot || "C:\\Windows", "System32", "taskkill.exe"), ["/F", "/T", "/PID", String(pid)], {
-        stdio: "ignore",
-        detached: true,
-        windowsHide: true
-      });
-      child.once("error", () => {
-      });
-    } catch {
-    }
-    return;
-  }
-  try {
-    process.kill(-pid, "SIGKILL");
-  } catch {
-    try {
-      process.kill(pid, "SIGKILL");
-    } catch {
-    }
-  }
-}
-function waitForChildProcess(child, spillIsDraining) {
-  return new Promise((resolvePromise, reject2) => {
-    let settled = false;
-    let exited = false;
-    let exitCode = null;
-    let exitSignal = null;
-    let postExitTimer;
-    let stdoutEnded = child.stdout === null;
-    let stderrEnded = child.stderr === null;
-    const cleanup = () => {
-      if (postExitTimer)
-        clearTimeout(postExitTimer);
-      child.removeListener("error", onError);
-      child.removeListener("exit", onExit);
-      child.removeListener("close", onClose);
-      child.stdout?.removeListener("end", onStdoutEnd);
-      child.stderr?.removeListener("end", onStderrEnd);
-      child.stdout?.removeListener("data", onData);
-      child.stderr?.removeListener("data", onData);
-    };
-    const finalize2 = () => {
-      if (settled)
-        return;
-      settled = true;
-      cleanup();
-      child.stdout?.destroy();
-      child.stderr?.destroy();
-      resolvePromise({ code: exitCode, signal: exitSignal });
-    };
-    const maybeFinalizeAfterExit = () => {
-      if (exited && stdoutEnded && stderrEnded)
-        finalize2();
-    };
-    const armIdleTimer = () => {
-      if (postExitTimer)
-        clearTimeout(postExitTimer);
-      postExitTimer = setTimeout(() => {
-        if (spillIsDraining())
-          armIdleTimer();
-        else
-          finalize2();
-      }, EXIT_STDIO_GRACE_MS);
-    };
-    const onData = () => {
-      if (exited && !settled)
-        armIdleTimer();
-    };
-    const onStdoutEnd = () => {
-      stdoutEnded = true;
-      maybeFinalizeAfterExit();
-    };
-    const onStderrEnd = () => {
-      stderrEnded = true;
-      maybeFinalizeAfterExit();
-    };
-    const onError = (error62) => {
-      if (settled)
-        return;
-      settled = true;
-      cleanup();
-      reject2(error62);
-    };
-    const onExit = (code, signal) => {
-      exited = true;
-      exitCode = code;
-      exitSignal = signal;
-      maybeFinalizeAfterExit();
-      if (!settled)
-        armIdleTimer();
-    };
-    const onClose = (code, signal) => {
-      exitCode = code;
-      exitSignal = signal;
-      finalize2();
-    };
-    child.stdout?.once("end", onStdoutEnd);
-    child.stderr?.once("end", onStderrEnd);
-    child.stdout?.on("data", onData);
-    child.stderr?.on("data", onData);
-    child.once("error", onError);
-    child.once("exit", onExit);
-    child.once("close", onClose);
-  });
-}
-function closedResult(what, path6) {
-  return err(new FileError("invalid", `${what} is closed`, path6));
-}
-function symlinkRefused(path6, cause) {
-  return new FileError("invalid", "Refusing to follow a symbolic link", path6, cause);
-}
-var MAX_TIMEOUT_MS, MAX_TIMEOUT_SECONDS2, EXIT_STDIO_GRACE_MS, SPILL_HIGH_WATER_MARK, BINARY_READ_CHUNK, NodeTextLineReader, NodeBinaryReader, NodeDirReader, NodeExecutionEnv;
-var init_node6 = __esm({
-  "node_modules/@earendil-works/pi-durable/dist/env/node.js"() {
-    init_decode();
-    init_env3();
-    init_line_scan();
-    init_node_watch();
-    MAX_TIMEOUT_MS = 2147483647;
-    MAX_TIMEOUT_SECONDS2 = MAX_TIMEOUT_MS / 1e3;
-    EXIT_STDIO_GRACE_MS = 100;
-    SPILL_HIGH_WATER_MARK = 1024 * 1024;
-    BINARY_READ_CHUNK = 1024 * 1024;
-    NodeTextLineReader = class {
-      file;
-      path;
-      decoder = new StreamDecoder();
-      chunk = new Uint8Array(64 * 1024);
-      byteOffset = 0;
-      buffered = "";
-      ended = false;
-      closed = false;
-      constructor(file2, path6) {
-        this.file = file2;
-        this.path = path6;
-      }
-      async readLine(context) {
-        const aborted2 = abortResult(context.abortSignal, this.path);
-        if (aborted2)
-          return aborted2;
-        if (this.closed)
-          return err(new FileError("invalid", "Text line reader is closed", this.path));
-        try {
-          while (true) {
-            const newline = this.buffered.indexOf("\n");
-            if (newline !== -1) {
-              const text3 = this.buffered.slice(0, newline);
-              this.buffered = this.buffered.slice(newline + 1);
-              return ok({ text: text3, terminated: true });
-            }
-            if (this.ended) {
-              if (this.buffered.length === 0)
-                return ok(void 0);
-              const text3 = this.buffered;
-              this.buffered = "";
-              return ok({ text: text3, terminated: false });
-            }
-            const { bytesRead } = await this.file.read(this.chunk, 0, this.chunk.length, this.byteOffset);
-            const afterReadAbort = abortResult(context.abortSignal, this.path);
-            if (afterReadAbort)
-              return afterReadAbort;
-            this.byteOffset += bytesRead;
-            if (bytesRead === 0) {
-              this.buffered += this.decoder.decode();
-              this.ended = true;
-            } else {
-              this.buffered += this.decoder.decode(this.chunk.subarray(0, bytesRead));
-            }
-          }
-        } catch (error62) {
-          return err(toFileError(error62, this.path));
-        }
-      }
-      async close(_context) {
-        if (this.closed)
-          return;
-        this.closed = true;
-        this.buffered = "";
-        try {
-          await this.file.close();
-        } catch {
-        }
-      }
-    };
-    NodeBinaryReader = class {
-      file;
-      path;
-      closed = false;
-      constructor(file2, path6) {
-        this.file = file2;
-        this.path = path6;
-      }
-      async info(context) {
-        const aborted2 = abortResult(context.abortSignal, this.path);
-        if (aborted2)
-          return aborted2;
-        if (this.closed)
-          return closedResult("Binary reader", this.path);
-        try {
-          return fileInfoFromStats(this.path, await this.file.stat());
-        } catch (error62) {
-          return err(toFileError(error62, this.path));
-        }
-      }
-      async read(offset, length, context) {
-        const aborted2 = abortResult(context.abortSignal, this.path);
-        if (aborted2)
-          return aborted2;
-        if (this.closed)
-          return closedResult("Binary reader", this.path);
-        if (!Number.isSafeInteger(offset) || offset < 0 || !Number.isSafeInteger(length) || length < 0) {
-          return err(new FileError("invalid", "Offset and length must be non-negative safe integers", this.path));
-        }
-        const chunks = [];
-        let total = 0;
-        try {
-          while (total < length) {
-            const chunk = new Uint8Array(Math.min(length - total, BINARY_READ_CHUNK));
-            const { bytesRead } = await this.file.read(chunk, 0, chunk.length, offset + total);
-            const afterReadAbort = abortResult(context.abortSignal, this.path);
-            if (afterReadAbort)
-              return afterReadAbort;
-            if (bytesRead === 0)
-              break;
-            chunks.push(bytesRead === chunk.length ? chunk : chunk.subarray(0, bytesRead));
-            total += bytesRead;
-          }
-        } catch (error62) {
-          return err(toFileError(error62, this.path));
-        }
-        if (chunks.length === 1)
-          return ok(chunks[0]);
-        const bytes2 = new Uint8Array(total);
-        let position = 0;
-        for (const chunk of chunks) {
-          bytes2.set(chunk, position);
-          position += chunk.length;
-        }
-        return ok(bytes2);
-      }
-      async scanLines(options, context) {
-        const aborted2 = abortResult(context.abortSignal, this.path);
-        if (aborted2)
-          return aborted2;
-        if (this.closed)
-          return closedResult("Binary reader", this.path);
-        let scanner;
-        try {
-          scanner = new LineScanner(options.startLine, options.endLine);
-        } catch {
-          return err(new FileError("invalid", "Invalid line range", this.path));
-        }
-        const chunk = new Uint8Array(64 * 1024);
-        try {
-          for (let position = 0; ; ) {
-            const { bytesRead } = await this.file.read(chunk, 0, chunk.length, position);
-            const afterReadAbort = abortResult(context.abortSignal, this.path);
-            if (afterReadAbort)
-              return afterReadAbort;
-            if (bytesRead === 0)
-              return ok(scanner.finish());
-            scanner.push(chunk.subarray(0, bytesRead));
-            position += bytesRead;
-          }
-        } catch (error62) {
-          return err(toFileError(error62, this.path));
-        }
-      }
-      async close(_context) {
-        if (this.closed)
-          return;
-        this.closed = true;
-        await this.file.close().catch(() => void 0);
-      }
-    };
-    NodeDirReader = class {
-      dir;
-      path;
-      done = false;
-      closed = false;
-      constructor(dir, path6) {
-        this.dir = dir;
-        this.path = path6;
-      }
-      async next(maxEntries, context) {
-        const aborted2 = abortResult(context.abortSignal, this.path);
-        if (aborted2)
-          return aborted2;
-        if (this.closed)
-          return closedResult("Directory reader", this.path);
-        if (!Number.isSafeInteger(maxEntries) || maxEntries <= 0) {
-          return err(new FileError("invalid", "maxEntries must be a positive safe integer", this.path));
-        }
-        const entries2 = [];
-        try {
-          while (!this.done && entries2.length < maxEntries) {
-            const entry2 = await this.dir.read();
-            if (entry2 === null) {
-              this.done = true;
-              break;
-            }
-            const loopAbort = abortResult(context.abortSignal, this.path);
-            if (loopAbort)
-              return loopAbort;
-            const entryPath = resolve7(this.path, entry2.name);
-            let stats;
-            try {
-              stats = await lstat2(entryPath);
-            } catch (error62) {
-              if (isNodeError2(error62) && error62.code === "ENOENT")
-                continue;
-              return err(toFileError(error62, entryPath));
-            }
-            const info = fileInfoFromStats(entryPath, stats);
-            if (info.ok)
-              entries2.push(info.value);
-          }
-          return ok({ entries: entries2, done: this.done });
-        } catch (error62) {
-          return err(toFileError(error62, this.path));
-        }
-      }
-      async close(_context) {
-        if (this.closed)
-          return;
-        this.closed = true;
-        await this.dir.close().catch(() => void 0);
-      }
-    };
-    NodeExecutionEnv = class {
-      /** Every local environment sees the same files. */
-      id = "node:local";
-      cwd;
-      shellPath;
-      shellEnv;
-      watchOptions;
-      activeChildPids = /* @__PURE__ */ new Set();
-      constructor(options) {
-        this.cwd = options.cwd;
-        this.shellPath = options.shellPath;
-        this.shellEnv = options.shellEnv;
-        this.watchOptions = options.watch ?? {};
-      }
-      async watch(targets, onChange, context) {
-        const aborted2 = abortResult(context.abortSignal);
-        if (aborted2)
-          return aborted2;
-        try {
-          const watcher = await NodeFileWatcher.open(targets, (path6) => resolvePath3(this.cwd, path6), onChange, this.watchOptions);
-          const afterOpenAbort = abortResult(context.abortSignal);
-          if (afterOpenAbort) {
-            await watcher.stop(context);
-            return afterOpenAbort;
-          }
-          return ok(watcher);
-        } catch (error62) {
-          return err(toFileError(error62));
-        }
-      }
-      async absolutePath(path6, _context) {
-        return ok(resolvePath3(this.cwd, path6));
-      }
-      async joinPath(parts, _context) {
-        return ok(join10(...parts));
-      }
-      async exec(command, options, context) {
-        const signal = context.abortSignal;
-        if (signal?.aborted)
-          return err(new ExecutionError("aborted", "aborted"));
-        const timeoutMsResult = resolveTimeoutMs(options?.timeout);
-        if (!timeoutMsResult.ok)
-          return err(timeoutMsResult.error);
-        const timeoutMs = timeoutMsResult.value;
-        const cwd = options?.cwd ? resolvePath3(this.cwd, options.cwd) : this.cwd;
-        let program;
-        let args;
-        let stdinCommand;
-        if (typeof command === "string") {
-          const shellConfig = await getShellConfig(this.shellPath);
-          if (!shellConfig.ok)
-            return shellConfig;
-          const commandFromStdin = shellConfig.value.commandTransport === "stdin";
-          program = shellConfig.value.shell;
-          args = commandFromStdin ? shellConfig.value.args : [...shellConfig.value.args, command];
-          stdinCommand = commandFromStdin ? command : void 0;
-        } else {
-          const [first, ...rest] = command;
-          if (first === void 0)
-            return err(new ExecutionError("spawn_error", "Empty argv: no program to run"));
-          program = first;
-          args = rest;
-        }
-        try {
-          await access2(cwd, constants4.F_OK);
-        } catch (error62) {
-          const cause = toError(error62);
-          return err(new ExecutionError("spawn_error", `Working directory does not exist: ${cwd}
-Cannot execute bash commands.`, cause));
-        }
-        return await new Promise((resolvePromise) => {
-          let settled = false;
-          let timedOut = false;
-          let callbackError;
-          let spillError;
-          let child;
-          let timeoutId;
-          const spillPrefix = [];
-          let spillPath;
-          const spillQueue = [];
-          let spillStart;
-          let spillStream;
-          let spillBackpressured = false;
-          const onAbort = () => {
-            if (child?.pid)
-              killProcessTree(child.pid);
-          };
-          const failCallback = (error62) => {
-            if (callbackError !== void 0)
-              return;
-            const cause = toError(error62);
-            callbackError = new ExecutionError("callback_error", cause.message, cause);
-            onAbort();
-          };
-          const stdoutDecoder = new StreamDecoder();
-          const stderrDecoder = new StreamDecoder();
-          const emit = (text3, stream6) => {
-            if (settled || text3 === "" || options?.onOutput === void 0 || callbackError !== void 0)
-              return;
-            try {
-              options.onOutput(text3, context, { stream: stream6 });
-            } catch (error62) {
-              failCallback(error62);
-            }
-          };
-          let seenBytes = 0;
-          let seenNewlines = 0;
-          const settle4 = (result2) => {
-            if (settled)
-              return;
-            settled = true;
-            if (timeoutId)
-              clearTimeout(timeoutId);
-            if (signal)
-              signal.removeEventListener("abort", onAbort);
-            if (child?.pid)
-              this.activeChildPids.delete(child.pid);
-            resolvePromise(result2);
-          };
-          const pauseOutput = () => {
-            child?.stdout?.pause();
-            child?.stderr?.pause();
-          };
-          const resumeOutput = () => {
-            if (callbackError || spillError || timedOut || signal?.aborted || spillBackpressured)
-              return;
-            child?.stdout?.resume();
-            child?.stderr?.resume();
-          };
-          const failSpill = (error62) => {
-            if (spillError !== void 0)
-              return;
-            const cause = toError(error62);
-            spillError = new ExecutionError("unknown", `Failed to preserve complete shell output: ${cause.message}`, cause);
-            spillBackpressured = false;
-            onAbort();
-          };
-          const writeSpill = (chunk) => {
-            if (spillStream === void 0 || chunk.length === 0)
-              return;
-            if (spillStream.write(chunk) || spillBackpressured)
-              return;
-            spillBackpressured = true;
-            pauseOutput();
-            spillStream.once("drain", () => {
-              spillBackpressured = false;
-              resumeOutput();
-            });
-          };
-          const startSpill = (chunk) => {
-            if (spillStream !== void 0) {
-              writeSpill(chunk);
-              return;
-            }
-            spillQueue.push(chunk);
-            if (spillStart !== void 0)
-              return;
-            pauseOutput();
-            spillStart = (async () => {
-              const created = await this.createTempFile({ prefix: "pi-output-", suffix: ".log" }, context);
-              if (!created.ok)
-                throw created.error;
-              spillPath = created.value;
-              spillStream = createWriteStream2(spillPath, { flags: "a", highWaterMark: SPILL_HIGH_WATER_MARK });
-              spillStream.on("error", failSpill);
-              for (const queued of spillQueue)
-                writeSpill(queued);
-              spillQueue.length = 0;
-            })().catch(failSpill).finally(resumeOutput);
-          };
-          const finishSpill = async () => {
-            await spillStart;
-            const stream6 = spillStream;
-            if (stream6 === void 0 || spillError !== void 0 || stream6.destroyed)
-              return;
-            await new Promise((resolveFinish) => {
-              stream6.once("error", () => resolveFinish());
-              stream6.once("finish", resolveFinish);
-              stream6.end();
-            });
-          };
-          try {
-            child = spawn5(program, args, {
-              cwd,
-              detached: process.platform !== "win32",
-              env: getShellEnv(this.shellEnv, options?.env, options?.inheritEnv),
-              stdio: [stdinCommand === void 0 ? "ignore" : "pipe", "pipe", "pipe"],
-              windowsHide: true
-            });
-            if (child.pid)
-              this.activeChildPids.add(child.pid);
-            if (stdinCommand !== void 0) {
-              child.stdin?.on("error", () => {
-              });
-              child.stdin?.end(stdinCommand);
-            }
-          } catch (error62) {
-            const cause = toError(error62);
-            settle4(err(new ExecutionError("spawn_error", cause.message, cause)));
-            return;
-          }
-          timeoutId = timeoutMs === void 0 ? void 0 : setTimeout(() => {
-            timedOut = true;
-            onAbort();
-          }, timeoutMs);
-          if (signal) {
-            if (signal.aborted)
-              onAbort();
-            else
-              signal.addEventListener("abort", onAbort, { once: true });
-          }
-          const feed = (source, decoder2) => (chunk) => {
-            emit(decoder2.decode(chunk), source);
-            const spill = options?.spill;
-            if (spill === void 0 || chunk.length === 0)
-              return;
-            if (spillStart !== void 0) {
-              startSpill(chunk);
-              return;
-            }
-            seenBytes += chunk.length;
-            for (let index = chunk.indexOf(10); index !== -1; index = chunk.indexOf(10, index + 1))
-              seenNewlines++;
-            const lines2 = seenNewlines + (chunk[chunk.length - 1] === 10 ? 0 : 1);
-            if (seenBytes <= spill.afterBytes && lines2 <= spill.afterLines) {
-              spillPrefix.push(chunk);
-              return;
-            }
-            for (const prefix of spillPrefix)
-              startSpill(prefix);
-            spillPrefix.length = 0;
-            startSpill(chunk);
-          };
-          child.stdout?.on("data", feed("stdout", stdoutDecoder));
-          child.stderr?.on("data", feed("stderr", stderrDecoder));
-          void waitForChildProcess(child, () => spillError === void 0 && spillStart !== void 0 && (spillStream === void 0 || spillBackpressured)).then(async ({ code, signal: exitSignal }) => {
-            await finishSpill();
-            emit(stdoutDecoder.decode(), "stdout");
-            emit(stderrDecoder.decode(), "stderr");
-            if (callbackError) {
-              settle4(err(callbackError));
-              return;
-            }
-            const interrupted2 = timedOut ? new ExecutionError("timeout", `timeout:${options?.timeout}`) : signal?.aborted ? new ExecutionError("aborted", "aborted") : void 0;
-            if (interrupted2 !== void 0) {
-              if (spillPath !== void 0)
-                interrupted2.spillPath = spillPath;
-              settle4(err(interrupted2));
-              return;
-            }
-            if (spillError) {
-              settle4(err(spillError));
-              return;
-            }
-            const exitCode = code ?? (exitSignal ? 128 + (osConstants.signals[exitSignal] ?? 0) : 1);
-            settle4(ok({ exitCode, ...spillPath === void 0 ? {} : { spillPath } }));
-          }, (error62) => settle4(err(new ExecutionError("spawn_error", error62.message, error62))));
-        });
-      }
-      async openTextLineReader(path6, context) {
-        const resolved = resolvePath3(this.cwd, path6);
-        const aborted2 = abortResult(context.abortSignal, resolved);
-        if (aborted2)
-          return aborted2;
-        try {
-          const file2 = await openFile(resolved, "r");
-          const afterOpenAbort = abortResult(context.abortSignal, resolved);
-          if (afterOpenAbort) {
-            await file2.close().catch(() => void 0);
-            return afterOpenAbort;
-          }
-          return ok(new NodeTextLineReader(file2, resolved));
-        } catch (error62) {
-          return err(toFileError(error62, resolved));
-        }
-      }
-      async readTextFile(path6, context) {
-        const resolved = resolvePath3(this.cwd, path6);
-        const signal = context.abortSignal;
-        const aborted2 = abortResult(signal, resolved);
-        if (aborted2)
-          return aborted2;
-        try {
-          return ok(await readFile3(resolved, { encoding: "utf8", signal }));
-        } catch (error62) {
-          return err(toFileError(error62, resolved));
-        }
-      }
-      async readTextLines(path6, options, context) {
-        if (options?.maxLines !== void 0 && options.maxLines <= 0)
-          return ok([]);
-        const opened = await this.openTextLineReader(path6, context);
-        if (!opened.ok)
-          return opened;
-        const lines2 = [];
-        try {
-          while (options?.maxLines === void 0 || lines2.length < options.maxLines) {
-            const line = await opened.value.readLine(context);
-            if (!line.ok)
-              return line;
-            if (line.value === void 0)
-              break;
-            lines2.push(line.value.text);
-          }
-          return ok(lines2);
-        } finally {
-          await opened.value.close(context);
-        }
-      }
-      async readBinaryFile(path6, context) {
-        const resolved = resolvePath3(this.cwd, path6);
-        const signal = context.abortSignal;
-        const aborted2 = abortResult(signal, resolved);
-        if (aborted2)
-          return aborted2;
-        try {
-          return ok(await readFile3(resolved, { signal }));
-        } catch (error62) {
-          return err(toFileError(error62, resolved));
-        }
-      }
-      async openBinaryReader(path6, options, context) {
-        const resolved = resolvePath3(this.cwd, path6);
-        const aborted2 = abortResult(context.abortSignal, resolved);
-        if (aborted2)
-          return aborted2;
-        const noFollow = options?.noFollow === true;
-        let file2;
-        try {
-          let flags = constants4.O_RDONLY;
-          if (process.platform === "win32") {
-            if (noFollow && (await lstat2(resolved)).isSymbolicLink())
-              return err(symlinkRefused(resolved));
-          } else {
-            flags |= constants4.O_NONBLOCK;
-            if (noFollow)
-              flags |= constants4.O_NOFOLLOW;
-          }
-          file2 = await openFile(resolved, flags);
-          const stats = await file2.stat();
-          if (!stats.isFile()) {
-            await file2.close().catch(() => void 0);
-            return err(stats.isDirectory() ? new FileError("is_directory", "EISDIR: illegal operation on a directory, read", resolved) : new FileError("invalid", "Not a regular file", resolved));
-          }
-          const afterOpenAbort = abortResult(context.abortSignal, resolved);
-          if (afterOpenAbort) {
-            await file2.close().catch(() => void 0);
-            return afterOpenAbort;
-          }
-          return ok(new NodeBinaryReader(file2, resolved));
-        } catch (error62) {
-          await file2?.close().catch(() => void 0);
-          if (noFollow && isNodeError2(error62) && (error62.code === "ELOOP" || error62.code === "EMLINK")) {
-            return err(symlinkRefused(resolved, toError(error62)));
-          }
-          return err(toFileError(error62, resolved));
-        }
-      }
-      async writeFile(path6, content, context) {
-        const resolved = resolvePath3(this.cwd, path6);
-        const signal = context.abortSignal;
-        const aborted2 = abortResult(signal, resolved);
-        if (aborted2)
-          return aborted2;
-        try {
-          await mkdir3(resolve7(resolved, ".."), { recursive: true });
-          const afterMkdirAbort = abortResult(signal, resolved);
-          if (afterMkdirAbort)
-            return afterMkdirAbort;
-          await writeFile2(resolved, content, { signal });
-          return ok(void 0);
-        } catch (error62) {
-          return err(toFileError(error62, resolved));
-        }
-      }
-      async appendFile(path6, content, context) {
-        const resolved = resolvePath3(this.cwd, path6);
-        const signal = context.abortSignal;
-        const aborted2 = abortResult(signal, resolved);
-        if (aborted2)
-          return aborted2;
-        try {
-          await mkdir3(resolve7(resolved, ".."), { recursive: true });
-          const afterMkdirAbort = abortResult(signal, resolved);
-          if (afterMkdirAbort)
-            return afterMkdirAbort;
-          await appendFile(resolved, content);
-          const afterAppendAbort = abortResult(signal, resolved);
-          return afterAppendAbort ?? ok(void 0);
-        } catch (error62) {
-          return err(toFileError(error62, resolved));
-        }
-      }
-      async truncateFile(path6, size2, context) {
-        const resolved = resolvePath3(this.cwd, path6);
-        const signal = context.abortSignal;
-        const aborted2 = abortResult(signal, resolved);
-        if (aborted2)
-          return aborted2;
-        if (!Number.isSafeInteger(size2) || size2 < 0) {
-          return err(new FileError("invalid", "File size must be a non-negative safe integer", resolved));
-        }
-        let file2;
-        try {
-          file2 = await openFile(resolved, "r+");
-          await file2.truncate(size2);
-          const afterTruncateAbort = abortResult(signal, resolved);
-          return afterTruncateAbort ?? ok(void 0);
-        } catch (error62) {
-          return err(toFileError(error62, resolved));
-        } finally {
-          await file2?.close().catch(() => void 0);
-        }
-      }
-      async flushFile(path6, context) {
-        const resolved = resolvePath3(this.cwd, path6);
-        const signal = context.abortSignal;
-        const aborted2 = abortResult(signal, resolved);
-        if (aborted2)
-          return aborted2;
-        let file2;
-        try {
-          file2 = await openFile(resolved, "r+");
-          if ((await file2.stat()).isDirectory())
-            return err(new FileError("is_directory", "Is a directory", resolved));
-          await file2.sync();
-          const afterSyncAbort = abortResult(signal, resolved);
-          return afterSyncAbort ?? ok(void 0);
-        } catch (error62) {
-          return err(toFileError(error62, resolved));
-        } finally {
-          await file2?.close().catch(() => void 0);
-        }
-      }
-      async renameFile(sourcePath, destinationPath, context) {
-        const source = resolvePath3(this.cwd, sourcePath);
-        const destination = resolvePath3(this.cwd, destinationPath);
-        const aborted2 = abortResult(context.abortSignal, destination);
-        if (aborted2)
-          return aborted2;
-        try {
-          await rename(source, destination);
-          return ok(void 0);
-        } catch (error62) {
-          return err(toFileError(error62, source));
-        }
-      }
-      async fileInfo(path6, context) {
-        const resolved = resolvePath3(this.cwd, path6);
-        const aborted2 = abortResult(context.abortSignal, resolved);
-        if (aborted2)
-          return aborted2;
-        try {
-          return fileInfoFromStats(resolved, await lstat2(resolved));
-        } catch (error62) {
-          return err(toFileError(error62, resolved));
-        }
-      }
-      async listDir(path6, context) {
-        const resolved = resolvePath3(this.cwd, path6);
-        const signal = context.abortSignal;
-        const aborted2 = abortResult(signal, resolved);
-        if (aborted2)
-          return aborted2;
-        try {
-          const entries2 = await readdir3(resolved, { withFileTypes: true });
-          const infos = [];
-          for (const entry2 of entries2) {
-            const loopAbort = abortResult(signal, resolved);
-            if (loopAbort)
-              return loopAbort;
-            const entryPath = resolve7(resolved, entry2.name);
-            try {
-              const info = fileInfoFromStats(entryPath, await lstat2(entryPath));
-              if (info.ok)
-                infos.push(info.value);
-            } catch (error62) {
-              return err(toFileError(error62, entryPath));
-            }
-          }
-          return ok(infos);
-        } catch (error62) {
-          return err(toFileError(error62, resolved));
-        }
-      }
-      async openDirReader(path6, context) {
-        const resolved = resolvePath3(this.cwd, path6);
-        const aborted2 = abortResult(context.abortSignal, resolved);
-        if (aborted2)
-          return aborted2;
-        try {
-          const dir = await opendir(resolved);
-          const afterOpenAbort = abortResult(context.abortSignal, resolved);
-          if (afterOpenAbort) {
-            await dir.close().catch(() => void 0);
-            return afterOpenAbort;
-          }
-          return ok(new NodeDirReader(dir, resolved));
-        } catch (error62) {
-          return err(toFileError(error62, resolved));
-        }
-      }
-      async canonicalPath(path6, context) {
-        const resolved = resolvePath3(this.cwd, path6);
-        const aborted2 = abortResult(context.abortSignal, resolved);
-        if (aborted2)
-          return aborted2;
-        try {
-          return ok(await realpath2(resolved));
-        } catch (error62) {
-          return err(toFileError(error62, resolved));
-        }
-      }
-      async exists(path6, context) {
-        const result2 = await this.fileInfo(path6, context);
-        if (result2.ok)
-          return ok(true);
-        if (result2.error.code === "not_found")
-          return ok(false);
-        return err(result2.error);
-      }
-      async createDir(path6, options, context) {
-        const resolved = resolvePath3(this.cwd, path6);
-        const aborted2 = abortResult(context.abortSignal, resolved);
-        if (aborted2)
-          return aborted2;
-        try {
-          await mkdir3(resolved, { recursive: options?.recursive ?? true });
-          return ok(void 0);
-        } catch (error62) {
-          return err(toFileError(error62, resolved));
-        }
-      }
-      async remove(path6, options, context) {
-        const resolved = resolvePath3(this.cwd, path6);
-        const aborted2 = abortResult(context.abortSignal, resolved);
-        if (aborted2)
-          return aborted2;
-        try {
-          await rm(resolved, { recursive: options?.recursive ?? false, force: options?.force ?? false });
-          return ok(void 0);
-        } catch (error62) {
-          return err(toFileError(error62, resolved));
-        }
-      }
-      async createTempDir(prefix, context) {
-        const aborted2 = abortResult(context.abortSignal);
-        if (aborted2)
-          return aborted2;
-        try {
-          prefix ??= "tmp-";
-          return ok(await mkdtemp(join10(tmpdir(), prefix)));
-        } catch (error62) {
-          return err(toFileError(error62));
-        }
-      }
-      async createTempFile(options, context) {
-        const dir = await this.createTempDir("tmp-", context);
-        if (!dir.ok)
-          return dir;
-        const filePath = join10(dir.value, `${options?.prefix ?? ""}${randomUUID9()}${options?.suffix ?? ""}`);
-        try {
-          await writeFile2(filePath, "");
-          return ok(filePath);
-        } catch (error62) {
-          return err(toFileError(error62, filePath));
-        }
-      }
-      async cleanup(_context) {
-        for (const pid of this.activeChildPids)
-          killProcessTree(pid);
-        this.activeChildPids.clear();
-      }
-    };
-  }
-});
-
-// src/pi-env.ts
-import { lstatSync as lstatSync4, mkdirSync as mkdirSync6, mkdtempSync, writeFileSync as writeFileSync3 } from "node:fs";
-import { dirname as dirname7, join as join11, resolve as resolve8, sep as sep4 } from "node:path";
-function checkedPath(policy, raw, write = false) {
-  if (raw.startsWith("~") || raw.startsWith("file:")) throw new Error("use an explicit filesystem path");
-  const path6 = resolve8(policy.workspace, raw);
-  let current = path6;
-  while (true) {
-    try {
-      if (lstatSync4(current).isSymbolicLink()) throw new Error(`symlink access is not permitted: ${current}`);
-    } catch (error62) {
-      if (error62.code !== "ENOENT") throw error62;
-    }
-    const parent = dirname7(current);
-    if (parent === current) break;
-    current = parent;
-  }
-  const roots = write ? [
-    { path: policy.reportPath, kind: "directory" },
-    ...policy.profile === "bounded-build" ? policy.writes : []
-  ] : [...policy.readRoots, ...policy.inputPaths ?? [], ...policy.profile === "bounded-build" ? policy.writes.map((w) => w.path) : [], policy.reportPath].map((path7) => ({ path: path7, kind: "directory" }));
-  if (!roots.some((r2) => r2.kind === "file" ? path6 === r2.path : inside3(path6, r2.path))) throw new Error("path is outside the frozen worker policy");
-  return path6;
-}
-function createBoundedEnv(policy) {
-  const safeEnv = {};
-  for (const key of ["PATH", "LANG", "LC_ALL", "TERM"]) if (process.env[key]) safeEnv[key] = process.env[key];
-  safeEnv.HOME = join11(policy.reportPath, ".home");
-  safeEnv.TMPDIR = join11(policy.reportPath, ".tmp");
-  mkdirSync6(safeEnv.HOME, { recursive: true, mode: 448 });
-  mkdirSync6(safeEnv.TMPDIR, { recursive: true, mode: 448 });
-  const base = new NodeExecutionEnv({ cwd: policy.workspace, shellEnv: safeEnv });
-  const writes = /* @__PURE__ */ new Set(["writeFile", "appendFile", "truncateFile", "flushFile", "remove", "createDir"]);
-  const reads = /* @__PURE__ */ new Set(["watch", "absolutePath", "openTextLineReader", "readTextFile", "readTextLines", "readBinaryFile", "openBinaryReader", "fileInfo", "listDir", "openDirReader", "canonicalPath", "exists"]);
-  return new Proxy(base, { get(target, prop) {
-    if (prop === "exec") return (command, options, ctx) => {
-      if (policy.profile !== "bounded-build") throw new Error("shell is disabled for bounded-inspect");
-      const cwd = checkedPath(policy, options?.cwd ?? policy.workspace);
-      return ownedExec(command, options, ctx, cwd, safeEnv);
-    };
-    if (prop === "createTempDir") return async () => ({ ok: true, value: mkdtempSync(join11(safeEnv.TMPDIR, "pi-")) });
-    if (prop === "createTempFile") return async (options) => {
-      const dir = mkdtempSync(join11(safeEnv.TMPDIR, "pi-"));
-      const file2 = join11(dir, `output${options?.suffix?.replace(/[^a-zA-Z0-9.]/g, "") ?? ""}`);
-      writeFileSync3(file2, "", { mode: 384 });
-      return { ok: true, value: file2 };
-    };
-    const value2 = Reflect.get(target, prop);
-    if (typeof value2 !== "function") return value2;
-    return (...args) => {
-      if (prop === "exec" && policy.profile !== "bounded-build") throw new Error("shell execution is disabled for bounded-inspect");
-      if (prop === "watch") throw new Error("file watches are unavailable to worker tools");
-      if (prop === "renameFile") {
-        checkedPath(policy, String(args[0]), true);
-        checkedPath(policy, String(args[1]), true);
-      } else if (writes.has(String(prop)) || reads.has(String(prop))) checkedPath(policy, String(args[0]), writes.has(String(prop)));
-      return Reflect.apply(value2, target, args);
-    };
-  } });
-}
-var inside3;
-var init_pi_env = __esm({
-  "src/pi-env.ts"() {
-    "use strict";
-    init_node6();
-    init_owned_shell();
-    inside3 = (path6, root) => path6 === root || path6.startsWith(root + sep4);
-  }
-});
-
 // src/pi-read-tools.ts
-import { readdirSync as readdirSync3, lstatSync as lstatSync5, readFileSync as readFileSync8 } from "node:fs";
-import { join as join12, relative as relative4, matchesGlob } from "node:path";
+import { readdirSync as readdirSync3, lstatSync as lstatSync5, readFileSync as readFileSync9 } from "node:fs";
+import { join as join13, relative as relative4, matchesGlob } from "node:path";
 function readTools(policyFor) {
   const files = (policy, root) => {
     const result2 = [];
@@ -134079,7 +134242,7 @@ function readTools(policyFor) {
       for (const entry2 of readdirSync3(dir, { withFileTypes: true })) {
         if (++visited > 5e3) return;
         if (entry2.name === ".git" || entry2.isSymbolicLink()) continue;
-        const path6 = checkedPath(policy, join12(dir, entry2.name));
+        const path6 = checkedPath(policy, join13(dir, entry2.name));
         if (entry2.isDirectory()) walk3(path6);
         else if (entry2.isFile()) result2.push(path6);
       }
@@ -134132,7 +134295,7 @@ function readTools(policyFor) {
             skipped++;
             continue;
           }
-          const content = readFileSync8(path6, "utf8");
+          const content = readFileSync9(path6, "utf8");
           if (content.includes("\0")) {
             skipped++;
             continue;
@@ -134205,15 +134368,15 @@ var init_pi_network_tools = __esm({
 });
 
 // src/pi-harness.ts
-import { mkdirSync as mkdirSync7, writeFileSync as writeFileSync4, renameSync as renameSync4 } from "node:fs";
-import { join as join13, basename as basename6 } from "node:path";
+import { mkdirSync as mkdirSync8, writeFileSync as writeFileSync5, renameSync as renameSync4 } from "node:fs";
+import { join as join14, basename as basename6 } from "node:path";
 import { randomUUID as randomUUID10 } from "node:crypto";
 var WorkerState, text2, PiHarness;
 var init_pi_harness = __esm({
   "src/pi-harness.ts"() {
     "use strict";
     init_dist5();
-    init_node5();
+    init_node6();
     init_tools();
     init_context2();
     init_dist3();
@@ -134224,6 +134387,7 @@ var init_pi_harness = __esm({
     init_pi_read_tools();
     init_pi_network_tools();
     init_pi_env();
+    init_request_feedback();
     WorkerState = defineDoc({
       kind: "pi-agents.worker",
       version: 1,
@@ -134249,11 +134413,11 @@ var init_pi_harness = __esm({
         const policy = JSON.parse(contract.configContent);
         assertFrozenEffectiveConfig(policy, contract);
         if (policy.version !== PI_VERSION || policy.reportPath !== contract.reportPath) throw new Error("unsupported Pi launch contract");
-        mkdirSync7(directory, { recursive: true, mode: 448 });
+        mkdirSync8(directory, { recursive: true, mode: 448 });
         const registry3 = createRegistry();
         let worker;
         registry3.install(defineExtension({ name: "pi-agents-worker", tools: _PiHarness.tools(() => worker) }));
-        const harness = await Harness.open(await openNodeSqliteStorage(join13(directory, "pi.sqlite")), {
+        const harness = await Harness.open(await openNodeSqliteStorage(join14(directory, "pi.sqlite")), {
           models: models ?? createWorkerModels(policy),
           registry: registry3,
           settings: { toolExecution: "sequential", retry: { maxRetries: 3 }, restartLimit: 5, afterFailedRun: "withdraw" },
@@ -134289,18 +134453,21 @@ var init_pi_harness = __esm({
             const reportWrite = fileEffect && String(input2.path) && checkedPath(policy, String(input2.path), true).startsWith(policy.reportPath + "/");
             if (!reportWrite) await w.permission(effect.name, input2, api, ctx);
             const result2 = await api.executeTool(internal, input2, ctx, { key: "effect" });
+            const exitCode = effect.name === "bash" && result2.structuredOutput && typeof result2.structuredOutput === "object" ? result2.structuredOutput.exitCode : void 0;
+            const knownProcessExit = typeof exitCode === "number" && Number.isInteger(exitCode);
+            const uncertain = result2.isError === true && !knownProcessExit;
             await api.commit(async (tx) => {
               const draft = await tx.doc(WorkerState);
               const request2 = draft.requests[api.taskId];
               if (request2) {
                 request2.status = "consumed";
-                request2.uncertain = result2.isError === true;
+                request2.uncertain = uncertain;
               }
             }, ctx);
             w.emit({
               type: "worker.diagnostic",
               sessionId: String(api.conversationId),
-              data: { text: `${effect.name} task ${api.taskId}: ${result2.isError ? "failed; effects may be uncertain" : "completed"}` }
+              data: { text: `${effect.name} task ${api.taskId}: ${uncertain ? "failed; effects may be uncertain" : knownProcessExit ? `process exited ${exitCode}` : "completed"}` }
             });
             return {
               ...text2(typeof result2.structuredOutput === "string" ? result2.structuredOutput : JSON.stringify(result2.structuredOutput ?? result2.diagnostics)),
@@ -134336,14 +134503,14 @@ var init_pi_harness = __esm({
             const policy = JSON.parse(state2.policies[api.conversationId]);
             const report2 = WorkerReportSchema.parse(JSON.parse(args.json));
             if (report2.execution_id !== basename6(policy.reportPath)) throw new Error("report execution identity mismatch");
-            const file2 = checkedPath(policy, join13(policy.reportPath, "result.json"), true);
-            mkdirSync7(policy.reportPath, { recursive: true, mode: 448 });
+            const file2 = checkedPath(policy, join14(policy.reportPath, "result.json"), true);
+            mkdirSync8(policy.reportPath, { recursive: true, mode: 448 });
             const content = JSON.stringify(report2, null, 2) + "\n";
-            const temp = checkedPath(policy, join13(policy.reportPath, `report-${randomUUID10()}.tmp`), true);
-            writeFileSync4(temp, content, { mode: 384, flag: "wx" });
+            const temp = checkedPath(policy, join14(policy.reportPath, `report-${randomUUID10()}.tmp`), true);
+            writeFileSync5(temp, content, { mode: 384, flag: "wx" });
             renameSync4(temp, file2);
-            const summary = checkedPath(policy, join13(policy.reportPath, "summary.md"), true);
-            writeFileSync4(summary, `# Worker report
+            const summary = checkedPath(policy, join14(policy.reportPath, "summary.md"), true);
+            writeFileSync5(summary, `# Worker report
 
 ${report2.summary}
 
@@ -134375,7 +134542,7 @@ ${report2.gaps.map((g) => "- " + g).join("\n")}
         }, ctx);
         while (true) {
           const request2 = (await api.snapshot(WorkerState, ctx)).requests[id];
-          if (request2.status === "deny") throw new Error("parent denied this exact operation");
+          if (request2.status === "deny") throw new Error("parent denied this exact operation" + (request2.workerExplanation === void 0 ? "" : "\nParent feedback within the existing assignment: " + request2.workerExplanation));
           if (request2.status === "allow_once" || request2.status === "consumed") return;
           await awaitWithContext(new Promise((resolve9) => setTimeout(resolve9, 100)), ctx);
         }
@@ -134477,16 +134644,18 @@ ${report2.gaps.map((g) => "- " + g).join("\n")}
           error: record2.status === "unanswered" ? aborted2 ? JSON.stringify({ name: "MessageAbortedError" }) : record2.reason + ": " + (live?.runFailure?.detail ?? "") : null
         };
       }
-      async reply(request2, reply) {
+      async reply(request2, reply, workerExplanation) {
+        validateWorkerExplanation(reply, workerExplanation);
         await this.harness.commit(async (tx) => {
           const state2 = await tx.doc(WorkerState);
           const current = state2.requests[request2.id];
-          if (!current || current.sessionId !== request2.sessionId || state2.messages[current.sessionId] !== current.messageId) throw new Error("stale or wrong-session permission request");
+          if (!current || current.sessionId !== request2.sessionId || state2.messages[current.sessionId] !== current.messageId || request2.detail?.messageId !== current.messageId || state2.cancelled[current.sessionId]) throw new Error("stale or wrong-session permission request");
           if (current.status !== "pending") {
-            if (current.status === reply || current.status === "consumed" && reply === "allow_once") return;
+            if ((current.status === reply || current.status === "consumed" && reply === "allow_once") && current.workerExplanation === workerExplanation) return;
             throw new Error("permission response conflict");
           }
           current.status = reply;
+          if (workerExplanation !== void 0) current.workerExplanation = workerExplanation;
         }, BACKGROUND_CONTEXT);
         this.emit({
           type: "worker.diagnostic",
@@ -134533,15 +134702,15 @@ var worker_runtime_exports = {};
 __export(worker_runtime_exports, {
   runWorker: () => runWorker
 });
-import { mkdirSync as mkdirSync8, readFileSync as readFileSync10, writeFileSync as writeFileSync5, rmSync as rmSync5 } from "node:fs";
-import { join as join14 } from "node:path";
+import { mkdirSync as mkdirSync9, readFileSync as readFileSync11, writeFileSync as writeFileSync6, rmSync as rmSync6 } from "node:fs";
+import { join as join15 } from "node:path";
 import { randomUUID as randomUUID11 } from "node:crypto";
 async function runWorker(directory, launchFile) {
-  const lock = join14(directory, "owner");
+  const lock = join15(directory, "owner");
   try {
-    mkdirSync8(lock, { mode: 448 });
+    mkdirSync9(lock, { mode: 448 });
   } catch (error62) {
-    rmSync5(launchFile, { force: true });
+    rmSync6(launchFile, { force: true });
     throw error62;
   }
   let worker;
@@ -134549,7 +134718,7 @@ async function runWorker(directory, launchFile) {
   const birth = processBirth(process.pid);
   if (!birth) throw new Error("cannot establish worker process identity");
   const owner = { pid: process.pid, birth, instanceId: randomUUID11() };
-  writeFileSync5(join14(lock, "record.json"), JSON.stringify(owner), { mode: 384, flag: "wx" });
+  writeFileSync6(join15(lock, "record.json"), JSON.stringify(owner), { mode: 384, flag: "wx" });
   let closing = false;
   const close = async () => {
     if (closing) return;
@@ -134557,12 +134726,12 @@ async function runWorker(directory, launchFile) {
     await worker?.close();
     if (!await confirmWorkerGroupQuiet()) throw new Error("worker children did not stop");
     await server?.close();
-    writeFileSync5(join14(directory, "stopped-owner.json"), JSON.stringify(owner), { mode: 384 });
-    rmSync5(lock, { recursive: true, force: true });
+    writeFileSync6(join15(directory, "stopped-owner.json"), JSON.stringify(owner), { mode: 384 });
+    rmSync6(lock, { recursive: true, force: true });
   };
   try {
-    const launch = JSON.parse(readFileSync10(launchFile, "utf8"));
-    rmSync5(launchFile);
+    const launch = JSON.parse(readFileSync11(launchFile, "utf8"));
+    rmSync6(launchFile);
     worker = await PiHarness.open(directory, launch.contract, launch.backendId);
     const exact = external_exports.object({ sessionId: external_exports.string().regex(/^\d+$/), messageId: external_exports.string().min(1) });
     server = await startRpcServer(directory, async (method, raw) => {
@@ -134583,7 +134752,8 @@ async function runWorker(directory, launchFile) {
               questionRequests: false,
               structuredOutput: false,
               sessionRecovery: true,
-              progressCheckpoints: true
+              progressCheckpoints: true,
+              workerDenialContext: true
             }
           };
         case "create":
@@ -134619,8 +134789,8 @@ async function runWorker(directory, launchFile) {
             type: external_exports.literal("permission"),
             api: external_exports.enum(["legacy", "v2"]),
             detail: external_exports.unknown()
-          }), reply: external_exports.enum(["allow_once", "deny"]) }).parse(raw);
-          await worker.reply(p.request, p.reply);
+          }), reply: external_exports.enum(["allow_once", "deny"]), workerExplanation: WorkerExplanationSchema.optional() }).parse(raw);
+          await worker.reply(p.request, p.reply, p.workerExplanation);
           return { acknowledged: true };
         }
         case "abort": {
@@ -134653,6 +134823,7 @@ async function runWorker(directory, launchFile) {
 var init_worker_runtime = __esm({
   "src/worker-runtime.ts"() {
     "use strict";
+    init_request_feedback();
     init_zod();
     init_owned_shell();
     init_pi_harness();
@@ -134663,8 +134834,8 @@ var init_worker_runtime = __esm({
 });
 
 // src/cli.ts
-import { createHash as createHash11 } from "node:crypto";
-import { createWriteStream as createWriteStream3, rmSync as rmSync6 } from "node:fs";
+import { createHash as createHash12 } from "node:crypto";
+import { createWriteStream as createWriteStream3, rmSync as rmSync7 } from "node:fs";
 import { once } from "node:events";
 
 // src/doctor.ts
@@ -134675,7 +134846,7 @@ import { existsSync as existsSync3 } from "node:fs";
 function doctor() {
   const [major, minor] = process.versions.node.split(".").map(Number);
   const result2 = {
-    runtime: { node: process.versions.node, supportedNode: major === 24 && minor >= 15 && process.platform !== "win32", toolkit: "0.1.0" },
+    runtime: { node: process.versions.node, supportedNode: major === 24 && minor >= 15 && process.platform !== "win32", toolkit: "0.2.0" },
     configuration: { path: configurationPath(), status: "missing", message: "" },
     backend: {
       mode: "managed",
@@ -134705,8 +134876,11 @@ function doctor() {
   }
   return result2;
 }
-async function doctorAsync() {
-  return doctor();
+async function doctorAsync(options = {}) {
+  const result2 = doctor();
+  if (!options.shellPreflight) return result2;
+  const { shellPreflight: shellPreflight2 } = await Promise.resolve().then(() => (init_shell_preflight(), shell_preflight_exports));
+  return { ...result2, shell_preflight: { source: options.source ?? "local_process", ...await shellPreflight2(stateDirectory()) } };
 }
 
 // node_modules/@modelcontextprotocol/server/dist/chunk-Br0eD_fh.mjs
@@ -141250,9 +141424,9 @@ var require_util3 = /* @__PURE__ */ __commonJSMin(((exports) => {
   const codegen_1 = require_codegen();
   const code_1 = require_code$1();
   function toHash(arr2) {
-    const hash3 = {};
-    for (const item of arr2) hash3[item] = true;
-    return hash3;
+    const hash4 = {};
+    for (const item of arr2) hash4[item] = true;
+    return hash4;
   }
   exports.toHash = toHash;
   function alwaysValidSchema(it, schema) {
@@ -148831,6 +149005,7 @@ var StdioServerTransport = class {
 };
 
 // src/mcp.ts
+init_request_feedback();
 init_zod();
 init_progress();
 init_contracts();
@@ -148838,22 +149013,22 @@ init_rpc();
 init_config();
 
 // src/daemon.ts
-import { spawn as spawn3 } from "node:child_process";
-import { join as join9 } from "node:path";
-import { fileURLToPath as fileURLToPath3 } from "node:url";
+import { spawn as spawn6 } from "node:child_process";
+import { join as join12 } from "node:path";
+import { fileURLToPath as fileURLToPath4 } from "node:url";
 
 // src/artifacts.ts
-import { createHash as createHash5, randomUUID as randomUUID4 } from "node:crypto";
-import { closeSync as closeSync2, existsSync as existsSync5, fsyncSync, lstatSync as lstatSync2, mkdirSync as mkdirSync2, openSync as openSync2, readFileSync as readFileSync4, readdirSync as readdirSync2, renameSync as renameSync2, rmSync as rmSync2, writeSync, constants as constants2 } from "node:fs";
-import { basename as basename4, join as join4, resolve as resolve4 } from "node:path";
+import { createHash as createHash6, randomUUID as randomUUID5 } from "node:crypto";
+import { closeSync as closeSync2, existsSync as existsSync5, fsyncSync, lstatSync as lstatSync3, mkdirSync as mkdirSync4, openSync as openSync2, readFileSync as readFileSync5, readdirSync as readdirSync2, renameSync as renameSync2, rmSync as rmSync3, writeSync, constants as constants3 } from "node:fs";
+import { basename as basename5, join as join7, resolve as resolve6 } from "node:path";
 var ArtifactStore = class {
   constructor(root, maxBytes = 50 * 1024 * 1024) {
     this.root = root;
     this.maxBytes = maxBytes;
-    this.staging = join4(root, "staging");
-    this.objects = join4(root, "objects");
-    mkdirSync2(this.staging, { recursive: true, mode: 448 });
-    mkdirSync2(this.objects, { recursive: true, mode: 448 });
+    this.staging = join7(root, "staging");
+    this.objects = join7(root, "objects");
+    mkdirSync4(this.staging, { recursive: true, mode: 448 });
+    mkdirSync4(this.objects, { recursive: true, mode: 448 });
   }
   root;
   maxBytes;
@@ -148861,11 +149036,11 @@ var ArtifactStore = class {
   objects;
   captureBytes(executionId, bytes2, mediaType, register2) {
     if (bytes2.byteLength > this.maxBytes) throw new Error(`artifact exceeds ${this.maxBytes} bytes`);
-    const sha256 = createHash5("sha256").update(bytes2).digest("hex");
-    const artifactId = `artifact_${randomUUID4()}`;
-    const stagedPath = join4(this.staging, `${artifactId}.tmp`);
-    const finalPath = join4(this.objects, sha256);
-    const fd = openSync2(stagedPath, constants2.O_CREAT | constants2.O_EXCL | constants2.O_WRONLY, 384);
+    const sha256 = createHash6("sha256").update(bytes2).digest("hex");
+    const artifactId = `artifact_${randomUUID5()}`;
+    const stagedPath = join7(this.staging, `${artifactId}.tmp`);
+    const finalPath = join7(this.objects, sha256);
+    const fd = openSync2(stagedPath, constants3.O_CREAT | constants3.O_EXCL | constants3.O_WRONLY, 384);
     try {
       let offset = 0;
       while (offset < bytes2.byteLength) offset += writeSync(fd, bytes2, offset, bytes2.byteLength - offset);
@@ -148877,15 +149052,15 @@ var ArtifactStore = class {
     try {
       register2(entry2);
       if (existsSync5(finalPath)) {
-        if (createHash5("sha256").update(readFileSync4(finalPath)).digest("hex") !== sha256) throw new Error("artifact hash collision or corrupt object");
-        rmSync2(stagedPath);
+        if (createHash6("sha256").update(readFileSync5(finalPath)).digest("hex") !== sha256) throw new Error("artifact hash collision or corrupt object");
+        rmSync3(stagedPath);
       } else {
         renameSync2(stagedPath, finalPath);
         this.syncDirectory(this.objects);
       }
       return entry2;
     } catch (error62) {
-      if (existsSync5(stagedPath)) rmSync2(stagedPath);
+      if (existsSync5(stagedPath)) rmSync3(stagedPath);
       throw error62;
     }
   }
@@ -148893,14 +149068,19 @@ var ArtifactStore = class {
     if (!Number.isSafeInteger(offset) || offset < 0 || !Number.isSafeInteger(maxBytes) || maxBytes < 1 || maxBytes > 65536) {
       throw new RangeError("invalid artifact read range");
     }
-    if (resolve4(entry2.path) !== join4(this.objects, entry2.sha256) || basename4(entry2.path) !== entry2.sha256) throw new Error("artifact path is outside store");
-    const stat5 = lstatSync2(entry2.path);
-    if (!stat5.isFile() || stat5.isSymbolicLink() || stat5.size !== entry2.byteLength) throw new Error("artifact changed");
-    const all = readFileSync4(entry2.path);
-    if (createHash5("sha256").update(all).digest("hex") !== entry2.sha256) throw new Error("artifact changed");
+    const all = this.readAllVerified(entry2);
     const bytes2 = all.subarray(offset, offset + maxBytes);
     const nextOffset = offset + bytes2.byteLength < all.byteLength ? offset + bytes2.byteLength : null;
     return { bytes: bytes2, nextOffset };
+  }
+  /** Internal evidence consumers need the complete verified object, without public read-range limits. */
+  readAllVerified(entry2) {
+    if (resolve6(entry2.path) !== join7(this.objects, entry2.sha256) || basename5(entry2.path) !== entry2.sha256) throw new Error("artifact path is outside store");
+    const stat5 = lstatSync3(entry2.path);
+    if (!stat5.isFile() || stat5.isSymbolicLink() || stat5.size !== entry2.byteLength) throw new Error("artifact changed");
+    const all = readFileSync5(entry2.path);
+    if (createHash6("sha256").update(all).digest("hex") !== entry2.sha256) throw new Error("artifact changed");
+    return all;
   }
   stagedFiles() {
     return readdirSync2(this.staging).filter((name) => name.endsWith(".tmp"));
@@ -148911,22 +149091,22 @@ var ArtifactStore = class {
     const removed = [];
     for (const name of this.stagedFiles()) {
       const artifactId = name.slice(0, -4);
-      const path6 = join4(this.staging, name);
+      const path6 = join7(this.staging, name);
       const entry2 = lookup(artifactId);
       if (!entry2) {
-        rmSync2(path6);
+        rmSync3(path6);
         removed.push(artifactId);
         continue;
       }
-      if (resolve4(entry2.path) !== join4(this.objects, entry2.sha256)) throw new Error(`artifact path mismatch: ${artifactId}`);
-      const staged = readFileSync4(path6);
-      if (staged.byteLength !== entry2.byteLength || createHash5("sha256").update(staged).digest("hex") !== entry2.sha256)
+      if (resolve6(entry2.path) !== join7(this.objects, entry2.sha256)) throw new Error(`artifact path mismatch: ${artifactId}`);
+      const staged = readFileSync5(path6);
+      if (staged.byteLength !== entry2.byteLength || createHash6("sha256").update(staged).digest("hex") !== entry2.sha256)
         throw new Error(`staged artifact differs from committed registration: ${artifactId}`);
       if (existsSync5(entry2.path)) {
-        const final = readFileSync4(entry2.path);
-        if (final.byteLength !== entry2.byteLength || createHash5("sha256").update(final).digest("hex") !== entry2.sha256)
+        const final = readFileSync5(entry2.path);
+        if (final.byteLength !== entry2.byteLength || createHash6("sha256").update(final).digest("hex") !== entry2.sha256)
           throw new Error(`published artifact differs from committed registration: ${artifactId}`);
-        rmSync2(path6);
+        rmSync3(path6);
       } else {
         renameSync2(path6, entry2.path);
         this.syncDirectory(this.objects);
@@ -148934,9 +149114,9 @@ var ArtifactStore = class {
       published.push(artifactId);
     }
     for (const entry2 of registered) {
-      if (resolve4(entry2.path) !== join4(this.objects, entry2.sha256)) throw new Error(`registered artifact path mismatch: ${entry2.artifactId}`);
+      if (resolve6(entry2.path) !== join7(this.objects, entry2.sha256)) throw new Error(`registered artifact path mismatch: ${entry2.artifactId}`);
       try {
-        const stat5 = lstatSync2(entry2.path);
+        const stat5 = lstatSync3(entry2.path);
         if (!stat5.isFile() || stat5.isSymbolicLink() || stat5.size !== entry2.byteLength)
           throw new Error("not a regular file with recorded size");
       } catch {
@@ -148946,7 +149126,7 @@ var ArtifactStore = class {
     return { published, removed };
   }
   syncDirectory(path6) {
-    const fd = openSync2(path6, constants2.O_RDONLY);
+    const fd = openSync2(path6, constants3.O_RDONLY);
     try {
       fsyncSync(fd);
     } finally {
@@ -148957,8 +149137,8 @@ var ArtifactStore = class {
 
 // src/coordinator.ts
 init_progress();
-import { createHash as createHash7, randomUUID as randomUUID6 } from "node:crypto";
-import { mkdirSync as mkdirSync4 } from "node:fs";
+import { createHash as createHash8, randomUUID as randomUUID7 } from "node:crypto";
+import { mkdirSync as mkdirSync6 } from "node:fs";
 
 // src/backend.ts
 function executionPairAllowed(inspection, _development = false) {
@@ -148971,33 +149151,33 @@ init_config();
 // src/evidence.ts
 init_contracts();
 init_workspace();
-import { createHash as createHash6 } from "node:crypto";
-import { execFileSync as execFileSync2 } from "node:child_process";
-import { closeSync as closeSync3, constants as constants3, existsSync as existsSync6, fstatSync as fstatSync2, lstatSync as lstatSync3, openSync as openSync3, readFileSync as readFileSync5 } from "node:fs";
-import { join as join5, resolve as resolve5, sep as sep2 } from "node:path";
+import { createHash as createHash7 } from "node:crypto";
+import { execFileSync as execFileSync3 } from "node:child_process";
+import { closeSync as closeSync3, constants as constants4, existsSync as existsSync6, fstatSync as fstatSync2, lstatSync as lstatSync4, openSync as openSync3, readFileSync as readFileSync6 } from "node:fs";
+import { join as join8, resolve as resolve7, sep as sep4 } from "node:path";
 function sha2(bytes2) {
-  return createHash6("sha256").update(bytes2).digest("hex");
+  return createHash7("sha256").update(bytes2).digest("hex");
 }
-function inside2(path6, root) {
-  return path6 === root || path6.startsWith(root + sep2);
+function inside3(path6, root) {
+  return path6 === root || path6.startsWith(root + sep4);
 }
 function git2(workspace, args) {
   try {
-    return execFileSync2("git", ["-C", workspace, ...args], { maxBuffer: 50 * 1024 * 1024, stdio: ["ignore", "pipe", "ignore"] });
+    return execFileSync3("git", ["-C", workspace, ...args], { maxBuffer: 50 * 1024 * 1024, stdio: ["ignore", "pipe", "ignore"] });
   } catch {
     return null;
   }
 }
-function sameEntry(before, after) {
+function sameEntry2(before, after) {
   return before.kind === after.kind && before.sha256 === after.sha256 && before.byteLength === after.byteLength;
 }
 function regularBytes(path6, expected) {
-  const fd = openSync3(path6, constants3.O_RDONLY | constants3.O_NOFOLLOW);
+  const fd = openSync3(path6, constants4.O_RDONLY | constants4.O_NOFOLLOW);
   try {
-    const stat5 = lstatSync3(path6);
+    const stat5 = lstatSync4(path6);
     if (!stat5.isFile() || stat5.isSymbolicLink() || stat5.size !== expected.byteLength)
       throw new Error("file changed type or size before capture");
-    const bytes2 = readFileSync5(fd);
+    const bytes2 = readFileSync6(fd);
     if (sha2(bytes2) !== expected.sha256) throw new Error("file changed after final index");
     return bytes2;
   } finally {
@@ -149005,15 +149185,15 @@ function regularBytes(path6, expected) {
   }
 }
 function safeRegularBytes(path6, maxBytes) {
-  const fd = openSync3(path6, constants3.O_RDONLY | constants3.O_NOFOLLOW);
+  const fd = openSync3(path6, constants4.O_RDONLY | constants4.O_NOFOLLOW);
   try {
     const before = fstatSync2(fd);
-    const namedBefore = lstatSync3(path6);
+    const namedBefore = lstatSync4(path6);
     if (!before.isFile() || !namedBefore.isFile() || namedBefore.isSymbolicLink() || namedBefore.ino !== before.ino || before.size > maxBytes)
       throw new Error("not a regular file within the snapshot limit");
-    const bytes2 = readFileSync5(fd);
+    const bytes2 = readFileSync6(fd);
     const after = fstatSync2(fd);
-    const namedAfter = lstatSync3(path6);
+    const namedAfter = lstatSync4(path6);
     if (after.size !== before.size || after.mtimeMs !== before.mtimeMs || after.ino !== before.ino || namedAfter.ino !== before.ino || bytes2.byteLength !== before.size)
       throw new Error("file changed during capture");
     return bytes2;
@@ -149026,6 +149206,7 @@ function captureEvidence(input2) {
   const workspace = baseline.workspace;
   const registered = store.artifactsForExecution(executionId);
   const captured = [];
+  const artifactRoles = /* @__PURE__ */ new Map();
   const gaps = [];
   const maxSnapshotBytes = input2.maxSnapshotBytes ?? 50 * 1024 * 1024;
   if (!Number.isSafeInteger(maxSnapshotBytes) || maxSnapshotBytes <= 0)
@@ -149034,15 +149215,20 @@ function captureEvidence(input2) {
   if (capturedBytes > maxSnapshotBytes) gaps.push("previously registered artifacts exceed the per-execution evidence snapshot limit");
   const identity = (digest, length, mediaType) => JSON.stringify([digest, length, mediaType]);
   const existingByIdentity = new Map(registered.map((entry2) => [identity(entry2.sha256, entry2.byteLength, entry2.mediaType), entry2]));
-  const include = (entry2) => {
+  const include = (entry2, role) => {
     if (!captured.some((item) => item.artifactId === entry2.artifactId)) captured.push(entry2);
+    if (role) {
+      const roles = artifactRoles.get(entry2.artifactId) ?? /* @__PURE__ */ new Set();
+      roles.add(role);
+      artifactRoles.set(entry2.artifactId, roles);
+    }
   };
-  const capture = (bytes2, mediaType, label) => {
+  const capture = (bytes2, mediaType, label, role) => {
     const key = identity(sha2(bytes2), bytes2.byteLength, mediaType);
     const existing = existingByIdentity.get(key);
     if (existing) {
       artifacts.read(existing, 0, 1);
-      include(existing);
+      include(existing, role);
       return existing;
     }
     if (bytes2.byteLength > artifacts.maxBytes || capturedBytes + bytes2.byteLength > maxSnapshotBytes) {
@@ -149052,10 +149238,10 @@ function captureEvidence(input2) {
     const entry2 = artifacts.captureBytes(executionId, bytes2, mediaType, (value2) => store.registerArtifact(value2));
     capturedBytes += bytes2.byteLength;
     existingByIdentity.set(key, entry2);
-    include(entry2);
+    include(entry2, role);
     return entry2;
   };
-  const reportPath = join5(outputDirectory, "result.json");
+  const reportPath = join8(outputDirectory, "result.json");
   let reportBytes = null;
   if (input2.structuredReport !== void 0 && input2.structuredReport !== null) {
     reportBytes = Buffer.from(JSON.stringify(input2.structuredReport));
@@ -149068,7 +149254,7 @@ function captureEvidence(input2) {
   }
   let reportValidity = "missing";
   if (reportBytes) {
-    if (capture(reportBytes, "application/json", "result.json")) {
+    if (capture(reportBytes, "application/json", "result.json", "report")) {
       try {
         const report2 = WorkerReportSchema.parse(JSON.parse(reportBytes.toString("utf8")));
         reportValidity = report2.task_id === taskId && report2.execution_id === executionId ? "valid" : "invalid";
@@ -149079,10 +149265,10 @@ function captureEvidence(input2) {
       }
     } else reportValidity = "invalid";
   } else gaps.push("result.json is missing or not capturable");
-  const summaryPath = join5(outputDirectory, "summary.md");
+  const summaryPath = join8(outputDirectory, "summary.md");
   if (existsSync6(summaryPath)) {
     try {
-      if (!capture(safeRegularBytes(summaryPath, maxSnapshotBytes), "text/markdown", "summary.md") && reportValidity === "valid")
+      if (!capture(safeRegularBytes(summaryPath, maxSnapshotBytes), "text/markdown", "summary.md", "summary") && reportValidity === "valid")
         reportValidity = "invalid";
     } catch (error62) {
       gaps.push(`summary.md cannot be captured safely: ${String(error62)}`);
@@ -149096,8 +149282,8 @@ function captureEvidence(input2) {
   const staged = baseline.git ? git2(workspace, ["diff", "--cached", "--binary", "--"]) : null;
   if (baseline.git && tracked === null) gaps.push("Git tracked diff could not be captured");
   if (baseline.git && staged === null) gaps.push("Git staged diff could not be captured");
-  if (tracked) capture(tracked, "text/x-diff", "Git worktree diff");
-  if (staged) capture(staged, "text/x-diff", "Git staged diff");
+  if (tracked) capture(tracked, "text/x-diff", "Git worktree diff", "tracked_diff");
+  if (staged) capture(staged, "text/x-diff", "Git staged diff", "staged_diff");
   const initial = baseline.evidenceIndex;
   if (!initial?.complete) gaps.push(...initial?.gaps ?? ["frozen baseline has no change index"]);
   const final = captureEvidenceIndex(workspace, baseline.writeTargetState, Boolean(baseline.git));
@@ -149109,17 +149295,17 @@ function captureEvidence(input2) {
   for (const path6 of [.../* @__PURE__ */ new Set([...before.keys(), ...after.keys()])].sort()) {
     const prior = before.get(path6) ?? absent(path6);
     const current = after.get(path6) ?? absent(path6);
-    if (sameEntry(prior, current)) continue;
-    const absolute = resolve5(workspace, path6);
-    if (inside2(absolute, outputDirectory)) continue;
-    const declared = baseline.writeTargetState.some((target) => target.kind === "file" ? absolute === target.path : inside2(absolute, target.path));
+    if (sameEntry2(prior, current)) continue;
+    const absolute = resolve7(workspace, path6);
+    if (inside3(absolute, outputDirectory)) continue;
+    const declared = baseline.writeTargetState.some((target) => target.kind === "file" ? absolute === target.path : inside3(absolute, target.path));
     if (!declared) gaps.push(`workspace changed outside declared writes: ${path6}`);
     const change = prior.kind === "absent" ? "added" : current.kind === "absent" ? "deleted" : prior.kind !== current.kind ? "type_changed" : "modified";
     let artifactId = null;
     if (current.kind === "file") {
       try {
         if (current.byteLength === null) gaps.push(`changed file has no captured byte length: ${path6}`);
-        else artifactId = capture(regularBytes(absolute, current), "application/octet-stream", `changed file ${path6}`)?.artifactId ?? null;
+        else artifactId = capture(regularBytes(absolute, current), "application/octet-stream", `changed file ${path6}`, "changed_file")?.artifactId ?? null;
       } catch (error62) {
         gaps.push(`changed file could not be captured: ${path6}: ${String(error62)}`);
       }
@@ -149143,7 +149329,13 @@ function captureEvidence(input2) {
     report_validity: reportValidity,
     snapshot_bytes: captured.reduce((sum, artifact) => sum + artifact.byteLength, 0),
     snapshot_limit_bytes: maxSnapshotBytes,
-    artifacts: captured.map(({ artifactId, sha256, byteLength, mediaType }) => ({ artifact_id: artifactId, sha256, byte_length: byteLength, media_type: mediaType })),
+    artifacts: captured.map(({ artifactId, sha256, byteLength, mediaType }) => ({
+      artifact_id: artifactId,
+      sha256,
+      byte_length: byteLength,
+      media_type: mediaType,
+      roles: [...artifactRoles.get(artifactId) ?? []].sort()
+    })),
     gaps
   };
   const manifestBytes = Buffer.from(JSON.stringify(manifest));
@@ -149166,7 +149358,7 @@ var defaultOpener = async ({ backendId, workspace, config: config2, launchContra
   });
 };
 function backendIdentity(task, _config) {
-  return `backend_${createHash7("sha256").update(JSON.stringify({
+  return `backend_${createHash8("sha256").update(JSON.stringify({
     taskId: task.taskId,
     workspace: task.workspace
   })).digest("hex").slice(0, 24)}`;
@@ -149238,13 +149430,18 @@ var ExecutionCoordinator = class {
     await Promise.allSettled([...this.backends.values()].map((lease) => lease.close()));
     this.backends.clear();
   }
-  async replyToRequest(task, request2, reply) {
+  async assertWorkerExplanationSupported(task) {
+    const { backend } = await this.backendFor(task);
+    const inspection = await backend.inspectBackend({ timeoutMs: 5e3 });
+    if (!inspection.capabilities.workerDenialContext) throw new Error("backend does not support worker-visible denial explanations; update resolved workers before using worker_explanation");
+  }
+  async replyToRequest(task, request2, reply, workerExplanation) {
     if (!task.sessionId || !task.userMessageId || request2.sessionId !== task.sessionId) {
       throw new Error("input request is not bound to the recorded session");
     }
     try {
       const { backend } = await this.backendFor(task);
-      await backend.replyToRequest(request2, reply, { timeoutMs: 5e3 });
+      await backend.replyToRequest(request2, reply, { timeoutMs: 5e3 }, workerExplanation);
       this.store.acknowledgeInputResponse(task.executionId, request2.id);
     } catch (error62) {
       try {
@@ -149490,9 +149687,9 @@ var ExecutionCoordinator = class {
     }
     if (!task.sessionId) throw new Error("session not bound");
     if (!task.reportPath) throw new Error("frozen report path is missing");
-    mkdirSync4(task.reportPath, { recursive: true, mode: 448 });
+    mkdirSync6(task.reportPath, { recursive: true, mode: 448 });
     const sessionId = task.sessionId;
-    const messageId = `msg_${randomUUID6()}`;
+    const messageId = `msg_${randomUUID7()}`;
     task = this.store.recordDispatchIntent(task.scopeId, task.taskId, task.revision, lease.backendId, sessionId, messageId, lease.instanceId ?? null);
     const slash = task.model.indexOf("/");
     const providerId = slash < 0 ? "" : task.model.slice(0, slash);
@@ -149549,14 +149746,20 @@ var ExecutionCoordinator = class {
     for (const effect of observed.uncertainEffects ?? []) this.store.recordEffectUncertainty(task.executionId, effect.requestId, effect.tool);
     for (const request2 of observed.pendingRequests) {
       if (request2.sessionId !== task.sessionId) throw new Error("upstream request belongs to another session");
-      this.store.upsertInputRequest(
-        task.scopeId,
-        task.taskId,
-        task.executionId,
-        request2.id,
-        request2.type,
-        request2
-      );
+      try {
+        this.store.upsertInputRequest(
+          task.scopeId,
+          task.taskId,
+          task.executionId,
+          request2.id,
+          request2.type,
+          request2
+        );
+      } catch (error62) {
+        this.store.recordInputRegistrationFailure(task.executionId, request2.id, String(error62));
+        this.markUnknown(task, "input request registration failed; inspect input_request_registration_failed and cancel if recovery is unavailable");
+        throw error62;
+      }
     }
     this.store.expireMissingInputRequests(task.executionId, observed.pendingRequests.map((request2) => request2.id));
   }
@@ -149736,7 +149939,7 @@ var ExecutionCoordinator = class {
     const outcome = task.intendedOutcome ?? "failed";
     try {
       if (!task.reportPath || !task.frozenBaseline) throw new Error("frozen report path or baseline missing");
-      mkdirSync4(task.reportPath, { recursive: true, mode: 448 });
+      mkdirSync6(task.reportPath, { recursive: true, mode: 448 });
       let structuredReport;
       if (task.sessionId && task.userMessageId && !this.store.cancellationEvent(task.executionId, "cancellation_stop_confirmed")) {
         try {
@@ -149797,19 +150000,36 @@ init_rpc();
 
 // src/service.ts
 init_progress();
+init_request_feedback();
 init_zod();
 init_contracts();
 init_config();
 init_launch_config();
 init_launch_config();
-import { randomUUID as randomUUID8 } from "node:crypto";
-import { join as join8 } from "node:path";
+import { randomUUID as randomUUID9 } from "node:crypto";
+import { join as join11 } from "node:path";
 
 // src/store.ts
-import { createHash as createHash8, randomUUID as randomUUID7 } from "node:crypto";
-import { chmodSync as chmodSync2, closeSync as closeSync4, existsSync as existsSync8, fsyncSync as fsyncSync2, mkdirSync as mkdirSync5, openSync as openSync4, rmSync as rmSync4 } from "node:fs";
-import { dirname as dirname4, join as join7 } from "node:path";
+init_request_feedback();
+import { createHash as createHash9, randomUUID as randomUUID8 } from "node:crypto";
+import { chmodSync as chmodSync2, closeSync as closeSync4, existsSync as existsSync8, fsyncSync as fsyncSync2, mkdirSync as mkdirSync7, openSync as openSync4, rmSync as rmSync5 } from "node:fs";
+import { dirname as dirname6, join as join10 } from "node:path";
 import { DatabaseSync } from "node:sqlite";
+
+// src/review-input.ts
+var ARTIFACT_REFERENCE_FORMAT = "artifact:<artifact_id>@sha256:<64 lowercase hexadecimal characters>";
+var ARTIFACT_REFERENCE_PATTERN = /^artifact:([^@\s]+)@sha256:([0-9a-f]{64})$/;
+var ReviewInputError = class extends Error {
+  constructor(details) {
+    super(`Review criterion ${details.criterion_id}${details.evidence_index === void 0 ? "" : ` evidence[${details.evidence_index}]`}: ${details.reason.replaceAll("_", " ")}${details.required_format ? `; expected ${details.required_format}. Put explanatory prose in review rationale, freshness, or integration_checks.` : ""}`);
+    this.details = details;
+  }
+  details;
+  code = "INVALID_INPUT";
+  retry = "change_input";
+};
+
+// src/store.ts
 var StoreConflict = class extends Error {
   constructor(code, message = code) {
     super(message);
@@ -149824,7 +150044,7 @@ function canonical2(value2) {
   return `{${Object.keys(object2).filter((key) => object2[key] !== void 0).sort().map((key) => `${JSON.stringify(key)}:${canonical2(object2[key])}`).join(",")}}`;
 }
 function hashPayload(value2) {
-  return createHash8("sha256").update(canonical2(value2)).digest("hex");
+  return createHash9("sha256").update(canonical2(value2)).digest("hex");
 }
 function now() {
   return (/* @__PURE__ */ new Date()).toISOString();
@@ -149871,7 +150091,8 @@ function replySemanticHash(input2) {
     requestId: input2.requestId,
     requestRevision: input2.requestRevision,
     reply: input2.reply,
-    authorizationBasis: input2.authorizationBasis
+    authorizationBasis: input2.authorizationBasis,
+    ...input2.workerExplanation === void 0 ? {} : { workerExplanation: input2.workerExplanation }
   });
 }
 var SqliteTaskStore = class {
@@ -149883,14 +150104,14 @@ var SqliteTaskStore = class {
   diagnosticMaintenanceTimer;
   constructor(filename, options = {}) {
     const existingDatabase = existsSync8(filename);
-    mkdirSync5(dirname4(filename), { recursive: true, mode: 448 });
+    mkdirSync7(dirname6(filename), { recursive: true, mode: 448 });
     this.db = new DatabaseSync(filename);
     const versionTable = this.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='schema_version'").get();
     let schemaVersion = null;
     if (versionTable) {
       const version2 = this.db.prepare("SELECT MAX(version) AS version FROM schema_version").get();
       schemaVersion = version2.version;
-      if (version2.version !== null && version2.version > 3) {
+      if (version2.version !== null && version2.version > 4) {
         this.db.close();
         throw new Error(`store schema version ${version2.version} is newer than this runtime supports`);
       }
@@ -149918,10 +150139,11 @@ var SqliteTaskStore = class {
       "diagnostic_logs"
     ];
     const missingColumn = (table, required2) => {
-      const columns2 = new Set(this.db.prepare(`PRAGMA table_info(${table})`).all().map((row) => row.name));
-      return required2.some((name) => !columns2.has(name));
+      const columns = new Set(this.db.prepare(`PRAGMA table_info(${table})`).all().map((row) => row.name));
+      return required2.some((name) => !columns.has(name));
     };
-    const schemaNeedsUpgrade = schemaVersion !== 3 || requiredObjects.some((name) => !objects.has(name)) || missingColumn("executions", [
+    const requestKey2 = this.db.prepare("PRAGMA table_info(input_requests)").all().filter((row) => row.pk).sort((a, b) => a.pk - b.pk).map((row) => row.name).join(",");
+    const schemaNeedsUpgrade = requestKey2 !== "execution_id,request_id" || schemaVersion !== 4 || requiredObjects.some((name) => !objects.has(name)) || missingColumn("executions", [
       "packet_json",
       "frozen_prompt",
       "frozen_baseline_json",
@@ -149936,15 +150158,15 @@ var SqliteTaskStore = class {
       "backend_config_json",
       "launch_contract_json",
       "worker_instance_id"
-    ]) || missingColumn("tasks", ["workspace_access", "request_model_json"]) || missingColumn("input_requests", ["created_at", "response_json", "authorization_basis_json"]) || missingColumn("cancellation_intents", ["abort_acknowledged"]);
+    ]) || missingColumn("tasks", ["workspace_access", "request_model_json"]) || missingColumn("input_requests", ["created_at", "response_json", "authorization_basis_json", "worker_explanation"]) || missingColumn("cancellation_intents", ["abort_acknowledged"]);
     if (existingDatabase && schemaNeedsUpgrade) {
-      const backupDirectory = join7(dirname4(filename), "backups");
+      const backupDirectory = join10(dirname6(filename), "backups");
       let backupPath = null;
       try {
-        mkdirSync5(backupDirectory, { recursive: true, mode: 448 });
-        backupPath = join7(
+        mkdirSync7(backupDirectory, { recursive: true, mode: 448 });
+        backupPath = join10(
           backupDirectory,
-          `${(/* @__PURE__ */ new Date()).toISOString().replaceAll(":", "-")}-schema-${schemaVersion ?? "unknown"}-to-3-${randomUUID7()}.sqlite`
+          `${(/* @__PURE__ */ new Date()).toISOString().replaceAll(":", "-")}-schema-${schemaVersion ?? "unknown"}-to-4-${randomUUID8()}.sqlite`
         );
         closeSync4(openSync4(backupPath, "wx", 384));
         this.db.prepare("VACUUM INTO ?").run(backupPath);
@@ -149961,120 +150183,144 @@ var SqliteTaskStore = class {
           closeSync4(directoryFd);
         }
       } catch (error62) {
-        if (backupPath) rmSync4(backupPath, { force: true });
+        if (backupPath) rmSync5(backupPath, { force: true });
         this.db.close();
         throw new Error(`pre-migration database backup failed: ${String(error62)}`);
       }
     }
-    this.db.exec(`
-      CREATE TABLE IF NOT EXISTS schema_version(version INTEGER NOT NULL);
-      INSERT INTO schema_version(version) SELECT 1 WHERE NOT EXISTS(SELECT 1 FROM schema_version);
-      CREATE TABLE IF NOT EXISTS scopes(scope_id TEXT PRIMARY KEY, created_at TEXT NOT NULL);
-      CREATE TABLE IF NOT EXISTS tasks(
-        task_id TEXT PRIMARY KEY, scope_id TEXT NOT NULL REFERENCES scopes(scope_id),
-        workspace TEXT NOT NULL, packet_json TEXT NOT NULL, model TEXT NOT NULL, profile TEXT NOT NULL,
-        current_execution_id TEXT NOT NULL, created_at TEXT NOT NULL,
-        workspace_access TEXT, request_model_json TEXT
-      );
-      CREATE TABLE IF NOT EXISTS executions(
-        execution_id TEXT PRIMARY KEY, task_id TEXT NOT NULL REFERENCES tasks(task_id),
-        predecessor_execution_id TEXT REFERENCES executions(execution_id),
-        revision INTEGER NOT NULL, phase TEXT NOT NULL, observation TEXT NOT NULL,
-        backend_id TEXT, session_id TEXT, user_message_id TEXT,
-        baseline_hash TEXT NOT NULL, prompt_hash TEXT NOT NULL,
-        report_validity TEXT NOT NULL DEFAULT 'pending', review_status TEXT NOT NULL DEFAULT 'pending',
-        final_manifest_hash TEXT,
-        created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
-        packet_json TEXT, frozen_prompt TEXT, frozen_baseline_json TEXT, report_path TEXT,
-        queue_deadline_at TEXT, admitted_at TEXT, execution_deadline_at TEXT,
-        finalization_deadline_at TEXT, intended_outcome TEXT, execution_timeout_seconds INTEGER,
-        context_mode TEXT, backend_config_json TEXT, launch_contract_json TEXT
-      );
-      CREATE UNIQUE INDEX IF NOT EXISTS unresolved_session_owner ON executions(backend_id,session_id)
-        WHERE session_id IS NOT NULL AND phase NOT IN ('completed','failed','cancelled','timed_out');
-      CREATE TABLE IF NOT EXISTS backend_instances(
-        backend_id TEXT PRIMARY KEY, workspace TEXT NOT NULL, config_digest TEXT NOT NULL,
-        identity_json TEXT NOT NULL, created_at TEXT NOT NULL
-      );
-      CREATE TABLE IF NOT EXISTS operations(
-        operation_id TEXT PRIMARY KEY, scope_id TEXT NOT NULL REFERENCES scopes(scope_id),
-        operation TEXT NOT NULL, idempotency_key TEXT NOT NULL, payload_hash TEXT NOT NULL,
-        result_json TEXT NOT NULL, created_at TEXT NOT NULL,
-        UNIQUE(scope_id,operation,idempotency_key)
-      );
-      CREATE TABLE IF NOT EXISTS dispatch_intents(
-        execution_id TEXT PRIMARY KEY REFERENCES executions(execution_id),
-        backend_id TEXT NOT NULL, session_id TEXT NOT NULL, user_message_id TEXT NOT NULL,
-        prompt_hash TEXT NOT NULL, acknowledged INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL
-      );
-      CREATE TABLE IF NOT EXISTS creation_intents(
-        execution_id TEXT PRIMARY KEY REFERENCES executions(execution_id),
-        backend_id TEXT NOT NULL, marker TEXT NOT NULL UNIQUE, session_id TEXT,
-        created_at TEXT NOT NULL
-      );
-      CREATE TABLE IF NOT EXISTS cancellation_intents(
-        execution_id TEXT PRIMARY KEY REFERENCES executions(execution_id),
-        reason TEXT NOT NULL, requester TEXT NOT NULL, deadline_origin TEXT,
-        created_at TEXT NOT NULL, abort_acknowledged INTEGER NOT NULL DEFAULT 0
-      );
-      CREATE TABLE IF NOT EXISTS resource_reservations(
-        resource_key TEXT PRIMARY KEY, execution_id TEXT NOT NULL REFERENCES executions(execution_id),
-        acquired_at TEXT NOT NULL
-      );
-      CREATE TABLE IF NOT EXISTS input_requests(
-        request_id TEXT PRIMARY KEY, execution_id TEXT NOT NULL REFERENCES executions(execution_id),
-        kind TEXT NOT NULL, revision INTEGER NOT NULL, detail_json TEXT NOT NULL, status TEXT NOT NULL,
-        created_at TEXT, response_json TEXT, authorization_basis_json TEXT
-      );
-      CREATE TABLE IF NOT EXISTS artifacts(
-        artifact_id TEXT PRIMARY KEY, execution_id TEXT NOT NULL REFERENCES executions(execution_id),
-        sha256 TEXT NOT NULL, byte_length INTEGER NOT NULL, media_type TEXT NOT NULL,
-        path TEXT NOT NULL, created_at TEXT NOT NULL
-      );
-      CREATE TABLE IF NOT EXISTS reviews(
-        review_id TEXT PRIMARY KEY, execution_id TEXT NOT NULL REFERENCES executions(execution_id),
-        disposition TEXT NOT NULL, record_json TEXT NOT NULL, created_at TEXT NOT NULL
-      );
-      CREATE TABLE IF NOT EXISTS events(
-        sequence INTEGER PRIMARY KEY AUTOINCREMENT, execution_id TEXT NOT NULL REFERENCES executions(execution_id),
-        kind TEXT NOT NULL, detail_json TEXT NOT NULL, created_at TEXT NOT NULL
-      );
-      CREATE TABLE IF NOT EXISTS diagnostic_logs(
-        execution_id TEXT PRIMARY KEY REFERENCES executions(execution_id),
-        content_blob BLOB NOT NULL, original_bytes INTEGER NOT NULL,
-        updated_at TEXT NOT NULL
-      );
-    `);
-    const columns = new Set(this.db.prepare("PRAGMA table_info(executions)").all().map((row) => row.name));
-    for (const [name, definition] of Object.entries({
-      packet_json: "TEXT",
-      frozen_prompt: "TEXT",
-      frozen_baseline_json: "TEXT",
-      report_path: "TEXT",
-      queue_deadline_at: "TEXT",
-      admitted_at: "TEXT",
-      execution_deadline_at: "TEXT",
-      finalization_deadline_at: "TEXT",
-      intended_outcome: "TEXT",
-      execution_timeout_seconds: "INTEGER",
-      context_mode: "TEXT",
-      backend_config_json: "TEXT",
-      launch_contract_json: "TEXT",
-      worker_instance_id: "TEXT"
-    })) {
-      if (!columns.has(name)) this.db.exec(`ALTER TABLE executions ADD COLUMN ${name} ${definition}`);
+    this.db.exec("BEGIN IMMEDIATE");
+    try {
+      this.db.exec(`
+        CREATE TABLE IF NOT EXISTS schema_version(version INTEGER NOT NULL);
+        INSERT INTO schema_version(version) SELECT 1 WHERE NOT EXISTS(SELECT 1 FROM schema_version);
+        CREATE TABLE IF NOT EXISTS scopes(scope_id TEXT PRIMARY KEY, created_at TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS tasks(
+          task_id TEXT PRIMARY KEY, scope_id TEXT NOT NULL REFERENCES scopes(scope_id),
+          workspace TEXT NOT NULL, packet_json TEXT NOT NULL, model TEXT NOT NULL, profile TEXT NOT NULL,
+          current_execution_id TEXT NOT NULL, created_at TEXT NOT NULL,
+          workspace_access TEXT, request_model_json TEXT
+        );
+        CREATE TABLE IF NOT EXISTS executions(
+          execution_id TEXT PRIMARY KEY, task_id TEXT NOT NULL REFERENCES tasks(task_id),
+          predecessor_execution_id TEXT REFERENCES executions(execution_id),
+          revision INTEGER NOT NULL, phase TEXT NOT NULL, observation TEXT NOT NULL,
+          backend_id TEXT, session_id TEXT, user_message_id TEXT,
+          baseline_hash TEXT NOT NULL, prompt_hash TEXT NOT NULL,
+          report_validity TEXT NOT NULL DEFAULT 'pending', review_status TEXT NOT NULL DEFAULT 'pending',
+          final_manifest_hash TEXT,
+          created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
+          packet_json TEXT, frozen_prompt TEXT, frozen_baseline_json TEXT, report_path TEXT,
+          queue_deadline_at TEXT, admitted_at TEXT, execution_deadline_at TEXT,
+          finalization_deadline_at TEXT, intended_outcome TEXT, execution_timeout_seconds INTEGER,
+          context_mode TEXT, backend_config_json TEXT, launch_contract_json TEXT
+        );
+        CREATE UNIQUE INDEX IF NOT EXISTS unresolved_session_owner ON executions(backend_id,session_id)
+          WHERE session_id IS NOT NULL AND phase NOT IN ('completed','failed','cancelled','timed_out');
+        CREATE TABLE IF NOT EXISTS backend_instances(
+          backend_id TEXT PRIMARY KEY, workspace TEXT NOT NULL, config_digest TEXT NOT NULL,
+          identity_json TEXT NOT NULL, created_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS operations(
+          operation_id TEXT PRIMARY KEY, scope_id TEXT NOT NULL REFERENCES scopes(scope_id),
+          operation TEXT NOT NULL, idempotency_key TEXT NOT NULL, payload_hash TEXT NOT NULL,
+          result_json TEXT NOT NULL, created_at TEXT NOT NULL,
+          UNIQUE(scope_id,operation,idempotency_key)
+        );
+        CREATE TABLE IF NOT EXISTS dispatch_intents(
+          execution_id TEXT PRIMARY KEY REFERENCES executions(execution_id),
+          backend_id TEXT NOT NULL, session_id TEXT NOT NULL, user_message_id TEXT NOT NULL,
+          prompt_hash TEXT NOT NULL, acknowledged INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS creation_intents(
+          execution_id TEXT PRIMARY KEY REFERENCES executions(execution_id),
+          backend_id TEXT NOT NULL, marker TEXT NOT NULL UNIQUE, session_id TEXT,
+          created_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS cancellation_intents(
+          execution_id TEXT PRIMARY KEY REFERENCES executions(execution_id),
+          reason TEXT NOT NULL, requester TEXT NOT NULL, deadline_origin TEXT,
+          created_at TEXT NOT NULL, abort_acknowledged INTEGER NOT NULL DEFAULT 0
+        );
+        CREATE TABLE IF NOT EXISTS resource_reservations(
+          resource_key TEXT PRIMARY KEY, execution_id TEXT NOT NULL REFERENCES executions(execution_id),
+          acquired_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS input_requests(
+          request_id TEXT NOT NULL, execution_id TEXT NOT NULL REFERENCES executions(execution_id),
+          kind TEXT NOT NULL, revision INTEGER NOT NULL, detail_json TEXT NOT NULL, status TEXT NOT NULL,
+          created_at TEXT, response_json TEXT, authorization_basis_json TEXT, worker_explanation TEXT,
+          PRIMARY KEY(execution_id,request_id)
+        );
+        CREATE TABLE IF NOT EXISTS artifacts(
+          artifact_id TEXT PRIMARY KEY, execution_id TEXT NOT NULL REFERENCES executions(execution_id),
+          sha256 TEXT NOT NULL, byte_length INTEGER NOT NULL, media_type TEXT NOT NULL,
+          path TEXT NOT NULL, created_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS reviews(
+          review_id TEXT PRIMARY KEY, execution_id TEXT NOT NULL REFERENCES executions(execution_id),
+          disposition TEXT NOT NULL, record_json TEXT NOT NULL, created_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS events(
+          sequence INTEGER PRIMARY KEY AUTOINCREMENT, execution_id TEXT NOT NULL REFERENCES executions(execution_id),
+          kind TEXT NOT NULL, detail_json TEXT NOT NULL, created_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS diagnostic_logs(
+          execution_id TEXT PRIMARY KEY REFERENCES executions(execution_id),
+          content_blob BLOB NOT NULL, original_bytes INTEGER NOT NULL,
+          updated_at TEXT NOT NULL
+        );
+      `);
+      const columns = new Set(this.db.prepare("PRAGMA table_info(executions)").all().map((row) => row.name));
+      for (const [name, definition] of Object.entries({
+        packet_json: "TEXT",
+        frozen_prompt: "TEXT",
+        frozen_baseline_json: "TEXT",
+        report_path: "TEXT",
+        queue_deadline_at: "TEXT",
+        admitted_at: "TEXT",
+        execution_deadline_at: "TEXT",
+        finalization_deadline_at: "TEXT",
+        intended_outcome: "TEXT",
+        execution_timeout_seconds: "INTEGER",
+        context_mode: "TEXT",
+        backend_config_json: "TEXT",
+        launch_contract_json: "TEXT",
+        worker_instance_id: "TEXT"
+      })) {
+        if (!columns.has(name)) this.db.exec(`ALTER TABLE executions ADD COLUMN ${name} ${definition}`);
+      }
+      const taskColumns = new Set(this.db.prepare("PRAGMA table_info(tasks)").all().map((row) => row.name));
+      for (const [name, definition] of Object.entries({ workspace_access: "TEXT", request_model_json: "TEXT" })) {
+        if (!taskColumns.has(name)) this.db.exec(`ALTER TABLE tasks ADD COLUMN ${name} ${definition}`);
+      }
+      const requestColumns = new Set(this.db.prepare("PRAGMA table_info(input_requests)").all().map((row) => row.name));
+      for (const [name, definition] of Object.entries({ created_at: "TEXT", response_json: "TEXT", authorization_basis_json: "TEXT", worker_explanation: "TEXT" })) {
+        if (!requestColumns.has(name)) this.db.exec(`ALTER TABLE input_requests ADD COLUMN ${name} ${definition}`);
+      }
+      const cancellationColumns = new Set(this.db.prepare("PRAGMA table_info(cancellation_intents)").all().map((row) => row.name));
+      if (!cancellationColumns.has("abort_acknowledged")) this.db.exec("ALTER TABLE cancellation_intents ADD COLUMN abort_acknowledged INTEGER NOT NULL DEFAULT 0");
+      if (objects.has("input_requests") && requestKey2 !== "execution_id,request_id") {
+        this.db.exec(`
+          CREATE TABLE input_requests_v4(
+            request_id TEXT NOT NULL, execution_id TEXT NOT NULL REFERENCES executions(execution_id),
+            kind TEXT NOT NULL, revision INTEGER NOT NULL, detail_json TEXT NOT NULL, status TEXT NOT NULL,
+            created_at TEXT, response_json TEXT, authorization_basis_json TEXT, worker_explanation TEXT,
+            PRIMARY KEY(execution_id,request_id)
+          );
+          INSERT INTO input_requests_v4 SELECT request_id,execution_id,kind,revision,detail_json,status,
+            created_at,response_json,authorization_basis_json,worker_explanation FROM input_requests;
+          DROP TABLE input_requests;
+          ALTER TABLE input_requests_v4 RENAME TO input_requests;
+        `);
+      }
+      this.db.prepare("UPDATE schema_version SET version=4 WHERE version<4").run();
+      if (this.db.prepare("PRAGMA foreign_key_check").all().length) throw new Error("store migration failed foreign-key validation");
+      this.db.exec("COMMIT");
+    } catch (error62) {
+      this.db.exec("ROLLBACK");
+      this.db.close();
+      throw error62;
     }
-    const taskColumns = new Set(this.db.prepare("PRAGMA table_info(tasks)").all().map((row) => row.name));
-    for (const [name, definition] of Object.entries({ workspace_access: "TEXT", request_model_json: "TEXT" })) {
-      if (!taskColumns.has(name)) this.db.exec(`ALTER TABLE tasks ADD COLUMN ${name} ${definition}`);
-    }
-    const requestColumns = new Set(this.db.prepare("PRAGMA table_info(input_requests)").all().map((row) => row.name));
-    for (const [name, definition] of Object.entries({ created_at: "TEXT", response_json: "TEXT", authorization_basis_json: "TEXT" })) {
-      if (!requestColumns.has(name)) this.db.exec(`ALTER TABLE input_requests ADD COLUMN ${name} ${definition}`);
-    }
-    const cancellationColumns = new Set(this.db.prepare("PRAGMA table_info(cancellation_intents)").all().map((row) => row.name));
-    if (!cancellationColumns.has("abort_acknowledged")) this.db.exec("ALTER TABLE cancellation_intents ADD COLUMN abort_acknowledged INTEGER NOT NULL DEFAULT 0");
-    this.db.prepare("UPDATE schema_version SET version=3 WHERE version<3").run();
     this.purgeExpiredDiagnostics();
     const maintenanceInterval = options.diagnosticMaintenanceIntervalMs ?? 60 * 60 * 1e3;
     if (!Number.isSafeInteger(maintenanceInterval) || maintenanceInterval <= 0)
@@ -150162,7 +150408,7 @@ var SqliteTaskStore = class {
     const row = this.db.prepare("SELECT content_blob,original_bytes FROM diagnostic_logs WHERE execution_id=?").get(executionId);
     if (!row) return null;
     const bytes2 = Buffer.from(row.content_blob);
-    const digest = createHash8("sha256").update(bytes2).digest("hex");
+    const digest = createHash9("sha256").update(bytes2).digest("hex");
     let offset = 0;
     if (opaqueCursor !== "start") {
       let token;
@@ -150215,8 +150461,8 @@ var SqliteTaskStore = class {
         if (!task2) throw new Error("stored idempotency result is missing");
         return task2;
       }
-      const taskId = input2.taskId ?? `task_${randomUUID7()}`;
-      const executionId = input2.executionId ?? `exec_${randomUUID7()}`;
+      const taskId = input2.taskId ?? `task_${randomUUID8()}`;
+      const executionId = input2.executionId ?? `exec_${randomUUID8()}`;
       const created = now();
       this.db.prepare("INSERT INTO tasks(task_id,scope_id,workspace,packet_json,model,profile,current_execution_id,created_at,workspace_access,request_model_json) VALUES(?,?,?,?,?,?,?,?,?,?)").run(
         taskId,
@@ -150248,7 +150494,7 @@ var SqliteTaskStore = class {
         created,
         created
       );
-      this.db.prepare("INSERT INTO operations VALUES(?,?,?,?,?,?,?)").run(`op_${randomUUID7()}`, input2.scopeId, "start", input2.idempotencyKey, payloadHash, canonical2({ taskId, executionId }), created);
+      this.db.prepare("INSERT INTO operations VALUES(?,?,?,?,?,?,?)").run(`op_${randomUUID8()}`, input2.scopeId, "start", input2.idempotencyKey, payloadHash, canonical2({ taskId, executionId }), created);
       this.event(executionId, "queued", { taskId });
       const task = this.get(input2.scopeId, taskId);
       if (!task) throw new Error("new task missing");
@@ -150465,6 +150711,10 @@ var SqliteTaskStore = class {
     const row = this.db.prepare("SELECT backend_id,session_id,user_message_id,acknowledged FROM dispatch_intents WHERE execution_id=?").get(executionId);
     return row ? { backendId: row.backend_id, sessionId: row.session_id, messageId: row.user_message_id, acknowledged: Boolean(row.acknowledged) } : null;
   }
+  eventCursor(executionId) {
+    const row = this.db.prepare("SELECT COALESCE(MAX(sequence),0) AS cursor FROM events WHERE execution_id=?").get(executionId);
+    return row.cursor;
+  }
   events(executionId, afterCursor = 0, limit3 = 100) {
     const rows = this.db.prepare("SELECT sequence,kind,detail_json,created_at FROM events WHERE execution_id=? AND sequence>? ORDER BY sequence LIMIT ?").all(executionId, afterCursor, limit3);
     return rows.map((row) => ({ cursor: row.sequence, kind: row.kind, detail: JSON.parse(row.detail_json), createdAt: row.created_at }));
@@ -150487,7 +150737,7 @@ var SqliteTaskStore = class {
           const value2 = typeof source[key] === "string" ? source[key] : JSON.stringify(source[key]);
           blockers[key] = Buffer.from(value2).subarray(0, 256).toString("utf8");
         }
-        const digest = createHash8("sha256").update(row.detail_json).digest("hex");
+        const digest = createHash9("sha256").update(row.detail_json).digest("hex");
         const detailCursor = Buffer.from(JSON.stringify({
           executionId,
           sequence: row.sequence,
@@ -150533,7 +150783,7 @@ var SqliteTaskStore = class {
     const row = this.db.prepare("SELECT detail_json FROM events WHERE execution_id=? AND sequence=?").get(executionId, token.sequence);
     if (!row) throw new StoreConflict("INVALID_STATE");
     const bytes2 = Buffer.from(row.detail_json);
-    const digest = createHash8("sha256").update(bytes2).digest("hex");
+    const digest = createHash9("sha256").update(bytes2).digest("hex");
     if (digest !== token.sha256 || token.offset > bytes2.byteLength) throw new StoreConflict("INVALID_STATE");
     const offset = token.offset;
     const chunk = bytes2.subarray(offset, offset + 2048);
@@ -150664,7 +150914,7 @@ var SqliteTaskStore = class {
       const objective = JSON.parse(original.packet_json).objective;
       if (packet.objective !== objective) throw new StoreConflict("INVALID_STATE");
       if (input2.contextMode === "resume" && (!predecessor.backendId || !predecessor.sessionId)) throw new StoreConflict("INVALID_STATE");
-      const executionId = input2.executionId ?? `exec_${randomUUID7()}`;
+      const executionId = input2.executionId ?? `exec_${randomUUID8()}`;
       const instant = now();
       const backendId = null;
       const sessionId = input2.contextMode === "resume" ? predecessor.sessionId : null;
@@ -150696,7 +150946,7 @@ var SqliteTaskStore = class {
       );
       this.db.prepare("UPDATE tasks SET current_execution_id=? WHERE task_id=?").run(executionId, input2.taskId);
       this.db.prepare("INSERT INTO operations VALUES(?,?,?,?,?,?,?)").run(
-        `op_${randomUUID7()}`,
+        `op_${randomUUID8()}`,
         input2.scopeId,
         "continue",
         input2.idempotencyKey,
@@ -150765,7 +151015,7 @@ var SqliteTaskStore = class {
       const phase = task.phase === "queued" ? input2.deadlineOrigin ? "timed_out" : "cancelled" : "cancelling";
       this.db.prepare("UPDATE executions SET phase=?,revision=revision+1,updated_at=? WHERE execution_id=?").run(phase, instant, task.executionId);
       this.db.prepare("INSERT INTO operations VALUES(?,?,?,?,?,?,?)").run(
-        `op_${randomUUID7()}`,
+        `op_${randomUUID8()}`,
         input2.scopeId,
         "cancel",
         input2.idempotencyKey,
@@ -150797,8 +151047,16 @@ var SqliteTaskStore = class {
       status: row.status,
       createdAt: row.created_at ?? "",
       response: row.response_json ? JSON.parse(row.response_json) : null,
-      authorizationBasis: row.authorization_basis_json ? JSON.parse(row.authorization_basis_json) : null
+      authorizationBasis: row.authorization_basis_json ? JSON.parse(row.authorization_basis_json) : null,
+      workerExplanation: row.worker_explanation
     }));
+  }
+  recordInputRegistrationFailure(executionId, requestId, reason) {
+    this.event(executionId, "input_request_registration_failed", {
+      requestId,
+      reason,
+      next_action: "Observe the exact execution; cancel and wait for confirmed stopping if registration cannot recover."
+    });
   }
   upsertInputRequest(scopeId, taskId, executionId, requestId, kind, detail) {
     return this.transaction(() => {
@@ -150811,7 +151069,7 @@ var SqliteTaskStore = class {
       if (previous && previous.status !== "pending") return previous;
       const instant = now();
       if (previous) {
-        this.db.prepare("UPDATE input_requests SET revision=revision+1,detail_json=? WHERE request_id=?").run(canonical2(detail), requestId);
+        this.db.prepare("UPDATE input_requests SET revision=revision+1,detail_json=? WHERE execution_id=? AND request_id=?").run(canonical2(detail), executionId, requestId);
       } else {
         this.db.prepare("INSERT INTO input_requests(request_id,execution_id,kind,revision,detail_json,status,created_at) VALUES(?,?,?,1,?,'pending',?)").run(requestId, executionId, kind, canonical2(detail), instant);
       }
@@ -150821,6 +151079,7 @@ var SqliteTaskStore = class {
     });
   }
   respondToRequest(input2) {
+    validateWorkerExplanation(input2.reply, input2.workerExplanation);
     const payloadHash = replySemanticHash(input2);
     return this.transaction(() => {
       const candidate = this.getExecution(input2.scopeId, input2.taskId, input2.executionId);
@@ -150843,14 +151102,15 @@ var SqliteTaskStore = class {
         if (task.phase !== "cancelling" || request2.kind !== "permission" || input2.reply !== "deny" || this.cancellationEvent(task.executionId, "cancellation_recovery_intent"))
           throw new StoreConflict("INVALID_STATE", "cancellation permits only permission denial before worker termination begins");
       } else if (task.phase !== "waiting_input") throw new StoreConflict("INVALID_STATE", "execution is not waiting for input");
+      if (input2.workerExplanation !== void 0 && request2.kind !== "permission") throw new StoreConflict("INVALID_STATE");
       const binding = request2.detail;
       if (binding.sessionId !== task.sessionId || binding.type !== request2.kind)
         throw new StoreConflict("REQUEST_EXPIRED", "request binding does not match the execution; observe the execution");
       const instant = now();
-      this.db.prepare("UPDATE input_requests SET status='responding',response_json=?,authorization_basis_json=? WHERE request_id=?").run(canonical2(input2.reply), canonical2(input2.authorizationBasis), input2.requestId);
+      this.db.prepare("UPDATE input_requests SET status='responding',response_json=?,authorization_basis_json=?,worker_explanation=? WHERE execution_id=? AND request_id=?").run(canonical2(input2.reply), canonical2(input2.authorizationBasis), input2.workerExplanation ?? null, input2.executionId, input2.requestId);
       this.db.prepare("UPDATE executions SET revision=revision+1,updated_at=? WHERE execution_id=?").run(instant, input2.executionId);
       this.db.prepare("INSERT INTO operations VALUES(?,?,?,?,?,?,?)").run(
-        `op_${randomUUID7()}`,
+        `op_${randomUUID8()}`,
         input2.scopeId,
         "respond",
         input2.idempotencyKey,
@@ -150858,7 +151118,11 @@ var SqliteTaskStore = class {
         canonical2({ taskId: input2.taskId, executionId: input2.executionId, requestId: input2.requestId }),
         instant
       );
-      this.event(input2.executionId, "input_response_intent", { requestId: input2.requestId, requestRevision: input2.requestRevision });
+      this.event(input2.executionId, "input_response_intent", {
+        requestId: input2.requestId,
+        requestRevision: input2.requestRevision,
+        ...input2.workerExplanation === void 0 ? {} : { worker_explanation: input2.workerExplanation, worker_explanation_delivery: "intent_recorded" }
+      });
       return this.get(input2.scopeId, input2.taskId);
     });
   }
@@ -150875,8 +151139,11 @@ var SqliteTaskStore = class {
     this.transaction(() => {
       const request2 = this.inputRequests(executionId).find((item) => item.requestId === requestId);
       if (!request2 || request2.status !== "responding") throw new StoreConflict("REQUEST_EXPIRED");
-      this.db.prepare("UPDATE input_requests SET status='responded' WHERE request_id=?").run(requestId);
-      this.event(executionId, "input_response_acknowledged", { requestId });
+      this.db.prepare("UPDATE input_requests SET status='responded' WHERE execution_id=? AND request_id=?").run(executionId, requestId);
+      this.event(executionId, "input_response_acknowledged", {
+        requestId,
+        ...request2.workerExplanation === null ? {} : { worker_explanation_delivery: "acknowledged" }
+      });
     });
   }
   /** The exact request vanished after a recorded reply intent, but delivery was never acknowledged. */
@@ -150885,7 +151152,11 @@ var SqliteTaskStore = class {
       const request2 = this.inputRequests(executionId).find((item) => item.requestId === requestId);
       if (!request2 || request2.status !== "responding") return;
       this.db.prepare("UPDATE input_requests SET status='unconfirmed' WHERE execution_id=? AND request_id=? AND status='responding'").run(executionId, requestId);
-      this.event(executionId, "input_response_unconfirmed", { requestId, reason: "request_absent_after_reply_intent" });
+      this.event(executionId, "input_response_unconfirmed", {
+        requestId,
+        reason: "request_absent_after_reply_intent",
+        ...request2.workerExplanation === null ? {} : { worker_explanation_delivery: "unconfirmed" }
+      });
     });
   }
   expireInputRequest(executionId, requestId) {
@@ -150904,7 +151175,11 @@ var SqliteTaskStore = class {
         this.event(
           executionId,
           status === "unconfirmed" ? "input_response_unconfirmed" : "input_request_expired",
-          { requestId: request2.requestId, reason: "request_absent_in_exact_session_snapshot" }
+          {
+            requestId: request2.requestId,
+            reason: "request_absent_in_exact_session_snapshot",
+            ...request2.workerExplanation === null ? {} : { worker_explanation_delivery: "unconfirmed" }
+          }
         );
       }
       if (expired2.length) this.db.prepare("UPDATE executions SET revision=revision+1,updated_at=? WHERE execution_id=?").run(now(), executionId);
@@ -150983,24 +151258,31 @@ var SqliteTaskStore = class {
         if (!artifacts.some((entry2) => entry2.sha256 === task.finalManifestHash && entry2.mediaType === "application/json") || artifacts.filter((entry2) => entry2.mediaType === "application/json").length < 2 || !artifacts.some((entry2) => entry2.mediaType === "text/markdown")) throw new StoreConflict("INVALID_STATE");
         const reviewed = /* @__PURE__ */ new Set();
         for (const criterion of review.criteria) {
-          if (!declared.has(criterion.id) || reviewed.has(criterion.id)) throw new StoreConflict("INVALID_STATE");
+          if (!declared.has(criterion.id)) throw new ReviewInputError({ criterion_id: criterion.id, reason: "undeclared_criterion" });
+          if (reviewed.has(criterion.id)) throw new ReviewInputError({ criterion_id: criterion.id, reason: "duplicate_criterion" });
           reviewed.add(criterion.id);
-          if (criterion.result === "satisfied" && criterion.evidence.length === 0) throw new StoreConflict("INVALID_STATE");
-          for (const reference of criterion.evidence) {
-            const match2 = /^artifact:([^@\s]+)@sha256:([0-9a-f]{64})$/.exec(reference);
-            if (!match2 || byId.get(match2[1])?.sha256 !== match2[2]) throw new StoreConflict("INVALID_STATE");
+          if (criterion.result === "satisfied" && criterion.evidence.length === 0)
+            throw new ReviewInputError({ criterion_id: criterion.id, reason: "missing_evidence" });
+          for (const [index, reference] of criterion.evidence.entries()) {
+            const match2 = ARTIFACT_REFERENCE_PATTERN.exec(reference);
+            const details = { criterion_id: criterion.id, evidence_index: index, required_format: ARTIFACT_REFERENCE_FORMAT };
+            if (!match2) throw new ReviewInputError({ ...details, reason: "malformed_reference" });
+            const artifact = byId.get(match2[1]);
+            if (!artifact) throw new ReviewInputError({ ...details, reason: "unknown_artifact" });
+            if (artifact.sha256 !== match2[2]) throw new ReviewInputError({ ...details, reason: "hash_mismatch" });
           }
         }
         for (const [id, required2] of declared) {
           if (!required2) continue;
           const result2 = review.criteria.find((item) => item.id === id);
-          if (!result2 || result2.result !== "satisfied" || result2.evidence.length === 0) throw new StoreConflict("INVALID_STATE");
+          if (!result2 || result2.result !== "satisfied") throw new ReviewInputError({ criterion_id: id, reason: "required_criterion_unsatisfied" });
+          if (result2.evidence.length === 0) throw new ReviewInputError({ criterion_id: id, reason: "missing_evidence" });
         }
       }
       const created = now();
-      this.db.prepare("INSERT INTO reviews VALUES(?,?,?,?,?)").run(`review_${randomUUID7()}`, task.executionId, review.disposition, canonical2(review), created);
+      this.db.prepare("INSERT INTO reviews VALUES(?,?,?,?,?)").run(`review_${randomUUID8()}`, task.executionId, review.disposition, canonical2(review), created);
       this.db.prepare("UPDATE executions SET review_status=?,revision=revision+1,updated_at=? WHERE execution_id=?").run(review.disposition, created, task.executionId);
-      this.db.prepare("INSERT INTO operations VALUES(?,?,?,?,?,?,?)").run(`op_${randomUUID7()}`, scopeId, "review", idempotencyKey, payloadHash, canonical2({ taskId, executionId: task.executionId }), created);
+      this.db.prepare("INSERT INTO operations VALUES(?,?,?,?,?,?,?)").run(`op_${randomUUID8()}`, scopeId, "review", idempotencyKey, payloadHash, canonical2({ taskId, executionId: task.executionId }), created);
       this.event(task.executionId, "review_recorded", { disposition: review.disposition });
       return this.getExecution(scopeId, taskId, task.executionId);
     });
@@ -151010,15 +151292,15 @@ var SqliteTaskStore = class {
 // src/prompt.ts
 init_zod();
 init_contracts();
-import { createHash as createHash9 } from "node:crypto";
-import { readFileSync as readFileSync7 } from "node:fs";
+import { createHash as createHash10 } from "node:crypto";
+import { readFileSync as readFileSync8 } from "node:fs";
 
 // src/resources.ts
 import { existsSync as existsSync9 } from "node:fs";
-import { fileURLToPath as fileURLToPath2 } from "node:url";
+import { fileURLToPath as fileURLToPath3 } from "node:url";
 function workerProfilePath(profile) {
   for (const relative5 of [`../../worker/${profile}.md`, `../worker/${profile}.md`]) {
-    const path6 = fileURLToPath2(new URL(relative5, import.meta.url));
+    const path6 = fileURLToPath3(new URL(relative5, import.meta.url));
     if (existsSync9(path6)) return path6;
   }
   throw new Error(`bundled worker profile is missing: ${profile}`);
@@ -151027,8 +151309,8 @@ function workerProfilePath(profile) {
 // src/prompt.ts
 function renderPrompt(input2) {
   const { taskId, executionId, profile, packet, baseline, outputDirectory } = input2;
-  const profileText = readFileSync7(workerProfilePath(profile), "utf8");
-  const profileHash = createHash9("sha256").update(profileText).digest("hex");
+  const profileText = readFileSync8(workerProfilePath(profile), "utf8");
+  const profileHash = createHash10("sha256").update(profileText).digest("hex");
   const text3 = [
     `# ${packet.title}`,
     `Task ID: ${taskId}`,
@@ -151067,13 +151349,233 @@ function renderPrompt(input2) {
     "The report is evidence for parent review; do not claim parent acceptance or invoke the parent-facing toolkit.",
     ""
   ].join("\n");
-  return { text: text3, sha256: createHash9("sha256").update(text3).digest("hex") };
+  return { text: text3, sha256: createHash10("sha256").update(text3).digest("hex") };
 }
 
 // src/service.ts
 init_workspace();
+
+// src/review-preparation.ts
+init_zod();
+init_contracts();
+import { createHash as createHash11 } from "node:crypto";
 var Id3 = external_exports.string().min(1);
-var ScopeTask = external_exports.object({ scope_id: Id3, task_id: Id3 }).strict();
+var Digest = external_exports.string().regex(/^[0-9a-f]{64}$/);
+var PrepareReviewSchema = external_exports.object({
+  scope_id: Id3,
+  task_id: Id3,
+  execution_id: Id3,
+  after_cursor: external_exports.string().min(1).max(512).optional(),
+  max_bytes: external_exports.number().int().min(8192).max(262144).default(32768),
+  limit: external_exports.number().int().min(1).max(20).default(10)
+}).strict();
+var CursorSchema3 = external_exports.object({
+  v: external_exports.literal(1),
+  e: Id3.max(128),
+  r: external_exports.number().int().positive(),
+  d: Digest,
+  o: external_exports.number().int().min(0).max(Number.MAX_SAFE_INTEGER)
+}).strict();
+var EvidenceRoleSchema = external_exports.enum(["report", "summary", "tracked_diff", "staged_diff", "changed_file"]);
+var ReviewPreparationError = class extends Error {
+  constructor(code, message, retry2, details) {
+    super(message);
+    this.code = code;
+    this.retry = retry2;
+    this.details = details;
+  }
+  code;
+  retry;
+  details;
+};
+var size2 = (value2) => Buffer.byteLength(JSON.stringify(value2), "utf8");
+var hash3 = (value2) => createHash11("sha256").update(JSON.stringify(value2)).digest("hex");
+var terminalPhases2 = /* @__PURE__ */ new Set(["completed", "failed", "cancelled", "timed_out"]);
+function budgetError(required2, subject) {
+  return new ReviewPreparationError(
+    "INVALID_INPUT",
+    required2 > 262144 ? `review preparation is unavailable: ${subject} exceeds the maximum 262144-byte response budget` : `${subject} exceeds max_bytes; increase the budget without truncating evidence or criteria`,
+    "change_input",
+    { required_min_bytes: required2, maximum_max_bytes: 262144 }
+  );
+}
+function encodeCursor(cursor) {
+  const encoded = Buffer.from(JSON.stringify(cursor)).toString("base64url");
+  if (encoded.length > 512) throw new ReviewPreparationError("INVALID_INPUT", "execution identity is too large for review preparation", "change_input");
+  return encoded;
+}
+function decodeCursor(encoded) {
+  try {
+    if (!/^[A-Za-z0-9_-]+$/.test(encoded) || Buffer.from(encoded, "base64url").toString("base64url") !== encoded)
+      throw new Error("invalid encoding");
+    return CursorSchema3.parse(JSON.parse(Buffer.from(encoded, "base64url").toString("utf8")));
+  } catch {
+    throw new ReviewPreparationError("INVALID_INPUT", "malformed review preparation cursor; start a new preparation read", "change_input");
+  }
+}
+function manifestRoles(task, entries2, artifacts) {
+  const roles = /* @__PURE__ */ new Map();
+  if (!task.finalManifestHash) return { roles, available: false, validManifest: false, reasons: ["final_manifest_missing"] };
+  if (!Digest.safeParse(task.finalManifestHash).success)
+    return { roles, available: false, validManifest: false, reasons: ["final_manifest_hash_invalid"] };
+  const entry2 = entries2.find((artifact) => artifact.sha256 === task.finalManifestHash && artifact.mediaType === "application/json");
+  if (!entry2) return { roles, available: false, validManifest: false, reasons: ["final_manifest_registration_missing"] };
+  roles.set(entry2.artifactId, ["manifest"]);
+  let bytes2;
+  try {
+    bytes2 = artifacts.readAllVerified(entry2);
+  } catch {
+    throw new ReviewPreparationError("ARTIFACT_CHANGED", `final manifest is missing or changed: ${entry2.artifactId}`, "observe_first");
+  }
+  let manifest;
+  try {
+    const parsed = JSON.parse(Buffer.from(bytes2).toString("utf8"));
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("not an object");
+    manifest = parsed;
+  } catch {
+    return { roles, available: false, validManifest: false, reasons: ["final_manifest_invalid"] };
+  }
+  if (manifest.task_id !== task.taskId || manifest.execution_id !== task.executionId || manifest.starting_state_sha256 !== task.baselineHash)
+    return { roles, available: false, validManifest: false, reasons: ["final_manifest_identity_or_baseline_mismatch"] };
+  if (!Array.isArray(manifest.artifacts)) return { roles, available: false, validManifest: false, reasons: ["final_manifest_artifacts_invalid"] };
+  const byId = new Map(entries2.map((artifact) => [artifact.artifactId, artifact]));
+  const seen = /* @__PURE__ */ new Set();
+  let hasRoles = true;
+  const candidateRoles = new Map(roles);
+  for (const raw of manifest.artifacts) {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return { roles, available: false, validManifest: false, reasons: ["final_manifest_artifacts_invalid"] };
+    const metadata = raw;
+    const registered = typeof metadata.artifact_id === "string" ? byId.get(metadata.artifact_id) : void 0;
+    if (!registered || seen.has(registered.artifactId) || metadata.sha256 !== registered.sha256 || metadata.byte_length !== registered.byteLength || metadata.media_type !== registered.mediaType)
+      return { roles, available: false, validManifest: false, reasons: ["final_manifest_artifact_reference_invalid"] };
+    seen.add(registered.artifactId);
+    if (metadata.roles === void 0) {
+      hasRoles = false;
+      continue;
+    }
+    const parsedRoles = external_exports.array(EvidenceRoleSchema).max(5).safeParse(metadata.roles);
+    if (!parsedRoles.success || new Set(parsedRoles.data).size !== parsedRoles.data.length)
+      return { roles, available: false, validManifest: false, reasons: ["final_manifest_roles_invalid"] };
+    candidateRoles.set(registered.artifactId, parsedRoles.data);
+  }
+  return { roles: hasRoles ? candidateRoles : roles, available: hasRoles, validManifest: true, reasons: [] };
+}
+function prepareReview(params, store, artifacts, progress) {
+  const parsed = PrepareReviewSchema.safeParse(params);
+  if (!parsed.success) throw new ReviewPreparationError("INVALID_INPUT", `invalid review preparation request: ${parsed.error.message}`, "change_input");
+  const input2 = parsed.data;
+  const task = store.getExecution(input2.scope_id, input2.task_id, input2.execution_id);
+  if (!task) throw new ReviewPreparationError("INVALID_INPUT", "exact task execution not found", "change_input");
+  const packet = TaskPacketSchema.safeParse(task.packet);
+  const declarations = packet.success ? packet.data.acceptance_criteria : [];
+  const declarationIds = new Set(declarations.map((criterion) => criterion.id));
+  const criteriaValid = packet.success && declarationIds.size === declarations.length;
+  const entries2 = store.artifactsForExecution(task.executionId);
+  const manifest = manifestRoles(task, entries2, artifacts);
+  const reasons = [...manifest.reasons];
+  if (task.phase !== "completed") reasons.push("execution_not_completed");
+  if (task.observation !== "current") reasons.push("execution_observation_not_current");
+  if (!["bounded-build", "bounded-inspect"].includes(task.profile)) reasons.push("unsupported_execution_profile");
+  if (task.reportValidity !== "valid") reasons.push("report_not_valid");
+  if (!Digest.safeParse(task.baselineHash).success) reasons.push("starting_state_hash_invalid");
+  if (!packet.success) reasons.push("frozen_packet_invalid");
+  else if (!criteriaValid) reasons.push("duplicate_criterion_ids");
+  const items = [
+    ...declarations.map((criterion, index) => ({
+      kind: "criterion",
+      index,
+      criterion: { ...criterion, result: "not_checked", evidence: [] }
+    })),
+    ...entries2.map((entry2, index) => ({
+      kind: "artifact",
+      index,
+      artifact_id: entry2.artifactId,
+      sha256: entry2.sha256,
+      byte_length: entry2.byteLength,
+      media_type: entry2.mediaType,
+      roles: manifest.roles.get(entry2.artifactId) ?? [],
+      reference: `artifact:${entry2.artifactId}@sha256:${entry2.sha256}`,
+      read_artifact: { scope_id: task.scopeId, task_id: task.taskId, execution_id: task.executionId, artifact_id: entry2.artifactId }
+    }))
+  ];
+  const digest = hash3({
+    scope_id: task.scopeId,
+    task_id: task.taskId,
+    execution_id: task.executionId,
+    packet_valid: packet.success,
+    criteria_valid: criteriaValid,
+    starting_state_sha256: task.baselineHash,
+    final_manifest_sha256: task.finalManifestHash,
+    items
+  });
+  const cursor = input2.after_cursor ? decodeCursor(input2.after_cursor) : null;
+  if (cursor && cursor.e !== task.executionId) throw new ReviewPreparationError("INVALID_INPUT", "review preparation cursor belongs to another execution", "change_input");
+  if (cursor && (cursor.r !== task.revision || cursor.d !== digest)) throw new ReviewPreparationError("STALE_PREPARATION", "review preparation changed; restart from the first page and inspect the current execution", "observe_first");
+  const offset = cursor?.o ?? 0;
+  if (offset > items.length) throw new ReviewPreparationError("INVALID_INPUT", "review preparation cursor is beyond the collection", "change_input");
+  const terminal = terminalPhases2.has(task.phase);
+  const hasHashes = Digest.safeParse(task.baselineHash).success && Digest.safeParse(task.finalManifestHash).success;
+  const reviewTemplate = hasHashes && criteriaValid && manifest.validManifest ? {
+    disposition: "awaiting_evidence",
+    rationale: "Parent verification required; inspect the cited artifacts and every declared criterion.",
+    criteria: [],
+    starting_state_sha256: task.baselineHash,
+    final_manifest_sha256: task.finalManifestHash,
+    freshness: "Parent freshness verification required.",
+    integration_checks: [],
+    coverage_limits: [],
+    unresolved_issues: [],
+    next_action: "Collect every preparation page, assemble all criteria, inspect full evidence, and record the parent decision."
+  } : null;
+  const hint = progress.hint(task.executionId);
+  const page2 = {
+    scope_id: task.scopeId,
+    task_id: task.taskId,
+    execution_id: task.executionId,
+    expected_revision: task.revision,
+    phase: task.phase,
+    observation: task.observation,
+    terminal,
+    operationally_resolved: terminal,
+    report_validity: task.reportValidity,
+    review_status: task.reviewStatus,
+    starting_state_sha256: task.baselineHash,
+    final_manifest_sha256: task.finalManifestHash,
+    lifecycle_cursor: store.eventCursor(task.executionId),
+    ...hint,
+    readiness: { ready_for_parent_review: reasons.length === 0, reasons, parent_verification_required: true },
+    roles_available: manifest.available,
+    review_template: reviewTemplate,
+    totals: { criteria: packet.success ? declarations.length : null, artifacts: entries2.length },
+    page_offsets: { criteria: Math.min(offset, declarations.length), artifacts: Math.max(0, offset - declarations.length) },
+    items: [],
+    next_cursor: null,
+    has_more: offset < items.length
+  };
+  const nextCursor2 = (next) => next < items.length ? encodeCursor({ v: 1, e: task.executionId, r: task.revision, d: digest, o: next }) : null;
+  page2.next_cursor = nextCursor2(offset);
+  if (size2(page2) > input2.max_bytes) throw budgetError(size2(page2), "review preparation metadata");
+  for (const item of items.slice(offset, offset + input2.limit)) {
+    const trial = {
+      ...page2,
+      items: [...page2.items, item],
+      next_cursor: nextCursor2(offset + page2.items.length + 1),
+      has_more: offset + page2.items.length + 1 < items.length
+    };
+    if (size2(trial) > input2.max_bytes) {
+      if (page2.items.length === 0) throw budgetError(size2(trial), "next review preparation item");
+      break;
+    }
+    page2.items = trial.items;
+    page2.next_cursor = trial.next_cursor;
+    page2.has_more = trial.has_more;
+  }
+  return page2;
+}
+
+// src/service.ts
+var Id4 = external_exports.string().min(1);
+var ScopeTask = external_exports.object({ scope_id: Id4, task_id: Id4 }).strict();
 function compactTask(task) {
   const {
     packet: _packet,
@@ -151136,7 +151638,7 @@ var SupervisorService = class {
   async handle(method, params) {
     switch (method) {
       case "health":
-        return this.health();
+        return this.health(params);
       case "get_task":
         return this.getTask(params);
       case "get_progress":
@@ -151147,6 +151649,8 @@ var SupervisorService = class {
         return this.waitTasks(params);
       case "read_artifact":
         return this.readArtifact(params);
+      case "prepare_review":
+        return prepareReview(params, this.store, this.artifacts, this.progress);
       case "record_review":
         return this.recordReview(params);
       case "start_task":
@@ -151161,10 +151665,11 @@ var SupervisorService = class {
         throw new ToolkitError("INVALID_INPUT", `unknown operation ${method}`, "change_input");
     }
   }
-  async health() {
+  async health(params) {
+    const input2 = external_exports.object({ backend_id: Id4.optional(), shell_preflight: external_exports.boolean().default(false) }).strict().parse(params);
     const unresolved = this.store.unresolved();
     return {
-      ...await doctorAsync(),
+      ...await doctorAsync({ shellPreflight: input2.shell_preflight, source: "daemon" }),
       supervisor: {
         state: "running",
         queued: unresolved.filter((task) => task.phase === "queued").length,
@@ -151174,7 +151679,7 @@ var SupervisorService = class {
   }
   getTask(params) {
     const input2 = ScopeTask.extend({
-      execution_id: Id3.optional(),
+      execution_id: Id4.optional(),
       after_cursor: external_exports.number().int().min(0).default(0),
       event_detail_cursor: external_exports.string().min(1).max(512).optional(),
       diagnostic_cursor: external_exports.string().min(1).max(512).optional()
@@ -151218,7 +151723,7 @@ var SupervisorService = class {
     }
   }
   listTasks(params) {
-    const input2 = external_exports.object({ scope_id: Id3, limit: external_exports.number().int().min(1).max(100).default(20), states: external_exports.array(Id3).optional(), page_cursor: Id3.optional() }).strict().parse(params);
+    const input2 = external_exports.object({ scope_id: Id4, limit: external_exports.number().int().min(1).max(100).default(20), states: external_exports.array(Id4).optional(), page_cursor: Id4.optional() }).strict().parse(params);
     const page2 = this.store.listPage(input2.scope_id, {
       limit: input2.limit,
       ...input2.states ? { states: input2.states } : {},
@@ -151228,8 +151733,8 @@ var SupervisorService = class {
   }
   async waitTasks(params) {
     const input2 = external_exports.object({
-      scope_id: Id3,
-      targets: external_exports.array(external_exports.object({ task_id: Id3, after_cursor: external_exports.number().int().min(0).default(0), execution_id: Id3.optional(), after_progress_cursor: Id3.max(512).optional() }).strict()).min(1).max(16),
+      scope_id: Id4,
+      targets: external_exports.array(external_exports.object({ task_id: Id4, after_cursor: external_exports.number().int().min(0).default(0), execution_id: Id4.optional(), after_progress_cursor: Id4.max(512).optional() }).strict()).min(1).max(16),
       timeout_ms: external_exports.number().int().min(0).max(3e4).default(2e4)
     }).strict().parse(params);
     const deadline2 = Date.now() + input2.timeout_ms;
@@ -151268,16 +151773,30 @@ var SupervisorService = class {
   }
   readArtifact(params) {
     const input2 = ScopeTask.extend({
-      execution_id: Id3,
-      artifact_id: Id3,
+      execution_id: Id4,
+      artifact_id: Id4,
       byte_offset: external_exports.number().int().min(0).default(0),
-      max_bytes: external_exports.number().int().min(1).max(65536).default(16384)
+      max_bytes: external_exports.number().int().min(1).max(65536).default(16384),
+      encoding: external_exports.enum(["auto", "text", "base64"]).default("auto")
     }).parse(params);
     const task = this.store.getExecution(input2.scope_id, input2.task_id, input2.execution_id);
     if (!task) throw new ToolkitError("INVALID_INPUT", "execution not found", "change_input");
     const entry2 = this.store.artifact(input2.execution_id, input2.artifact_id);
     if (!entry2) throw new ToolkitError("INVALID_INPUT", "artifact not found", "change_input");
     const range = this.artifacts.read(entry2, input2.byte_offset, input2.max_bytes);
+    let body;
+    if (input2.encoding === "text" || input2.encoding === "auto" && (entry2.mediaType.startsWith("text/") || entry2.mediaType === "application/json")) {
+      try {
+        body = { encoding: "text", content: new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(range.bytes) };
+      } catch {
+        if (input2.encoding === "text") throw new ToolkitError(
+          "INVALID_INPUT",
+          "artifact byte range is not complete valid UTF-8; use encoding: base64 to read these exact bytes",
+          "change_input"
+        );
+        body = { encoding: "base64", content_base64: Buffer.from(range.bytes).toString("base64") };
+      }
+    } else body = { encoding: "base64", content_base64: Buffer.from(range.bytes).toString("base64") };
     return {
       artifact_id: entry2.artifactId,
       sha256: entry2.sha256,
@@ -151285,12 +151804,11 @@ var SupervisorService = class {
       media_type: entry2.mediaType,
       byte_offset: input2.byte_offset,
       next_offset: range.nextOffset,
-      content: entry2.mediaType.startsWith("text/") || entry2.mediaType === "application/json" ? Buffer.from(range.bytes).toString("utf8") : null,
-      content_base64: Buffer.from(range.bytes).toString("base64")
+      ...body
     };
   }
   recordReview(params) {
-    const input2 = ScopeTask.extend({ execution_id: Id3, expected_revision: external_exports.number().int().positive(), idempotency_key: external_exports.string().min(16).max(128), review: ReviewSchema }).parse(params);
+    const input2 = ScopeTask.extend({ execution_id: Id4, expected_revision: external_exports.number().int().positive(), idempotency_key: external_exports.string().min(16).max(128), review: ReviewSchema }).parse(params);
     const task = this.store.getExecution(input2.scope_id, input2.task_id, input2.execution_id);
     if (!task) throw new ToolkitError("INVALID_INPUT", "execution not found", "change_input");
     if (!["bounded-build", "bounded-inspect"].includes(task.profile)) throw new StoreConflict("INVALID_STATE");
@@ -151314,10 +151832,10 @@ var SupervisorService = class {
   }
   async startTask(params) {
     const input2 = external_exports.object({
-      scope_id: Id3,
+      scope_id: Id4,
       idempotency_key: external_exports.string().min(16).max(128).optional(),
-      workspace: external_exports.object({ path: Id3, access: external_exports.enum(["exclusive", "shared_read"]).default("exclusive") }).strict(),
-      model: external_exports.union([external_exports.object({ provider_id: Id3, model_id: Id3 }).strict(), external_exports.object({ profile: Id3 }).strict()]),
+      workspace: external_exports.object({ path: Id4, access: external_exports.enum(["exclusive", "shared_read"]).default("exclusive") }).strict(),
+      model: external_exports.union([external_exports.object({ provider_id: Id4, model_id: Id4 }).strict(), external_exports.object({ profile: Id4 }).strict()]),
       profile: external_exports.enum(["bounded-build", "bounded-inspect"]),
       limits: external_exports.object({ queue_timeout_seconds: external_exports.number().int().positive(), execution_timeout_seconds: external_exports.number().int().positive() }).strict(),
       packet: TaskPacketSchema,
@@ -151372,9 +151890,9 @@ var SupervisorService = class {
     };
     if (!input2.idempotency_key) throw new ToolkitError("INVALID_INPUT", "idempotency_key is required", "change_input");
     this.assertExecutionAdmission(config2, baseline.workspace);
-    const taskId = `task_${randomUUID8()}`;
-    const executionId = `exec_${randomUUID8()}`;
-    const reportPath = join8(stateDirectory(), "reports", executionId);
+    const taskId = `task_${randomUUID9()}`;
+    const executionId = `exec_${randomUUID9()}`;
+    const reportPath = join11(stateDirectory(), "reports", executionId);
     const launchContract = await this.frozenLaunch(config2, baseline.workspace, reportPath, configuredModel, input2.profile, input2.packet);
     const frozen = renderPrompt({
       taskId,
@@ -151411,7 +151929,7 @@ var SupervisorService = class {
   }
   async continueTask(params) {
     const input2 = ScopeTask.extend({
-      predecessor_execution_id: Id3,
+      predecessor_execution_id: Id4,
       expected_revision: external_exports.number().int().positive(),
       idempotency_key: external_exports.string().min(16).max(128),
       context_mode: external_exports.enum(["resume", "fresh"]),
@@ -151448,8 +151966,8 @@ var SupervisorService = class {
       readRoots: config2.read_roots,
       packet: input2.packet
     });
-    const executionId = `exec_${randomUUID8()}`;
-    const reportPath = join8(stateDirectory(), "reports", executionId);
+    const executionId = `exec_${randomUUID9()}`;
+    const reportPath = join11(stateDirectory(), "reports", executionId);
     if (!predecessor.launchContract) throw new ToolkitError("UNSUPPORTED_BACKEND", "predecessor launch configuration is missing");
     const launchContract = await this.frozenLaunch(config2, current.workspace, reportPath, freshModel, current.profile, input2.packet);
     if (policyNeutralConfigHash(launchContract) !== policyNeutralConfigHash(predecessor.launchContract))
@@ -151486,8 +152004,8 @@ var SupervisorService = class {
   }
   cancelTask(params) {
     const input2 = ScopeTask.extend({
-      execution_id: Id3,
-      reason: Id3,
+      execution_id: Id4,
+      reason: Id4,
       expected_revision: external_exports.number().int().positive(),
       idempotency_key: external_exports.string().min(16).max(128)
     }).parse(params);
@@ -151514,13 +152032,15 @@ var SupervisorService = class {
   }
   async respondToRequest(params) {
     const input2 = ScopeTask.extend({
-      execution_id: Id3,
-      request_id: Id3,
+      execution_id: Id4,
+      request_id: Id4,
       request_revision: external_exports.number().int().positive(),
-      reply: external_exports.union([external_exports.enum(["allow_once", "deny"]), external_exports.array(external_exports.array(Id3))]),
-      authorization_basis: Id3,
+      reply: external_exports.union([external_exports.enum(["allow_once", "deny"]), external_exports.array(external_exports.array(Id4))]),
+      authorization_basis: Id4,
+      worker_explanation: WorkerExplanationSchema.optional(),
       idempotency_key: external_exports.string().min(16).max(128)
     }).parse(params);
+    validateWorkerExplanation(input2.reply, input2.worker_explanation);
     if (!this.coordinator) throw new ToolkitError("UNSUPPORTED_BACKEND", "execution coordinator is unavailable");
     const candidate = this.store.getExecution(input2.scope_id, input2.task_id, input2.execution_id);
     if (candidate && !["bounded-build", "bounded-inspect"].includes(candidate.profile)) throw new StoreConflict("INVALID_STATE");
@@ -151530,7 +152050,8 @@ var SupervisorService = class {
       requestId: input2.request_id,
       requestRevision: input2.request_revision,
       reply: input2.reply,
-      authorizationBasis: input2.authorization_basis
+      authorizationBasis: input2.authorization_basis,
+      ...input2.worker_explanation === void 0 ? {} : { workerExplanation: input2.worker_explanation }
     });
     if (repeated) {
       this.coordinator.kick();
@@ -151545,6 +152066,9 @@ var SupervisorService = class {
       throw new ToolkitError("REQUEST_EXPIRED", "request binding does not match the execution", "observe_first");
     if (request2.kind === "permission" && Array.isArray(input2.reply) || request2.kind === "question" && input2.reply === "allow_once")
       throw new ToolkitError("INVALID_INPUT", "reply does not match request type", "change_input");
+    if (input2.worker_explanation !== void 0 && request2.kind !== "permission")
+      throw new ToolkitError("INVALID_INPUT", "worker_explanation requires a permission denial", "change_input");
+    if (input2.worker_explanation !== void 0) await this.coordinator.assertWorkerExplanationSupported(task);
     const updated = this.store.respondToRequest({
       scopeId: input2.scope_id,
       taskId: input2.task_id,
@@ -151554,9 +152078,10 @@ var SupervisorService = class {
       requestId: input2.request_id,
       requestRevision: input2.request_revision,
       reply: input2.reply,
-      authorizationBasis: input2.authorization_basis
+      authorizationBasis: input2.authorization_basis,
+      ...input2.worker_explanation === void 0 ? {} : { workerExplanation: input2.worker_explanation }
     });
-    await this.coordinator.replyToRequest(updated, request2.detail, input2.reply);
+    await this.coordinator.replyToRequest(updated, request2.detail, input2.reply, input2.worker_explanation);
     return compactTask(this.store.get(input2.scope_id, input2.task_id));
   }
 };
@@ -151566,17 +152091,17 @@ async function runDaemon() {
   const stateDir = stateDirectory();
   let resolveService;
   let rejectService;
-  const ready = new Promise((resolve9, reject2) => {
+  const ready2 = new Promise((resolve9, reject2) => {
     resolveService = resolve9;
     rejectService = reject2;
   });
-  void ready.catch(() => {
+  void ready2.catch(() => {
   });
   let lastRequest = Date.now();
   let closing = false;
   let close;
   const server = await startRpcServer(stateDir, async (method, params) => {
-    const service = await ready;
+    const service = await ready2;
     lastRequest = Date.now();
     if (method === "daemon_stop") {
       const unresolved = service.store.unresolved();
@@ -151591,8 +152116,8 @@ async function runDaemon() {
   let store;
   let coordinator;
   try {
-    store = new SqliteTaskStore(join9(stateDir, "state.sqlite"));
-    const artifacts = new ArtifactStore(join9(stateDir, "artifacts"));
+    store = new SqliteTaskStore(join12(stateDir, "state.sqlite"));
+    const artifacts = new ArtifactStore(join12(stateDir, "artifacts"));
     coordinator = new ExecutionCoordinator(store, artifacts);
     const service = new SupervisorService(store, artifacts, coordinator);
     artifacts.reconcile((artifactId) => store.artifactById(artifactId), store.allArtifacts());
@@ -151623,7 +152148,7 @@ async function runDaemon() {
     throw error62;
   }
 }
-async function startDaemon(executable = fileURLToPath3(new URL("./cli.js", import.meta.url))) {
+async function startDaemon(executable = fileURLToPath4(new URL("./cli.js", import.meta.url))) {
   const stateDir = stateDirectory();
   try {
     await rpcRequest(stateDir, "health", {}, 1e3);
@@ -151631,7 +152156,7 @@ async function startDaemon(executable = fileURLToPath3(new URL("./cli.js", impor
   } catch (error62) {
     if (!String(error62).includes("not running") && !String(error62).includes("ECONNREFUSED")) throw error62;
   }
-  const child = spawn3(process.execPath, [executable, "daemon", "run"], { detached: true, stdio: "ignore", env: process.env });
+  const child = spawn6(process.execPath, [executable, "daemon", "run"], { detached: true, stdio: "ignore", env: process.env });
   child.unref();
   const deadline2 = Date.now() + 5e3;
   while (Date.now() < deadline2) {
@@ -151653,10 +152178,10 @@ async function stopDaemon() {
 }
 
 // src/mcp.ts
-var Id4 = external_exports.string().min(1);
+var Id5 = external_exports.string().min(1);
 var Key = external_exports.string().min(16).max(128);
 var Revision = external_exports.number().int().positive();
-var Scope = { scope_id: Id4 };
+var Scope = { scope_id: Id5 };
 function result(value2) {
   const structuredContent = value2 && typeof value2 === "object" && !Array.isArray(value2) ? value2 : { value: value2 };
   const raw = JSON.stringify(structuredContent);
@@ -151664,10 +152189,10 @@ function result(value2) {
   return { structuredContent, content: [{ type: "text", text: text3 }] };
 }
 function createMcpServer(call) {
-  const server = new McpServer({ name: "pi-agents", version: "0.1.0" });
+  const server = new McpServer({ name: "pi-agents", version: "0.2.0" });
   server.registerTool("pi_health", {
     description: "Read toolkit and configured backend health without inference.",
-    inputSchema: external_exports.object({ backend_id: Id4.optional() }).strict(),
+    inputSchema: external_exports.object({ backend_id: Id5.optional(), shell_preflight: external_exports.boolean().optional() }).strict(),
     annotations: { readOnlyHint: true }
   }, async (input2) => result(await call("health", input2)));
   server.registerTool("pi_start_task", {
@@ -151675,10 +152200,10 @@ function createMcpServer(call) {
     inputSchema: external_exports.object({
       ...Scope,
       idempotency_key: Key.optional(),
-      workspace: external_exports.object({ path: Id4, access: external_exports.enum(["exclusive", "shared_read"]).default("exclusive") }).strict(),
+      workspace: external_exports.object({ path: Id5, access: external_exports.enum(["exclusive", "shared_read"]).default("exclusive") }).strict(),
       model: external_exports.union([
-        external_exports.object({ provider_id: Id4, model_id: Id4 }).strict(),
-        external_exports.object({ profile: Id4 }).strict()
+        external_exports.object({ provider_id: Id5, model_id: Id5 }).strict(),
+        external_exports.object({ profile: Id5 }).strict()
       ]),
       profile: external_exports.enum(["bounded-build", "bounded-inspect"]),
       limits: external_exports.object({ queue_timeout_seconds: external_exports.number().int().positive(), execution_timeout_seconds: external_exports.number().int().positive() }).strict(),
@@ -151690,11 +152215,11 @@ function createMcpServer(call) {
     description: "Read a compact task snapshot and material events.",
     inputSchema: external_exports.object({
       ...Scope,
-      task_id: Id4,
-      execution_id: Id4.optional(),
+      task_id: Id5,
+      execution_id: Id5.optional(),
       after_cursor: external_exports.number().int().min(0).optional(),
-      event_detail_cursor: Id4.optional(),
-      diagnostic_cursor: Id4.optional()
+      event_detail_cursor: Id5.optional(),
+      diagnostic_cursor: Id5.optional()
     }).strict(),
     annotations: { readOnlyHint: true }
   }, async (input2) => result(await call("get_task", input2)));
@@ -151711,20 +152236,20 @@ function createMcpServer(call) {
   });
   server.registerTool("pi_list_tasks", {
     description: "Recover task identities in a coordination scope.",
-    inputSchema: external_exports.object({ ...Scope, states: external_exports.array(Id4).optional(), limit: external_exports.number().int().min(1).max(100).default(20), page_cursor: Id4.optional() }).strict(),
+    inputSchema: external_exports.object({ ...Scope, states: external_exports.array(Id5).optional(), limit: external_exports.number().int().min(1).max(100).default(20), page_cursor: Id5.optional() }).strict(),
     annotations: { readOnlyHint: true }
   }, async (input2) => result(await call("list_tasks", input2)));
   server.registerTool("pi_wait_tasks", {
     description: "Wait briefly for material changes; timeout never cancels work.",
-    inputSchema: external_exports.object({ ...Scope, targets: external_exports.array(external_exports.object({ task_id: Id4, after_cursor: external_exports.number().int().min(0).default(0), execution_id: Id4.optional(), after_progress_cursor: Id4.max(512).optional() }).strict()).min(1).max(16), timeout_ms: external_exports.number().int().min(0).max(3e4).default(2e4) }).strict(),
+    inputSchema: external_exports.object({ ...Scope, targets: external_exports.array(external_exports.object({ task_id: Id5, after_cursor: external_exports.number().int().min(0).default(0), execution_id: Id5.optional(), after_progress_cursor: Id5.max(512).optional() }).strict()).min(1).max(16), timeout_ms: external_exports.number().int().min(0).max(3e4).default(2e4) }).strict(),
     annotations: { readOnlyHint: true }
   }, async (input2) => result(await call("wait_tasks", input2)));
   server.registerTool("pi_continue_task", {
     description: "Continue a resolved task in its exact recorded session or fresh context.",
     inputSchema: external_exports.object({
       ...Scope,
-      task_id: Id4,
-      predecessor_execution_id: Id4,
+      task_id: Id5,
+      predecessor_execution_id: Id5,
       expected_revision: Revision,
       idempotency_key: Key,
       context_mode: external_exports.enum(["resume", "fresh"]),
@@ -151733,18 +152258,19 @@ function createMcpServer(call) {
   }, async (input2) => result(await call("continue_task", input2)));
   server.registerTool("pi_cancel_task", {
     description: "Record a cancellation request; confirmation is reported separately.",
-    inputSchema: external_exports.object({ ...Scope, task_id: Id4, execution_id: Id4, reason: Id4, expected_revision: Revision, idempotency_key: Key }).strict()
+    inputSchema: external_exports.object({ ...Scope, task_id: Id5, execution_id: Id5, reason: Id5, expected_revision: Revision, idempotency_key: Key }).strict()
   }, async (input2) => result(await call("cancel_task", input2)));
   server.registerTool("pi_respond_to_request", {
     description: "Reply once to a current permission or question request.",
     inputSchema: external_exports.object({
       ...Scope,
-      task_id: Id4,
-      execution_id: Id4,
-      request_id: Id4,
+      task_id: Id5,
+      execution_id: Id5,
+      request_id: Id5,
       request_revision: Revision,
-      reply: external_exports.union([external_exports.enum(["allow_once", "deny"]), external_exports.array(external_exports.array(Id4))]),
-      authorization_basis: Id4,
+      reply: external_exports.union([external_exports.enum(["allow_once", "deny"]), external_exports.array(external_exports.array(Id5))]),
+      authorization_basis: Id5,
+      worker_explanation: WorkerExplanationSchema.optional(),
       idempotency_key: Key
     }).strict()
   }, async (input2) => result(await call("respond_to_request", input2)));
@@ -151752,18 +152278,42 @@ function createMcpServer(call) {
     description: "Read a bounded range of an immutable artifact.",
     inputSchema: external_exports.object({
       ...Scope,
-      task_id: Id4,
-      execution_id: Id4,
-      artifact_id: Id4,
+      task_id: Id5,
+      execution_id: Id5,
+      artifact_id: Id5,
       byte_offset: external_exports.number().int().min(0).default(0),
-      max_bytes: external_exports.number().int().min(1).max(65536).default(16384)
+      max_bytes: external_exports.number().int().min(1).max(65536).default(16384),
+      encoding: external_exports.enum(["auto", "text", "base64"]).default("auto")
     }).strict(),
     annotations: { readOnlyHint: true }
-  }, async (input2) => result(await call("read_artifact", input2)));
+  }, async (input2) => ({
+    structuredContent: await call("read_artifact", input2),
+    content: [{ type: "text", text: "Read structuredContent for the bounded artifact bytes, encoding, hash, and pagination metadata." }]
+  }));
   server.registerTool("pi_record_review", {
     description: "Append the parent's evidence-based review decision.",
-    inputSchema: external_exports.object({ ...Scope, task_id: Id4, execution_id: Id4, expected_revision: Revision, idempotency_key: Key, review: ReviewSchema }).strict()
+    inputSchema: external_exports.object({ ...Scope, task_id: Id5, execution_id: Id5, expected_revision: Revision, idempotency_key: Key, review: ReviewSchema }).strict()
   }, async (input2) => result(await call("record_review", input2)));
+  server.registerTool("pi_prepare_review", {
+    description: "Prepare bounded exact-execution review criteria and artifact citations; parent verification remains required.",
+    inputSchema: PrepareReviewSchema,
+    annotations: { readOnlyHint: true }
+  }, async (input2) => {
+    try {
+      return {
+        structuredContent: await call("prepare_review", input2),
+        content: [{ type: "text", text: "Read structuredContent for review preparation; collect all pages and inspect cited evidence before deciding acceptance." }]
+      };
+    } catch (error62) {
+      const known = error62 && typeof error62 === "object" ? error62 : null;
+      return { isError: true, ...result({ error: {
+        code: typeof known?.code === "string" ? known.code : "INTERNAL",
+        message: typeof known?.message === "string" ? known.message : String(error62),
+        ...typeof known?.retry === "string" ? { retry: known.retry } : {},
+        ...known?.details !== void 0 ? { details: known.details } : {}
+      } }) };
+    }
+  });
   return server;
 }
 async function runMcp() {
@@ -151785,8 +152335,8 @@ async function main(args) {
     await (await Promise.resolve().then(() => (init_worker_runtime(), worker_runtime_exports))).runWorker(args[2], args[3]);
     return 0;
   }
-  if (args.length === 1 && args[0] === "doctor") {
-    process.stdout.write(`${JSON.stringify(await doctorAsync(), null, 2)}
+  if (args[0] === "doctor" && (args.length === 1 || args.length === 2 && args[1] === "--shell-preflight")) {
+    process.stdout.write(`${JSON.stringify(await doctorAsync({ shellPreflight: args[1] === "--shell-preflight" }), null, 2)}
 `);
     return 0;
   }
@@ -151865,7 +152415,7 @@ async function main(args) {
   }
   if (args[0] === "artifacts" && args[1] === "export" && args.length === 7) {
     const output2 = createWriteStream3(args[6], { flags: "wx", mode: 384 });
-    const hash3 = createHash11("sha256");
+    const hash4 = createHash12("sha256");
     try {
       let offset = 0;
       let digest = null;
@@ -151876,29 +152426,30 @@ async function main(args) {
           execution_id: args[4],
           artifact_id: args[5],
           byte_offset: offset,
-          max_bytes: 65536
+          max_bytes: 65536,
+          encoding: "base64"
         });
         if (digest && result2.sha256 !== digest) throw new Error("artifact changed during export");
         digest = result2.sha256;
         const bytes2 = Buffer.from(result2.content_base64, "base64");
-        hash3.update(bytes2);
+        hash4.update(bytes2);
         if (!output2.write(bytes2)) await once(output2, "drain");
         if (result2.next_offset === null) break;
         offset = result2.next_offset;
       }
       output2.end();
       await once(output2, "finish");
-      if (hash3.digest("hex") !== digest) throw new Error("exported bytes do not match artifact hash");
+      if (hash4.digest("hex") !== digest) throw new Error("exported bytes do not match artifact hash");
       process.stdout.write(`${JSON.stringify({ path: args[6], sha256: digest })}
 `);
     } catch (error62) {
       output2.destroy();
-      rmSync6(args[6], { force: true });
+      rmSync7(args[6], { force: true });
       throw error62;
     }
     return 0;
   }
-  process.stderr.write("Usage: pi-agents doctor|mcp|daemon start|status|stop|tasks list|get|diagnostics|wait|cancel|artifacts read|export\n");
+  process.stderr.write("Usage: pi-agents doctor [--shell-preflight]|mcp|daemon start|status|stop|tasks list|get|diagnostics|wait|cancel|artifacts read|export\n");
   return 2;
 }
 main(process.argv.slice(2)).then((code) => {

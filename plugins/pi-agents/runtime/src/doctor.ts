@@ -5,7 +5,7 @@ import { createWorkerModels } from "./pi-models.js";
 export function doctor() {
   const [major, minor] = process.versions.node.split(".").map(Number);
   const result = {
-    runtime: { node: process.versions.node, supportedNode: major === 24 && minor! >= 15 && process.platform !== "win32", toolkit: "0.1.0" },
+    runtime: { node: process.versions.node, supportedNode: major === 24 && minor! >= 15 && process.platform !== "win32", toolkit: "0.2.0" },
     configuration: { path: configurationPath(), status: "missing" as "missing" | "invalid" | "valid", message: "" },
     backend: { mode: "managed", binary: null, version: PI_VERSION, configuredModels: [] as string[],
       supportedVersions: [PI_VERSION], supportedForExecution: false },
@@ -27,4 +27,9 @@ export function doctor() {
   } catch (error) { result.configuration.status = "invalid"; result.configuration.message = String(error); }
   return result;
 }
-export async function doctorAsync() { return doctor(); }
+export async function doctorAsync(options: { shellPreflight?: boolean; source?: "daemon" | "local_process" } = {}) {
+  const result = doctor();
+  if (!options.shellPreflight) return result;
+  const { shellPreflight } = await import("./shell-preflight.js");
+  return { ...result, shell_preflight: { source: options.source ?? "local_process", ...await shellPreflight(stateDirectory()) } };
+}

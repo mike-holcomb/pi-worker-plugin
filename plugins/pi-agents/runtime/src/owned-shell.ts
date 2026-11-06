@@ -55,11 +55,14 @@ export async function ownedExec(command: string | readonly string[], options: Sh
       child[stream].on("data", (chunk: string) => { try { options?.onOutput?.(chunk, context, { stream }); }
         catch (error) { callbackError = error as Error; stop(); } });
     }
+    let settled = false;
     const finish = (result: Result<ShellExecResult, ExecutionError>) => {
+      if (settled) return; settled = true;
       clearTimeout(timer); context.abortSignal?.removeEventListener("abort", stop); resolve(result);
     };
     child.once("error", error => finish(err(new ExecutionError("spawn_error", error.message))));
-    child.once("close", code => finish(callbackError ? err(new ExecutionError("unknown", callbackError.message)) :
-      aborted ? err(new ExecutionError("aborted", "command interrupted; effects may be uncertain")) : ok({ exitCode: code ?? 1 })));
+    child.once("close", (code, signal) => finish(callbackError ? err(new ExecutionError("unknown", callbackError.message)) :
+      aborted || signal ? err(new ExecutionError("aborted", "command interrupted; effects may be uncertain")) :
+      code === null ? err(new ExecutionError("unknown", "command exit was not observed; effects may be uncertain")) : ok({ exitCode: code })));
   });
 }

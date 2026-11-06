@@ -10,4 +10,6 @@ Supply this content through the typed `packet` fields of `pi_start_task` or `pi_
 - `checks`: IDs, descriptions, and optional argv/cwd for checks the worker may run.
 - `constraints`, `stop_conditions`, `shared_resources`: policy limits, concrete stop triggers, and read/write resource keys.
 
-Set launch fields separately: workspace, configured model, profile, limits, scope, and idempotency key. For mutable inputs include revision, relevant dirty state, dependencies, and freshness check in the packet context. Allowed writes are audited task boundaries, not an OS sandbox.
+Set launch fields separately: workspace, configured model, profile, limits, scope, and idempotency key. For mutable inputs include revision, relevant dirty state, dependencies, and freshness check in the packet context. Allowed writes are audited task boundaries, not an OS sandbox or a standing permission. A source write, two edits, and one assigned check require four separate exact replies even within those boundaries; saving the assigned report requires none. Batch related edits when practical and keep checks meaningful. A smaller request count does not establish completion quality.
+
+For `bounded-inspect`, use static inspection checks without `argv`; shell and external endpoints are disabled even for read-only commands. Keep parent Git/validator checks outside the worker check list. The [audit example](audit-inspect.md) supplies a schema-valid packet with explicit must-inspect bounds and parent check ownership.

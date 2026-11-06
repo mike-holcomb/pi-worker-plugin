@@ -2,7 +2,7 @@
 
 ## Install release 0.1.0
 
-The first release is being prepared. These commands apply once the `v0.1.0` tag is available; until then, use local installation below.
+Version 0.1.0 is the published stable release. This checkout prepares 0.2.0; use local installation below to try the candidate. Once 0.2.0 is published, select `--ref v0.2.0` explicitly.
 
 1. Install Node.js `>=24.15 <25` on macOS or Linux and ensure the Codex host's `node` resolves to that version.
 2. Add the repository marketplace and install the plugin:
@@ -15,7 +15,7 @@ The first release is being prepared. These commands apply once the `v0.1.0` tag 
 3. Start a fresh Codex session and select `pi-agents:pi-agents` (**Pi Agents**).
 4. Configure project roots and model routes as described below before submitting live tasks.
 
-The GitHub release will include `pi-agents-v0.1.0.zip`, its per-file `.manifest.json`, and `.sha256` checksums. The runtime and provider dependencies are prebuilt. End-user installation needs no Pi CLI, backend server, TypeScript compilation, Python, or `npm install`. Repository marketplace distribution is separate from OpenAI's public plugin directory.
+The GitHub release includes `pi-agents-v0.1.0.zip`, its per-file `.manifest.json`, and `.sha256` checksums. The runtime and provider dependencies are prebuilt. End-user installation needs no Pi CLI, backend server, TypeScript compilation, Python, or `npm install`. Repository marketplace distribution is separate from OpenAI's public plugin directory.
 
 ## Local installation
 
@@ -78,6 +78,14 @@ Native provider kinds are `openai`, `anthropic`, `google`, and `openrouter`. Set
 
 Credentials remain in the host environment. Their values are not stored in launch contracts or included in shell-tool environments. Provider IDs and model aliases are operator-defined. OAuth login, auth-file discovery, attached services, and project extension discovery are unsupported.
 
+## Shell readiness
+
+Workers inherit the daemon's PATH, LANG, LC_ALL, and TERM, with private HOME and TMPDIR beneath their report directory. Shell strings run `/bin/bash --noprofile --norc`; login-shell startup files and version-manager activation are not loaded. An absent PATH remains empty. A supported Node executable in the parent shell does not establish daemon executable discovery. Start or restart the resolved daemon from the operator's intended supported environment; no worker input can choose an executable profile or change frozen policy.
+
+Use MCP `pi_health` with `shell_preflight: true` to inspect the daemon environment without inference. `pi-agents doctor --shell-preflight` probes its local process instead, explicitly labelled `local_process`. Normal health/doctor calls omit these probes. The optional response reports shell mode, PATH Node availability/version and whether it resolves to the supervisor executable, private file usability, and local Unix IPC usability. It exposes no raw PATH, HOME, credentials, or arbitrary command arguments. Every probe is bounded and its newly allocated private directory is removed.
+
+Preflight is representative: project dependencies, exact report-path length, and assigned test commands require their own authorized checks. A writable private directory can still fail IPC due to socket-path length or host restrictions. Capture the first exit code and original bounded stderr before a retry, distinguishing missing/unsupported executables, temp/IPC facilities, dependency access, actual assertion failure, and interrupted effects. Do not infer a production fix from a PATH override or `TMPDIR=/tmp` experiment. Symlink file access remains prohibited; approving a shell command that uses shared dependencies is a separate exact decision. A completed command with a nonzero exit is preserved as a known process result; interrupted or ambiguous effects remain uncertain.
+
 ## Policy and recovery
 
 Health and `dry_run` never start inference. Live admission freezes the selected route, policy, model, and instructions. Existing tasks retain this contract after configuration changes. A follow-up must preserve the model route and profile; it may declare new scoped writes and receives a new report directory.
@@ -93,6 +101,8 @@ Build workers have `webfetch` and DuckDuckGo `websearch` tools. Each request nee
 Set `PI_AGENTS_CAPTURE_DIAGNOSTICS=1` to retain bounded permission and effect-status diagnostics. These contain operation IDs and outcomes, without query text, file contents, or shell output. Capture is advisory and may have gaps or repeated status lines across reconnection. The supervisor retains at most 64 KiB per execution for seven days; use the task diagnostic cursor to read it.
 
 ## Upgrade and rollback
+
+In 0.2.0, `pi_read_artifact` returns one body field and a resolved `encoding`; clients requiring exact bytes must request `encoding: "base64"`. CLI export does this automatically. The new `pi_prepare_review` tool is read-only. SQLite schema 4 replaces globally keyed native permission IDs with `(execution_id, request_id)` and retains denial explanations. Opening an older durable store first creates a private, WAL-consistent database backup under its `backups` directory, then migrates transactionally. Pending, responding, responded, unconfirmed, and expired requests and existing reply keys are preserved. Backup/migration failure stops opening without a partial schema upgrade. Pi Durable remains 1.5.0.
 
 Before updating, reconcile active tasks, stop resolved workers and the daemon, and preserve the state database and reports. Do not run two plugin versions against the same state directory. Refresh a configured marketplace with `codex plugin marketplace upgrade pi-worker-plugin`; when changing a pinned release, select the new `--ref` explicitly and start a fresh Codex session. Uninstalling the plugin does not cancel accepted work or delete evidence.
 

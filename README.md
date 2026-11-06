@@ -2,18 +2,18 @@
 
 Public repository marketplace for [Pi Agents](plugins/pi-agents/README.md), published by Mike Holcomb under the [MIT License](LICENSE). Delegate bounded work to local workers powered by [Earendil Pi Durable](https://github.com/earendil-works/pi/tree/main/packages/durable), then inspect evidence and record your review.
 
-## Release 0.1.0
+## Release 0.2.0 candidate
 
-Version **0.1.0** is prepared for its first release; `v0.1.0` has not yet been published. It preserves durable task admission, recovery, progress, permissions, immutable evidence, and parent review from OpenCode Worker Plugin 2.1.0. See the [release notes](docs/releases/v0.1.0.md) for changes, validation limits, and upgrade guidance.
+Version **0.2.0** is being prepared. It adds actionable review validation, compact artifact reads, clearer audit contracts and checkpoint diagnostics, a read-only review-preparation tool, execution-scoped permission IDs, safe shell preflight, and worker-visible denial explanations. See the [candidate release notes](docs/releases/v0.2.0.md). The published stable release is [v0.1.0](https://github.com/mike-holcomb/pi-worker-plugin/releases/tag/v0.1.0).
 
-After the `v0.1.0` tag is available, install Node.js 24.15 or later within the 24.x line and select the plugin from the marketplace:
+For the published stable release, install Node.js 24.15 or later within the 24.x line and select the plugin from the marketplace:
 
 ```bash
 codex plugin marketplace add mike-holcomb/pi-worker-plugin --ref v0.1.0
 codex plugin add pi-agents@pi-worker-plugin
 ```
 
-Until then, use the [local installation guide](plugins/pi-agents/docs/installation.md). Start a fresh Codex session and select `pi-agents:pi-agents` (**Pi Agents**). The executable includes Pi Durable 1.5.0 and its provider dependencies; no Pi CLI, backend server, Python, or runtime `npm install` is required.
+To try the 0.2.0 candidate from this checkout, use the [local installation guide](plugins/pi-agents/docs/installation.md). Start a fresh Codex session and select `pi-agents:pi-agents` (**Pi Agents**). The executable includes Pi Durable 1.5.0 and its provider dependencies; no Pi CLI, backend server, Python, or runtime `npm install` is required.
 
 ## Execution setup
 
@@ -23,7 +23,7 @@ The parent approves scoped worker effects and reviews immutable evidence before 
 
 ## Distribution and development
 
-The release assets are `pi-agents-v0.1.0.zip`, a per-file `.manifest.json`, and a `.sha256` sidecar. The [release process](docs/release-process.md) describes validation, draft preparation, and publication. This repository marketplace is separate from OpenAI's public plugin directory.
+Candidate release assets will be `pi-agents-v0.2.0.zip`, a per-file `.manifest.json`, and a `.sha256` sidecar. The [release process](docs/release-process.md) describes validation, draft preparation, and publication. This repository marketplace is separate from OpenAI's public plugin directory.
 
 The catalog is [.agents/plugins/marketplace.json](.agents/plugins/marketplace.json), and the canonical plugin source is [plugins/pi-agents](plugins/pi-agents). See its [build instructions](plugins/pi-agents/README.md#build-and-verify) and [evaluation guide](plugins/pi-agents/docs/evaluation.md).
 

@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import { SqliteTaskStore, StoreConflict } from "../store.js";
+import { ReviewInputError } from "../review-input.js";
 import { DatabaseSync } from "node:sqlite";
 
 test("a lost start response is recovered by the same key after reopening the store", () => {
@@ -91,7 +92,7 @@ test("accepted review requires valid frozen evidence and every required criterio
     };
     assert.throws(() => store.recordReview(task.scopeId, task.taskId, task.revision, "review-key-0000001", {
       ...review, criteria: [{ id: "criterion-1", result: "not_checked", evidence: [] }],
-    }), (error) => error instanceof StoreConflict && error.code === "INVALID_STATE");
+    }), (error) => error instanceof ReviewInputError && error.details.reason === "required_criterion_unsatisfied");
     const invalidCriteria = [
       [{ id: "criterion-1", result: "satisfied" as const, evidence: ["artifact:123"] }],
       [{ id: "criterion-1", result: "satisfied" as const, evidence: [`artifact:artifact_report@sha256:${"f".repeat(64)}`] }],
@@ -104,7 +105,8 @@ test("accepted review requires valid frozen evidence and every required criterio
     for (const [index, criteria] of invalidCriteria.entries()) {
       assert.throws(() => store.recordReview(task.scopeId, task.taskId, task.revision,
         `review-invalid-${index}-000001`, { ...review, criteria }),
-      (error) => error instanceof StoreConflict && error.code === "INVALID_STATE");
+      (error) => error instanceof ReviewInputError && error.details.reason ===
+        ["malformed_reference", "hash_mismatch", "unknown_artifact", "duplicate_criterion", "undeclared_criterion"][index]);
     }
     const other = store.start({ scopeId: task.scopeId, idempotencyKey: "start-other-review-0001",
       workspace: "/tmp/elsewhere", packet: { acceptance_criteria: [] }, model: "local/model",
@@ -113,7 +115,7 @@ test("accepted review requires valid frozen evidence and every required criterio
       byteLength: 1, mediaType: "application/json", path: join(dir, "other") });
     assert.throws(() => store.recordReview(task.scopeId, task.taskId, task.revision, "review-wrong-exec-0001", {
       ...review, criteria: [{ id: "criterion-1", result: "satisfied", evidence: [`artifact:artifact_other@sha256:${reportHash}`] }],
-    }), (error) => error instanceof StoreConflict && error.code === "INVALID_STATE");
+    }), (error) => error instanceof ReviewInputError && error.details.reason === "unknown_artifact");
     assert.equal(store.get(task.scopeId, task.taskId)?.reviewStatus, "pending");
     const reviewed = store.recordReview(task.scopeId, task.taskId, task.revision, "review-key-0000002", review);
     assert.equal(reviewed.reviewStatus, "accepted");
@@ -323,7 +325,7 @@ test("old v2 database is backed up before schema changes and retains its data", 
     db.close();
     const upgraded = new DatabaseSync(filename, { readOnly: true });
     assert.equal((upgraded.prepare("SELECT value FROM migration_marker").get() as { value: string }).value, "committed in WAL");
-    assert.equal((upgraded.prepare("SELECT MAX(version) AS version FROM schema_version").get() as { version: number }).version, 3);
+    assert.equal((upgraded.prepare("SELECT MAX(version) AS version FROM schema_version").get() as { version: number }).version, 4);
     upgraded.close();
     const task = store.start({ scopeId: "coord_migrate", idempotencyKey: "start-migrate-000001", workspace: "/tmp/project",
       packet: { objective: "Inspect" }, model: "local/model", profile: "bounded-inspect",
@@ -366,7 +368,7 @@ for (const backupFails of [false, true]) {
         baselineHash: "a".repeat(64), promptHash: "b".repeat(64) });
       initial.close();
       const old = new DatabaseSync(filename);
-      old.exec("ALTER TABLE executions DROP COLUMN worker_instance_id");
+      old.exec("ALTER TABLE executions DROP COLUMN worker_instance_id; UPDATE schema_version SET version=3");
       old.close();
 
       if (backupFails) {
@@ -419,12 +421,12 @@ test("a newer schema is refused without changing stored data or creating a migra
   const filename = join(dir, "state.sqlite");
   try {
     const db = new DatabaseSync(filename);
-    db.exec("CREATE TABLE schema_version(version INTEGER); INSERT INTO schema_version VALUES(4)");
+    db.exec("CREATE TABLE schema_version(version INTEGER); INSERT INTO schema_version VALUES(5)");
     db.exec("CREATE TABLE retained(value BLOB); INSERT INTO retained VALUES(X'000102ff')");
     db.close();
-    assert.throws(() => new SqliteTaskStore(filename), /schema version 4 is newer/);
+    assert.throws(() => new SqliteTaskStore(filename), /schema version 5 is newer/);
     const check = new DatabaseSync(filename, { readOnly: true });
-    assert.deepEqual(check.prepare("SELECT version FROM schema_version").get(), Object.assign(Object.create(null), { version: 4 }));
+    assert.deepEqual(check.prepare("SELECT version FROM schema_version").get(), Object.assign(Object.create(null), { version: 5 }));
     assert.equal((check.prepare("SELECT hex(value) AS value FROM retained").get() as { value: string }).value, "000102FF");
     check.close();
     assert.deepEqual(readdirSync(dir), ["state.sqlite"]);

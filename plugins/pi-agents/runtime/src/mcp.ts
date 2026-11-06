@@ -1,11 +1,13 @@
 import { McpServer } from "@modelcontextprotocol/server";
 import { StdioServerTransport } from "@modelcontextprotocol/server/stdio";
+import { WorkerExplanationSchema } from "./request-feedback.js";
 import { z } from "zod";
 import { ProgressReadSchema } from "./progress.js";
 import { TaskPacketSchema, ReviewSchema } from "./contracts.js";
 import { rpcRequest } from "./rpc.js";
 import { stateDirectory } from "./config.js";
 import { startDaemon } from "./daemon.js";
+import { PrepareReviewSchema } from "./review-preparation.js";
 
 const Id = z.string().min(1);
 const Key = z.string().min(16).max(128);
@@ -21,10 +23,10 @@ function result(value: unknown) {
 }
 
 export function createMcpServer(call: (method: string, params: unknown) => Promise<unknown>): McpServer {
-  const server = new McpServer({ name: "pi-agents", version: "0.1.0" });
+  const server = new McpServer({ name: "pi-agents", version: "0.2.0" });
   server.registerTool("pi_health", {
     description: "Read toolkit and configured backend health without inference.",
-    inputSchema: z.object({ backend_id: Id.optional() }).strict(),
+    inputSchema: z.object({ backend_id: Id.optional(), shell_preflight: z.boolean().optional() }).strict(),
     annotations: { readOnlyHint: true },
   }, async (input) => result(await call("health", input)));
   server.registerTool("pi_start_task", {
@@ -80,18 +82,41 @@ export function createMcpServer(call: (method: string, params: unknown) => Promi
   server.registerTool("pi_respond_to_request", {
     description: "Reply once to a current permission or question request.",
     inputSchema: z.object({ ...Scope, task_id: Id, execution_id: Id, request_id: Id, request_revision: Revision,
-      reply: z.union([z.enum(["allow_once", "deny"]), z.array(z.array(Id))]), authorization_basis: Id, idempotency_key: Key }).strict(),
+      reply: z.union([z.enum(["allow_once", "deny"]), z.array(z.array(Id))]), authorization_basis: Id, worker_explanation: WorkerExplanationSchema.optional(), idempotency_key: Key }).strict(),
   }, async (input) => result(await call("respond_to_request", input)));
   server.registerTool("pi_read_artifact", {
     description: "Read a bounded range of an immutable artifact.",
     inputSchema: z.object({ ...Scope, task_id: Id, execution_id: Id, artifact_id: Id,
-      byte_offset: z.number().int().min(0).default(0), max_bytes: z.number().int().min(1).max(65_536).default(16_384) }).strict(),
+      byte_offset: z.number().int().min(0).default(0), max_bytes: z.number().int().min(1).max(65_536).default(16_384),
+      encoding: z.enum(["auto", "text", "base64"]).default("auto") }).strict(),
     annotations: { readOnlyHint: true },
-  }, async (input) => result(await call("read_artifact", input)));
+  }, async (input) => ({ structuredContent: await call("read_artifact", input) as Record<string, unknown>,
+    content: [{ type: "text" as const, text: "Read structuredContent for the bounded artifact bytes, encoding, hash, and pagination metadata." }] }));
   server.registerTool("pi_record_review", {
     description: "Append the parent's evidence-based review decision.",
     inputSchema: z.object({ ...Scope, task_id: Id, execution_id: Id, expected_revision: Revision, idempotency_key: Key, review: ReviewSchema }).strict(),
   }, async (input) => result(await call("record_review", input)));
+  server.registerTool("pi_prepare_review", {
+    description: "Prepare bounded exact-execution review criteria and artifact citations; parent verification remains required.",
+    inputSchema: PrepareReviewSchema,
+    annotations: { readOnlyHint: true },
+  }, async (input) => {
+    try {
+      return { structuredContent: await call("prepare_review", input) as Record<string, unknown>,
+        content: [{ type: "text" as const, text: "Read structuredContent for review preparation; collect all pages and inspect cited evidence before deciding acceptance." }] };
+    } catch (error) {
+      // RPC reconstructs errors as plain Error objects; preserve their fields
+      // explicitly because the MCP SDK only exposes the message of thrown errors.
+      const known = error && typeof error === "object"
+        ? error as { code?: unknown; message?: unknown; retry?: unknown; details?: unknown } : null;
+      return { isError: true, ...result({ error: {
+        code: typeof known?.code === "string" ? known.code : "INTERNAL",
+        message: typeof known?.message === "string" ? known.message : String(error),
+        ...(typeof known?.retry === "string" ? { retry: known.retry } : {}),
+        ...(known?.details !== undefined ? { details: known.details } : {}),
+      } }) };
+    }
+  });
   return server;
 }
 

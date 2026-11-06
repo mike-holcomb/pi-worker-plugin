@@ -1,4 +1,5 @@
 import { ProgressManager, ProgressReadSchema } from "./progress.js";
+import { WorkerExplanationSchema, validateWorkerExplanation } from "./request-feedback.js";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
 import { join } from "node:path";
@@ -12,6 +13,7 @@ import { doctor, doctorAsync } from "./doctor.js";
 import { SqliteTaskStore, StoreConflict, type StoredTask } from "./store.js";
 import { renderPrompt } from "./prompt.js";
 import { captureBaseline, WorkspaceError } from "./workspace.js";
+import { prepareReview } from "./review-preparation.js";
 
 const Id = z.string().min(1);
 const ScopeTask = z.object({ scope_id: Id, task_id: Id }).strict();
@@ -55,12 +57,13 @@ export class SupervisorService {
 
   async handle(method: string, params: unknown): Promise<unknown> {
     switch (method) {
-      case "health": return this.health();
+      case "health": return this.health(params);
       case "get_task": return this.getTask(params);
       case "get_progress": return this.getProgress(params);
       case "list_tasks": return this.listTasks(params);
       case "wait_tasks": return this.waitTasks(params);
       case "read_artifact": return this.readArtifact(params);
+      case "prepare_review": return prepareReview(params, this.store, this.artifacts, this.progress);
       case "record_review": return this.recordReview(params);
       case "start_task": return this.startTask(params);
       case "continue_task": return this.continueTask(params);
@@ -70,10 +73,11 @@ export class SupervisorService {
     }
   }
 
-  private async health() {
+  private async health(params: unknown) {
+    const input = z.object({ backend_id: Id.optional(), shell_preflight: z.boolean().default(false) }).strict().parse(params);
     const unresolved = this.store.unresolved();
     return {
-      ...await doctorAsync(),
+      ...await doctorAsync({ shellPreflight: input.shell_preflight, source: "daemon" }),
       supervisor: { state: "running", queued: unresolved.filter((task) => task.phase === "queued").length,
         unresolved: unresolved.length },
     };
@@ -152,17 +156,28 @@ export class SupervisorService {
 
   private readArtifact(params: unknown) {
     const input = ScopeTask.extend({ execution_id: Id, artifact_id: Id,
-      byte_offset: z.number().int().min(0).default(0), max_bytes: z.number().int().min(1).max(65_536).default(16_384) }).parse(params);
+      byte_offset: z.number().int().min(0).default(0), max_bytes: z.number().int().min(1).max(65_536).default(16_384),
+      encoding: z.enum(["auto", "text", "base64"]).default("auto") }).parse(params);
     const task = this.store.getExecution(input.scope_id, input.task_id, input.execution_id);
     if (!task) throw new ToolkitError("INVALID_INPUT", "execution not found", "change_input");
     const entry = this.store.artifact(input.execution_id, input.artifact_id);
     if (!entry) throw new ToolkitError("INVALID_INPUT", "artifact not found", "change_input");
     const range = this.artifacts.read(entry, input.byte_offset, input.max_bytes);
+    let body: { encoding: "text"; content: string } | { encoding: "base64"; content_base64: string };
+    if (input.encoding === "text" || (input.encoding === "auto" &&
+      (entry.mediaType.startsWith("text/") || entry.mediaType === "application/json"))) {
+      try {
+        // Preserve BOMs and reject incomplete or invalid UTF-8 rather than replacing bytes.
+        body = { encoding: "text", content: new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(range.bytes) };
+      } catch {
+        if (input.encoding === "text") throw new ToolkitError("INVALID_INPUT",
+          "artifact byte range is not complete valid UTF-8; use encoding: base64 to read these exact bytes", "change_input");
+        body = { encoding: "base64", content_base64: Buffer.from(range.bytes).toString("base64") };
+      }
+    } else body = { encoding: "base64", content_base64: Buffer.from(range.bytes).toString("base64") };
     return { artifact_id: entry.artifactId, sha256: entry.sha256, byte_length: entry.byteLength,
       media_type: entry.mediaType, byte_offset: input.byte_offset, next_offset: range.nextOffset,
-      content: entry.mediaType.startsWith("text/") || entry.mediaType === "application/json"
-        ? Buffer.from(range.bytes).toString("utf8") : null,
-      content_base64: Buffer.from(range.bytes).toString("base64") };
+      ...body };
   }
 
   private recordReview(params: unknown) {
@@ -310,14 +325,16 @@ export class SupervisorService {
 
   private async respondToRequest(params: unknown) {
     const input = ScopeTask.extend({ execution_id: Id, request_id: Id, request_revision: z.number().int().positive(),
-      reply: z.union([z.enum(["allow_once", "deny"]), z.array(z.array(Id))]), authorization_basis: Id,
+      reply: z.union([z.enum(["allow_once", "deny"]), z.array(z.array(Id))]), authorization_basis: Id, worker_explanation: WorkerExplanationSchema.optional(),
       idempotency_key: z.string().min(16).max(128) }).parse(params);
+    validateWorkerExplanation(input.reply, input.worker_explanation);
     if (!this.coordinator) throw new ToolkitError("UNSUPPORTED_BACKEND", "execution coordinator is unavailable");
     const candidate = this.store.getExecution(input.scope_id, input.task_id, input.execution_id);
     if (candidate && !["bounded-build", "bounded-inspect"].includes(candidate.profile)) throw new StoreConflict("INVALID_STATE");
     const repeated = this.store.findResponseByKey(input.scope_id, input.idempotency_key, {
       taskId: input.task_id, executionId: input.execution_id, requestId: input.request_id,
       requestRevision: input.request_revision, reply: input.reply, authorizationBasis: input.authorization_basis,
+      ...(input.worker_explanation === undefined ? {} : { workerExplanation: input.worker_explanation }),
     });
     if (repeated) { this.coordinator.kick(); return compactTask(repeated); }
     const task = this.store.getExecution(input.scope_id, input.task_id, input.execution_id);
@@ -330,11 +347,15 @@ export class SupervisorService {
     if ((request.kind === "permission" && Array.isArray(input.reply)) ||
       (request.kind === "question" && input.reply === "allow_once"))
       throw new ToolkitError("INVALID_INPUT", "reply does not match request type", "change_input");
+    if (input.worker_explanation !== undefined && request.kind !== "permission")
+      throw new ToolkitError("INVALID_INPUT", "worker_explanation requires a permission denial", "change_input");
+    if (input.worker_explanation !== undefined) await this.coordinator.assertWorkerExplanationSupported(task);
     const updated = this.store.respondToRequest({ scopeId: input.scope_id, taskId: input.task_id,
       executionId: input.execution_id, expectedRevision: task.revision,
       idempotencyKey: input.idempotency_key, requestId: input.request_id,
-      requestRevision: input.request_revision, reply: input.reply, authorizationBasis: input.authorization_basis });
-    await this.coordinator.replyToRequest(updated, request.detail as Parameters<ExecutionCoordinator["replyToRequest"]>[1], input.reply);
+      requestRevision: input.request_revision, reply: input.reply, authorizationBasis: input.authorization_basis,
+      ...(input.worker_explanation === undefined ? {} : { workerExplanation: input.worker_explanation }) });
+    await this.coordinator.replyToRequest(updated, request.detail as Parameters<ExecutionCoordinator["replyToRequest"]>[1], input.reply, input.worker_explanation);
     return compactTask(this.store.get(input.scope_id, input.task_id)!);
   }
 

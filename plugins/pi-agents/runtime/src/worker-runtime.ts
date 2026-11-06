@@ -1,6 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
+import { WorkerExplanationSchema } from "./request-feedback.js";
 import { z } from "zod";
 import { confirmWorkerGroupQuiet } from "./owned-shell.js";
 import { PiHarness } from "./pi-harness.js";
@@ -42,7 +43,7 @@ export async function runWorker(directory: string, launchFile: string): Promise<
           backendId: launch.backendId, workspace: worker!.workspace,
           configurationDigest: policyNeutralConfigHash(launch.contract), supportedForExecution: true,
           capabilities: { callerAssignedMessageId: true, permissionRequests: true, questionRequests: false,
-            structuredOutput: false, sessionRecovery: true, progressCheckpoints: true } };
+            structuredOutput: false, sessionRecovery: true, progressCheckpoints: true, workerDenialContext: true } };
         case "create": return worker!.createSession(z.object({ marker: z.string().min(1) }).parse(raw).marker);
         case "find": return worker!.findCreatedSession(z.object({ marker: z.string().min(1) }).parse(raw).marker);
         case "turn": {
@@ -64,8 +65,8 @@ export async function runWorker(directory: string, launchFile: string): Promise<
         }
         case "reply": {
           const p = z.object({ request: z.object({ id: z.string(), sessionId: z.string(),
-            type: z.literal("permission"), api: z.enum(["legacy", "v2"]), detail: z.unknown() }), reply: z.enum(["allow_once", "deny"]) }).parse(raw);
-          await worker!.reply(p.request as PendingRequest, p.reply); return { acknowledged: true };
+            type: z.literal("permission"), api: z.enum(["legacy", "v2"]), detail: z.unknown() }), reply: z.enum(["allow_once", "deny"]), workerExplanation: WorkerExplanationSchema.optional() }).parse(raw);
+          await worker!.reply(p.request as PendingRequest, p.reply, p.workerExplanation); return { acknowledged: true };
         }
         case "abort": {
           const result = await worker!.abort(z.object({ sessionId: z.string() }).parse(raw).sessionId);

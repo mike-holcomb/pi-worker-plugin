@@ -3,7 +3,7 @@ import { ownedExec } from "./owned-shell.js";
 import type { Context } from "@earendil-works/chord/context";
 import type { ShellExecOptions } from "@earendil-works/pi-durable/env";
 import type { ExecutionEnv } from "@earendil-works/pi-durable/env";
-import { lstatSync, mkdirSync, realpathSync, mkdtempSync, writeFileSync } from "node:fs";
+import { lstatSync, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve, sep } from "node:path";
 import type { FrozenPolicy } from "./launch-config.js";
 
@@ -30,14 +30,26 @@ export function checkedPath(policy: FrozenPolicy, raw: string, write = false): s
   return path;
 }
 
+/** Identical non-login environment for shell tools and operator preflight. */
+export function createShellEnvironment(reportPath: string, inherited: NodeJS.ProcessEnv = process.env): NodeJS.ProcessEnv {
+  const safeEnv: NodeJS.ProcessEnv = {};
+  for (const key of ["PATH", "LANG", "LC_ALL", "TERM"]) if (inherited[key]) safeEnv[key] = inherited[key];
+  // An absent PATH must not invoke the shell/exec implementation's fallback search path.
+  safeEnv.PATH ??= "";
+  safeEnv.HOME = join(reportPath, ".home");
+  safeEnv.TMPDIR = join(reportPath, ".tmp");
+  for (const path of [safeEnv.HOME, safeEnv.TMPDIR]) {
+    mkdirSync(path, { recursive: true, mode: 0o700 });
+    const info = lstatSync(path);
+    if (!info.isDirectory() || info.isSymbolicLink() || (info.mode & 0o077) ||
+      (process.getuid && info.uid !== process.getuid())) throw new Error("worker private directory is not owned and private");
+  }
+  return safeEnv;
+}
+
 /** File tools are scoped here; arbitrary shell commands require explicit parent approval. */
 export function createBoundedEnv(policy: FrozenPolicy): ExecutionEnv {
-  const safeEnv: NodeJS.ProcessEnv = {};
-  for (const key of ["PATH", "LANG", "LC_ALL", "TERM"]) if (process.env[key]) safeEnv[key] = process.env[key];
-  safeEnv.HOME = join(policy.reportPath, ".home");
-  safeEnv.TMPDIR = join(policy.reportPath, ".tmp");
-  mkdirSync(safeEnv.HOME, { recursive: true, mode: 0o700 });
-  mkdirSync(safeEnv.TMPDIR, { recursive: true, mode: 0o700 });
+  const safeEnv = createShellEnvironment(policy.reportPath);
   const base = new NodeExecutionEnv({ cwd: policy.workspace, shellEnv: safeEnv });
   const writes = new Set(["writeFile", "appendFile", "truncateFile", "flushFile", "remove", "createDir"]);
   const reads = new Set(["watch", "absolutePath", "openTextLineReader", "readTextFile", "readTextLines", "readBinaryFile", "openBinaryReader", "fileInfo", "listDir", "openDirReader", "canonicalPath", "exists"]);
