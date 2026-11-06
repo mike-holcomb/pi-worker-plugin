@@ -233,3 +233,69 @@ for (const kind of ["openai", "anthropic", "google", "openrouter"] as const) {
     } finally { rmSync(fx.root, { recursive: true, force: true }); }
   });
 }
+
+test("denial feedback survives reopen, reaches model output once, and cannot grant a subsequent effect", async () => {
+  const fx = policyFixture("bounded-build");
+  const explanation = "Use the existing evidence and finish the report.";
+  const observed: string[] = [];
+  fx.fake.setResponses([
+    fauxAssistantMessage([fauxToolCall("write", { path: "output.txt", content: "denied" })], { stopReason: "toolUse" }),
+    context => { observed.push(JSON.stringify(context.messages));
+      return fauxAssistantMessage([fauxToolCall("write", { path: "output.txt", content: "second attempt" })], { stopReason: "toolUse" }); },
+    fauxAssistantMessage("No write was approved."),
+  ]);
+  let worker = await PiHarness.open(join(fx.root, "storage"), fx.contract(), "backend_test", fx.models);
+  try {
+    const session = await worker.createSession("marker");
+    await worker.submitTurn({ sessionId: session.id, messageId: "denial-turn", prompt: "Write output", launchContract: fx.contract() });
+    const pending = await until(() => worker.inspectTurn(session.id, "denial-turn"), v => v.pendingRequests.length === 1);
+    const request = pending.pendingRequests[0]!;
+    await assert.rejects(worker.reply(request, "allow_once", explanation), /only valid/);
+    await assert.rejects(worker.reply(request, "deny", "é".repeat(2049)), /4096/);
+    await assert.rejects(worker.reply({ ...request, detail: { messageId: "stale" } }, "deny", explanation), /wrong-session/);
+    await worker.close();
+    worker = await PiHarness.open(join(fx.root, "storage"), fx.contract(), "backend_test", fx.models);
+    await worker.reply(request, "deny", explanation);
+    await worker.reply(request, "deny", explanation);
+    await assert.rejects(worker.reply(request, "deny", "changed"), /conflict/);
+    await worker.resume();
+    const next = await until(() => worker.inspectTurn(session.id, "denial-turn"), v => v.pendingRequests.length === 1 && v.pendingRequests[0]!.id !== request.id);
+    assert.equal(observed.length, 1);
+    assert.match(observed[0]!, /Use the existing evidence and finish the report/);
+    assert.equal(existsSync(join(fx.workspace, "output.txt")), false);
+    await worker.abort(session.id);
+    await assert.rejects(worker.reply(next.pendingRequests[0]!, "deny", explanation), /wrong-session/);
+    await until(() => worker.inspectTurn(session.id, "denial-turn"), v => v.finished);
+    assert.equal(existsSync(join(fx.workspace, "output.txt")), false);
+  } finally { await worker.close(); rmSync(fx.root, { recursive: true, force: true }); }
+});
+
+test("first failing shell output and successful retry remain separate known process results", async () => {
+  const fx = policyFixture("bounded-build");
+  const observed: string[] = [];
+  fx.fake.setResponses([
+    fauxAssistantMessage([fauxToolCall("bash", { command: "printf 'first-original-error' >&2; exit 3" })], { stopReason: "toolUse" }),
+    context => { observed.push(JSON.stringify(context.messages));
+      return fauxAssistantMessage([fauxToolCall("bash", { command: "printf 'successful-retry'" })], { stopReason: "toolUse" }); },
+    context => { observed.push(JSON.stringify(context.messages)); return fauxAssistantMessage("The first check failed; the retry passed."); },
+  ]);
+  const worker = await PiHarness.open(join(fx.root, "storage"), fx.contract(), "backend_test", fx.models);
+  try {
+    const session = await worker.createSession("marker");
+    await worker.submitTurn({ sessionId: session.id, messageId: "check-turn", prompt: "Run checks", launchContract: fx.contract() });
+    const first = await until(() => worker.inspectTurn(session.id, "check-turn"), v => v.pendingRequests.length === 1);
+    await worker.reply(first.pendingRequests[0]!, "allow_once");
+    const second = await until(() => worker.inspectTurn(session.id, "check-turn"), v => v.pendingRequests.length === 1 && v.pendingRequests[0]!.id !== first.pendingRequests[0]!.id);
+    await worker.reply(second.pendingRequests[0]!, "allow_once");
+    const final = await until(() => worker.inspectTurn(session.id, "check-turn"), v => v.finished);
+    assert.deepEqual(final.uncertainEffects, []);
+    assert.match(observed[0]!, /first-original-error/);
+    assert.match(observed[0]!, /exitCode/);
+    assert.doesNotMatch(observed[0]!, /successful-retry/);
+    assert.match(observed[1]!, /first-original-error/);
+    assert.match(observed[1]!, /successful-retry/);
+    const diagnostics = JSON.stringify(worker.eventPage(0));
+    assert.match(diagnostics, /process exited 3/);
+    assert.doesNotMatch(diagnostics, /effects may be uncertain/);
+  } finally { await worker.close(); rmSync(fx.root, { recursive: true, force: true }); }
+});

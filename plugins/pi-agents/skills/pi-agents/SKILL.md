@@ -15,7 +15,7 @@ Choose the smallest adequate [lightweight](assets/task-lite.md), [standard](asse
 
 ## Profile capabilities and audit checks
 
-Choose the profile before constructing checks. Declared commands do not grant permission to run them; even read-only Git/Python commands are shell effects.
+Choose the profile before constructing checks. `allowed_writes` defines file boundaries, not approval: each non-report write/edit, shell, and network operation still requires an exact `allow_once` reply. Declared check argv does not grant execution. Three edits followed by one check normally produce four requests; `write_report` adds none. Batch coherent edits and run meaningful checks when changed evidence warrants them. Avoid combining unrelated effects into a broad shell command merely to reduce requests.
 
 | Capability | `bounded-inspect` | `bounded-build` |
 | --- | --- | --- |
@@ -32,7 +32,7 @@ Choose the profile before constructing checks. Declared commands do not grant pe
 
 Use the registered MCP tools described in [tools](references/tools.md). Optionally preview with `pi_start_task` and `dry_run: true`. For a real start, supply a caller-generated idempotency key and retain the returned scope, task, execution, and revision. Continue independent parent work and use bounded `pi_wait_tasks` calls for material changes. When semantic milestones help coordination, read only unseen `pi_get_progress` checkpoints for the exact execution and retain its separate cursor. Treat claims as advisory and gaps as missed transient history.
 
-A wait timeout, MCP disconnect, quiet worker, or missing acknowledgement is not permission to launch a replacement. Recover with `pi_list_tasks` and `pi_get_task`, using the original scope and operation key. Reply to a pending request only within actual authorization. Cancel with `pi_cancel_task`, then observe until stopping is confirmed. Follow up only after the predecessor is terminal and operationally resolved. [Recovery](references/recovery.md) gives the detailed sequence.
+A wait timeout, MCP disconnect, quiet worker, or missing acknowledgement is not permission to launch a replacement. Recover with `pi_list_tasks` and `pi_get_task`, using the original scope and operation key. Reply to a pending request only within actual authorization. `authorization_basis` is an audit record and is not delivered to the model. For a permission denial, optional `worker_explanation` delivers up to 4,096 UTF-8 bytes through that operation's tool error, for example: "Use the existing check evidence and finish the report." It cannot broaden the assignment or grant another effect. A worker delivery acknowledgement is separate from model compliance. General in-flight steering is unavailable. Cancel with `pi_cancel_task`, then observe until stopping is confirmed. Follow up only after the predecessor is terminal and operationally resolved. [Recovery](references/recovery.md) gives the detailed sequence.
 
 ## Verify and decide
 

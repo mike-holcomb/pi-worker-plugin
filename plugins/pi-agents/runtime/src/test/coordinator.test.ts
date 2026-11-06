@@ -19,6 +19,7 @@ class FakeBackend implements WorkerBackend {
   readonly backendId = "backend_fake";
   readonly workspace: string;
   supportsProgress = false;
+  supportsDenialContext = true;
   progressEvents: BackendEvent[] = [];
   submitted = false;
   finished = false;
@@ -33,6 +34,7 @@ class FakeBackend implements WorkerBackend {
   messageId = "";
   requests: PendingRequest[] = [];
   replyCount = 0;
+  explanations: Array<string | undefined> = [];
   replyFailure: "pending" | "gone" | null = null;
   inspectionCount = 0;
   error: string | null = null;
@@ -40,7 +42,7 @@ class FakeBackend implements WorkerBackend {
   async inspectBackend() { return { version: "fake", dependencyDigest: "fake", backendId: this.backendId,
     workspace: this.workspace, configurationDigest: "fake", supportedForExecution: true,
     capabilities: { callerAssignedMessageId: true, permissionRequests: true, questionRequests: false,
-      structuredOutput: false, sessionRecovery: true, progressCheckpoints: this.supportsProgress } }; }
+      structuredOutput: false, sessionRecovery: true, progressCheckpoints: this.supportsProgress, workerDenialContext: this.supportsDenialContext } }; }
   async createSession() {
     this.created = true;
     if (this.createAckLost) { this.createAckLost = false; throw new Error("lost session acknowledgement"); }
@@ -69,8 +71,8 @@ class FakeBackend implements WorkerBackend {
   readCheckpoint(event: BackendEvent, sessionId: string, messageId: string) {
     return new PiBackend("unused").readCheckpoint(event, sessionId, messageId);
   }
-  async replyToRequest(request: PendingRequest, _reply: "allow_once" | "deny" | string[][]) {
-    this.replyCount++;
+  async replyToRequest(request: PendingRequest, _reply: "allow_once" | "deny" | string[][], _control?: RequestControl, explanation?: string) {
+    this.replyCount++; this.explanations.push(explanation);
     if (this.replyFailure !== "pending") this.requests = this.requests.filter((item) => item.id !== request.id);
     if (this.replyFailure) throw new Error("lost reply acknowledgement");
   }
@@ -961,4 +963,110 @@ test("multi-milestone events are ingested for the exact execution and wake advis
     assert.equal(fx.store.get("scope", task.taskId)!.revision, task.revision);
     assert.deepEqual(fx.store.events(task.executionId), eventsBefore);
   } finally { await fx.coordinator.close(); fx.restore(); }
+});
+
+for (const lostReply of [false, true]) {
+  test(`service denial explanation has durable identity and at-most-once delivery (lost ack: ${lostReply})`, async () => {
+    const fx = setup();
+    try {
+      await fx.coordinator.start();
+      fx.backend.requests = [permission(fx, "30")]; fx.coordinator.kick();
+      await until(() => fx.store.get("scope", fx.task.taskId)?.pendingRequests.length === 1);
+      const service = new SupervisorService(fx.store, fx.artifacts, fx.coordinator);
+      const input = { scope_id: "scope", task_id: fx.task.taskId, execution_id: fx.task.executionId,
+        request_id: "30", request_revision: 1, reply: "deny", authorization_basis: "private audit rationale",
+        worker_explanation: "Finish the report using existing evidence.", idempotency_key: "explanation-denial-00001" };
+      await assert.rejects(service.handle("respond_to_request", { ...input, reply: "allow_once" }), /only valid/);
+      await assert.rejects(service.handle("respond_to_request", { ...input, worker_explanation: "é".repeat(2049) }), /4096/);
+      if (lostReply) fx.backend.replyFailure = "pending";
+      await service.handle("respond_to_request", input);
+      await service.handle("respond_to_request", input);
+      await assert.rejects(service.handle("respond_to_request", { ...input, worker_explanation: "Changed" }), /IDEMPOTENCY_CONFLICT/);
+      assert.equal(fx.backend.replyCount, 1);
+      assert.deepEqual(fx.backend.explanations, [input.worker_explanation]);
+      assert.equal(fx.store.inputRequests(fx.task.executionId)[0]!.workerExplanation, input.worker_explanation);
+      assert.equal(fx.store.inputRequests(fx.task.executionId)[0]!.status, lostReply ? "responding" : "responded");
+      assert.doesNotMatch(JSON.stringify(fx.backend.explanations), /private audit rationale/);
+    } finally { await fx.coordinator.close(); fx.restore(); }
+  });
+}
+
+test("coordinator exposes registration failures and retains workspace ownership", async () => {
+  const fx = setup();
+  const original = fx.store.upsertInputRequest.bind(fx.store);
+  try {
+    await fx.coordinator.start();
+    fx.store.upsertInputRequest = () => { throw new Error("synthetic registration failure"); };
+    fx.backend.requests = [permission(fx, "30")]; fx.coordinator.kick();
+    await until(() => fx.store.events(fx.task.executionId).some(event => event.kind === "input_request_registration_failed"));
+    const current = fx.store.get("scope", fx.task.taskId)!;
+    assert.equal(current.observation, "unknown");
+    assert.equal(current.phase, "running");
+    assert.equal(current.pendingRequests.length, 0);
+    const other = fx.store.start({ scopeId: "scope", idempotencyKey: "registration-owner-0001", workspace: fx.task.workspace,
+      packet: {}, model: "fake/model", profile: "bounded-build", baselineHash: "a".repeat(64), promptHash: "b".repeat(64) });
+    assert.equal(fx.store.admit("scope", other.taskId, other.revision, [`workspace:${fx.task.workspace}`]), null);
+    fx.store.upsertInputRequest = original; fx.coordinator.kick();
+    await until(() => fx.store.get("scope", fx.task.taskId)?.pendingRequests.length === 1);
+  } finally { fx.store.upsertInputRequest = original; await fx.coordinator.close(); fx.restore(); }
+});
+
+test("unsupported denial context is rejected before recording an intent", async () => {
+  const fx = setup();
+  try {
+    fx.backend.supportsDenialContext = false;
+    await fx.coordinator.start();
+    fx.backend.requests = [permission(fx, "30")]; fx.coordinator.kick();
+    await until(() => fx.store.get("scope", fx.task.taskId)?.pendingRequests.length === 1);
+    const service = new SupervisorService(fx.store, fx.artifacts, fx.coordinator);
+    await assert.rejects(service.handle("respond_to_request", { scope_id: "scope", task_id: fx.task.taskId,
+      execution_id: fx.task.executionId, request_id: "30", request_revision: 1, reply: "deny",
+      authorization_basis: "audit", worker_explanation: "Finish the report.", idempotency_key: "unsupported-explanation-01" }), /does not support/);
+    assert.equal(fx.backend.replyCount, 0);
+    assert.equal(fx.store.inputRequests(fx.task.executionId)[0]!.status, "pending");
+    assert.ok(!fx.store.events(fx.task.executionId).some(event => event.kind === "input_response_intent"));
+  } finally { await fx.coordinator.close(); fx.restore(); }
+});
+
+test("two coordinator backends with overlapping native request IDs remain independently replyable after restart", async () => {
+  const fx = setup();
+  const workspaceB = join(fx.root, "project-b"); mkdirSync(workspaceB); writeFileSync(join(workspaceB, "input.txt"), "original\n");
+  const packet = fx.task.packet as TaskPacket;
+  const baseline = captureBaseline({ workspace: workspaceB, projectRoots: [fx.root], packet });
+  const taskB = fx.store.start({ scopeId: "scope", idempotencyKey: "overlapping-backend-b-01", workspace: workspaceB,
+    packet, model: fx.task.model, profile: fx.task.profile, baselineHash: baseline.sha256, promptHash: fx.task.promptHash,
+    frozenPrompt: fx.task.frozenPrompt, frozenBaseline: baseline, reportPath: join(fx.root, "report-b"),
+    backendConfig: loadConfiguration(), launchContract: { configContent: "{}", effectiveConfigSha256: "fixture", reportPath: join(fx.root, "report-b") } });
+  const backendA = new FakeBackend(fx.task.workspace), backendB = new FakeBackend(workspaceB);
+  backendA.sessionId = "session-a"; backendB.sessionId = "session-b";
+  const opener = async (input: { backendId: string; workspace: string }) => {
+    const backend = input.workspace === workspaceB ? backendB : backendA;
+    Object.assign(backend, { backendId: input.backendId });
+    return { backendId: input.backendId, backend, close: async () => {} };
+  };
+  let coordinator = new ExecutionCoordinator(fx.store, fx.artifacts, opener);
+  try {
+    await coordinator.start();
+    await until(() => backendA.submitted && backendB.submitted);
+    for (const backend of [backendA, backendB]) backend.requests = [{ id: "30", sessionId: backend.sessionId,
+      type: "permission", api: "v2", detail: { tool: "edit", messageId: backend.messageId } }];
+    coordinator.kick();
+    await until(() => fx.store.get("scope", fx.task.taskId)?.pendingRequests.length === 1 && fx.store.get("scope", taskB.taskId)?.pendingRequests.length === 1);
+    await coordinator.close(); coordinator = new ExecutionCoordinator(fx.store, fx.artifacts, opener); await coordinator.start();
+    const service = new SupervisorService(fx.store, fx.artifacts, coordinator);
+    await service.handle("respond_to_request", { scope_id: "scope", task_id: fx.task.taskId,
+      execution_id: fx.task.executionId, request_id: "30", request_revision: 1, reply: "deny",
+      authorization_basis: "Only A is denied", worker_explanation: "Finish A's report.", idempotency_key: "overlap-reply-a-0001" });
+    assert.equal(backendA.replyCount, 1); assert.equal(backendB.replyCount, 0);
+    assert.equal(fx.store.inputRequests(taskB.executionId)[0]!.status, "pending");
+    assert.equal(fx.store.inputRequests(taskB.executionId)[0]!.workerExplanation, null);
+    await service.handle("respond_to_request", { scope_id: "scope", task_id: taskB.taskId,
+      execution_id: taskB.executionId, request_id: "30", request_revision: 1, reply: "allow_once",
+      authorization_basis: "Only B is approved", idempotency_key: "overlap-reply-b-0001" });
+    assert.equal(backendB.replyCount, 1);
+    assert.equal(fx.store.inputRequests(fx.task.executionId)[0]!.status, "responded");
+    const events = fx.store.events(fx.task.executionId);
+    assert.ok(events.some(event => event.kind === "input_response_intent" && JSON.stringify(event.detail).includes("Finish A's report")));
+    assert.ok(events.some(event => event.kind === "input_response_acknowledged" && JSON.stringify(event.detail).includes("acknowledged")));
+  } finally { await coordinator.close(); await fx.coordinator.close(); fx.restore(); }
 });

@@ -95,13 +95,19 @@ export class ExecutionCoordinator {
     this.backends.clear();
   }
 
-  async replyToRequest(task: StoredTask, request: PendingRequest, reply: "allow_once" | "deny" | string[][]): Promise<void> {
+  async assertWorkerExplanationSupported(task: StoredTask): Promise<void> {
+    const { backend } = await this.backendFor(task);
+    const inspection = await backend.inspectBackend({ timeoutMs: 5_000 });
+    if (!inspection.capabilities.workerDenialContext) throw new Error("backend does not support worker-visible denial explanations; update resolved workers before using worker_explanation");
+  }
+
+  async replyToRequest(task: StoredTask, request: PendingRequest, reply: "allow_once" | "deny" | string[][], workerExplanation?: string): Promise<void> {
     if (!task.sessionId || !task.userMessageId || request.sessionId !== task.sessionId) {
       throw new Error("input request is not bound to the recorded session");
     }
     try {
       const { backend } = await this.backendFor(task);
-      await backend.replyToRequest(request, reply, { timeoutMs: 5_000 });
+      await backend.replyToRequest(request, reply, { timeoutMs: 5_000 }, workerExplanation);
       this.store.acknowledgeInputResponse(task.executionId, request.id);
     } catch (error) {
       // A timeout, process death, or local write error can follow an upstream reply.
@@ -369,8 +375,14 @@ export class ExecutionCoordinator {
     for (const effect of observed.uncertainEffects ?? []) this.store.recordEffectUncertainty(task.executionId, effect.requestId, effect.tool);
     for (const request of observed.pendingRequests) {
       if (request.sessionId !== task.sessionId) throw new Error("upstream request belongs to another session");
-      this.store.upsertInputRequest(task.scopeId, task.taskId,
-        task.executionId, request.id, request.type, request);
+      try {
+        this.store.upsertInputRequest(task.scopeId, task.taskId,
+          task.executionId, request.id, request.type, request);
+      } catch (error) {
+        this.store.recordInputRegistrationFailure(task.executionId, request.id, String(error));
+        this.markUnknown(task, "input request registration failed; inspect input_request_registration_failed and cancel if recovery is unavailable");
+        throw error;
+      }
     }
     this.store.expireMissingInputRequests(task.executionId, observed.pendingRequests.map((request) => request.id));
   }

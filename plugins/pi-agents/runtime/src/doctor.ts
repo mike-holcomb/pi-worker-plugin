@@ -27,4 +27,9 @@ export function doctor() {
   } catch (error) { result.configuration.status = "invalid"; result.configuration.message = String(error); }
   return result;
 }
-export async function doctorAsync() { return doctor(); }
+export async function doctorAsync(options: { shellPreflight?: boolean; source?: "daemon" | "local_process" } = {}) {
+  const result = doctor();
+  if (!options.shellPreflight) return result;
+  const { shellPreflight } = await import("./shell-preflight.js");
+  return { ...result, shell_preflight: { source: options.source ?? "local_process", ...await shellPreflight(stateDirectory()) } };
+}

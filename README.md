@@ -4,7 +4,7 @@ Public repository marketplace for [Pi Agents](plugins/pi-agents/README.md), publ
 
 ## Release 0.2.0 candidate
 
-Version **0.2.0** is being prepared. It adds actionable review validation, compact artifact reads, clearer audit contracts and checkpoint diagnostics, and a read-only review-preparation tool. See the [candidate release notes](docs/releases/v0.2.0.md). The published stable release is [v0.1.0](https://github.com/mike-holcomb/pi-worker-plugin/releases/tag/v0.1.0).
+Version **0.2.0** is being prepared. It adds actionable review validation, compact artifact reads, clearer audit contracts and checkpoint diagnostics, a read-only review-preparation tool, execution-scoped permission IDs, safe shell preflight, and worker-visible denial explanations. See the [candidate release notes](docs/releases/v0.2.0.md). The published stable release is [v0.1.0](https://github.com/mike-holcomb/pi-worker-plugin/releases/tag/v0.1.0).
 
 For the published stable release, install Node.js 24.15 or later within the 24.x line and select the plugin from the marketplace:
 

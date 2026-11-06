@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { chmodSync, closeSync, existsSync, fsyncSync, mkdirSync, openSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { validateWorkerExplanation } from "./request-feedback.js";
 import { DatabaseSync } from "node:sqlite";
 import type { Review } from "./contracts.js";
 import type { UserConfig } from "./config.js";
@@ -21,6 +22,7 @@ export type StoredInputRequest = {
   createdAt: string;
   response: unknown | null;
   authorizationBasis: unknown | null;
+  workerExplanation: string | null;
 };
 
 export type CreationIntent = { backendId: string; marker: string; sessionId: string | null; createdAt: string };
@@ -138,6 +140,7 @@ export type RequestReplyRecord = {
   requestRevision: number;
   reply: unknown;
   authorizationBasis: unknown;
+  workerExplanation?: string;
 };
 
 export class StoreConflict extends Error {
@@ -183,10 +186,11 @@ function cancelSemanticHash(input: CancelSemanticInput): string {
     reason: input.reason, requester: input.requester, deadlineOrigin: input.deadlineOrigin ?? null });
 }
 
-type ReplySemanticInput = Pick<RequestReplyRecord, "taskId" | "executionId" | "requestId" | "requestRevision" | "reply" | "authorizationBasis">;
+type ReplySemanticInput = Pick<RequestReplyRecord, "taskId" | "executionId" | "requestId" | "requestRevision" | "reply" | "authorizationBasis" | "workerExplanation">;
 function replySemanticHash(input: ReplySemanticInput): string {
   return hashPayload({ taskId: input.taskId, executionId: input.executionId, requestId: input.requestId,
-    requestRevision: input.requestRevision, reply: input.reply, authorizationBasis: input.authorizationBasis });
+    requestRevision: input.requestRevision, reply: input.reply, authorizationBasis: input.authorizationBasis,
+    ...(input.workerExplanation === undefined ? {} : { workerExplanation: input.workerExplanation }) });
 }
 
 export class SqliteTaskStore {
@@ -206,7 +210,7 @@ export class SqliteTaskStore {
     if (versionTable) {
       const version = this.db.prepare("SELECT MAX(version) AS version FROM schema_version").get() as { version: number | null };
       schemaVersion = version.version;
-      if (version.version !== null && version.version > 3) {
+      if (version.version !== null && version.version > 4) {
         this.db.close();
         throw new Error(`store schema version ${version.version} is newer than this runtime supports`);
       }
@@ -222,12 +226,14 @@ export class SqliteTaskStore {
       const columns = new Set((this.db.prepare(`PRAGMA table_info(${table})`).all() as Array<{ name: string }>).map((row) => row.name));
       return required.some((name) => !columns.has(name));
     };
-    const schemaNeedsUpgrade = schemaVersion !== 3 || requiredObjects.some((name) => !objects.has(name)) ||
+    const requestKey = (this.db.prepare("PRAGMA table_info(input_requests)").all() as Array<{ name: string; pk: number }>)
+      .filter(row => row.pk).sort((a, b) => a.pk - b.pk).map(row => row.name).join(",");
+    const schemaNeedsUpgrade = requestKey !== "execution_id,request_id" || schemaVersion !== 4 || requiredObjects.some((name) => !objects.has(name)) ||
       missingColumn("executions", ["packet_json", "frozen_prompt", "frozen_baseline_json", "report_path",
         "queue_deadline_at", "admitted_at", "execution_deadline_at", "finalization_deadline_at", "intended_outcome",
         "execution_timeout_seconds", "context_mode", "backend_config_json", "launch_contract_json", "worker_instance_id"]) ||
       missingColumn("tasks", ["workspace_access", "request_model_json"]) ||
-      missingColumn("input_requests", ["created_at", "response_json", "authorization_basis_json"]) ||
+      missingColumn("input_requests", ["created_at", "response_json", "authorization_basis_json", "worker_explanation"]) ||
       missingColumn("cancellation_intents", ["abort_acknowledged"]);
     if (existingDatabase && schemaNeedsUpgrade) {
       const backupDirectory = join(dirname(filename), "backups");
@@ -235,7 +241,7 @@ export class SqliteTaskStore {
       try {
         mkdirSync(backupDirectory, { recursive: true, mode: 0o700 });
         backupPath = join(backupDirectory,
-          `${new Date().toISOString().replaceAll(":", "-")}-schema-${schemaVersion ?? "unknown"}-to-3-${randomUUID()}.sqlite`);
+          `${new Date().toISOString().replaceAll(":", "-")}-schema-${schemaVersion ?? "unknown"}-to-4-${randomUUID()}.sqlite`);
         closeSync(openSync(backupPath, "wx", 0o600));
         this.db.prepare("VACUUM INTO ?").run(backupPath);
         const backupFd = openSync(backupPath, "r");
@@ -248,107 +254,129 @@ export class SqliteTaskStore {
         throw new Error(`pre-migration database backup failed: ${String(error)}`);
       }
     }
-    this.db.exec(`
-      CREATE TABLE IF NOT EXISTS schema_version(version INTEGER NOT NULL);
-      INSERT INTO schema_version(version) SELECT 1 WHERE NOT EXISTS(SELECT 1 FROM schema_version);
-      CREATE TABLE IF NOT EXISTS scopes(scope_id TEXT PRIMARY KEY, created_at TEXT NOT NULL);
-      CREATE TABLE IF NOT EXISTS tasks(
-        task_id TEXT PRIMARY KEY, scope_id TEXT NOT NULL REFERENCES scopes(scope_id),
-        workspace TEXT NOT NULL, packet_json TEXT NOT NULL, model TEXT NOT NULL, profile TEXT NOT NULL,
-        current_execution_id TEXT NOT NULL, created_at TEXT NOT NULL,
-        workspace_access TEXT, request_model_json TEXT
-      );
-      CREATE TABLE IF NOT EXISTS executions(
-        execution_id TEXT PRIMARY KEY, task_id TEXT NOT NULL REFERENCES tasks(task_id),
-        predecessor_execution_id TEXT REFERENCES executions(execution_id),
-        revision INTEGER NOT NULL, phase TEXT NOT NULL, observation TEXT NOT NULL,
-        backend_id TEXT, session_id TEXT, user_message_id TEXT,
-        baseline_hash TEXT NOT NULL, prompt_hash TEXT NOT NULL,
-        report_validity TEXT NOT NULL DEFAULT 'pending', review_status TEXT NOT NULL DEFAULT 'pending',
-        final_manifest_hash TEXT,
-        created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
-        packet_json TEXT, frozen_prompt TEXT, frozen_baseline_json TEXT, report_path TEXT,
-        queue_deadline_at TEXT, admitted_at TEXT, execution_deadline_at TEXT,
-        finalization_deadline_at TEXT, intended_outcome TEXT, execution_timeout_seconds INTEGER,
-        context_mode TEXT, backend_config_json TEXT, launch_contract_json TEXT
-      );
-      CREATE UNIQUE INDEX IF NOT EXISTS unresolved_session_owner ON executions(backend_id,session_id)
-        WHERE session_id IS NOT NULL AND phase NOT IN ('completed','failed','cancelled','timed_out');
-      CREATE TABLE IF NOT EXISTS backend_instances(
-        backend_id TEXT PRIMARY KEY, workspace TEXT NOT NULL, config_digest TEXT NOT NULL,
-        identity_json TEXT NOT NULL, created_at TEXT NOT NULL
-      );
-      CREATE TABLE IF NOT EXISTS operations(
-        operation_id TEXT PRIMARY KEY, scope_id TEXT NOT NULL REFERENCES scopes(scope_id),
-        operation TEXT NOT NULL, idempotency_key TEXT NOT NULL, payload_hash TEXT NOT NULL,
-        result_json TEXT NOT NULL, created_at TEXT NOT NULL,
-        UNIQUE(scope_id,operation,idempotency_key)
-      );
-      CREATE TABLE IF NOT EXISTS dispatch_intents(
-        execution_id TEXT PRIMARY KEY REFERENCES executions(execution_id),
-        backend_id TEXT NOT NULL, session_id TEXT NOT NULL, user_message_id TEXT NOT NULL,
-        prompt_hash TEXT NOT NULL, acknowledged INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL
-      );
-      CREATE TABLE IF NOT EXISTS creation_intents(
-        execution_id TEXT PRIMARY KEY REFERENCES executions(execution_id),
-        backend_id TEXT NOT NULL, marker TEXT NOT NULL UNIQUE, session_id TEXT,
-        created_at TEXT NOT NULL
-      );
-      CREATE TABLE IF NOT EXISTS cancellation_intents(
-        execution_id TEXT PRIMARY KEY REFERENCES executions(execution_id),
-        reason TEXT NOT NULL, requester TEXT NOT NULL, deadline_origin TEXT,
-        created_at TEXT NOT NULL, abort_acknowledged INTEGER NOT NULL DEFAULT 0
-      );
-      CREATE TABLE IF NOT EXISTS resource_reservations(
-        resource_key TEXT PRIMARY KEY, execution_id TEXT NOT NULL REFERENCES executions(execution_id),
-        acquired_at TEXT NOT NULL
-      );
-      CREATE TABLE IF NOT EXISTS input_requests(
-        request_id TEXT PRIMARY KEY, execution_id TEXT NOT NULL REFERENCES executions(execution_id),
-        kind TEXT NOT NULL, revision INTEGER NOT NULL, detail_json TEXT NOT NULL, status TEXT NOT NULL,
-        created_at TEXT, response_json TEXT, authorization_basis_json TEXT
-      );
-      CREATE TABLE IF NOT EXISTS artifacts(
-        artifact_id TEXT PRIMARY KEY, execution_id TEXT NOT NULL REFERENCES executions(execution_id),
-        sha256 TEXT NOT NULL, byte_length INTEGER NOT NULL, media_type TEXT NOT NULL,
-        path TEXT NOT NULL, created_at TEXT NOT NULL
-      );
-      CREATE TABLE IF NOT EXISTS reviews(
-        review_id TEXT PRIMARY KEY, execution_id TEXT NOT NULL REFERENCES executions(execution_id),
-        disposition TEXT NOT NULL, record_json TEXT NOT NULL, created_at TEXT NOT NULL
-      );
-      CREATE TABLE IF NOT EXISTS events(
-        sequence INTEGER PRIMARY KEY AUTOINCREMENT, execution_id TEXT NOT NULL REFERENCES executions(execution_id),
-        kind TEXT NOT NULL, detail_json TEXT NOT NULL, created_at TEXT NOT NULL
-      );
-      CREATE TABLE IF NOT EXISTS diagnostic_logs(
-        execution_id TEXT PRIMARY KEY REFERENCES executions(execution_id),
-        content_blob BLOB NOT NULL, original_bytes INTEGER NOT NULL,
-        updated_at TEXT NOT NULL
-      );
-    `);
-    // Early v2 databases predate these columns. ALTER TABLE preserves admitted work.
-    const columns = new Set((this.db.prepare("PRAGMA table_info(executions)").all() as Array<{ name: string }>).map((row) => row.name));
-    for (const [name, definition] of Object.entries({
-      packet_json: "TEXT", frozen_prompt: "TEXT", frozen_baseline_json: "TEXT", report_path: "TEXT",
-      queue_deadline_at: "TEXT", admitted_at: "TEXT", execution_deadline_at: "TEXT",
-      finalization_deadline_at: "TEXT", intended_outcome: "TEXT", execution_timeout_seconds: "INTEGER", context_mode: "TEXT",
-      backend_config_json: "TEXT", launch_contract_json: "TEXT",
-      worker_instance_id: "TEXT",
-    })) {
-      if (!columns.has(name)) this.db.exec(`ALTER TABLE executions ADD COLUMN ${name} ${definition}`);
+    this.db.exec("BEGIN IMMEDIATE");
+    try {
+      this.db.exec(`
+        CREATE TABLE IF NOT EXISTS schema_version(version INTEGER NOT NULL);
+        INSERT INTO schema_version(version) SELECT 1 WHERE NOT EXISTS(SELECT 1 FROM schema_version);
+        CREATE TABLE IF NOT EXISTS scopes(scope_id TEXT PRIMARY KEY, created_at TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS tasks(
+          task_id TEXT PRIMARY KEY, scope_id TEXT NOT NULL REFERENCES scopes(scope_id),
+          workspace TEXT NOT NULL, packet_json TEXT NOT NULL, model TEXT NOT NULL, profile TEXT NOT NULL,
+          current_execution_id TEXT NOT NULL, created_at TEXT NOT NULL,
+          workspace_access TEXT, request_model_json TEXT
+        );
+        CREATE TABLE IF NOT EXISTS executions(
+          execution_id TEXT PRIMARY KEY, task_id TEXT NOT NULL REFERENCES tasks(task_id),
+          predecessor_execution_id TEXT REFERENCES executions(execution_id),
+          revision INTEGER NOT NULL, phase TEXT NOT NULL, observation TEXT NOT NULL,
+          backend_id TEXT, session_id TEXT, user_message_id TEXT,
+          baseline_hash TEXT NOT NULL, prompt_hash TEXT NOT NULL,
+          report_validity TEXT NOT NULL DEFAULT 'pending', review_status TEXT NOT NULL DEFAULT 'pending',
+          final_manifest_hash TEXT,
+          created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
+          packet_json TEXT, frozen_prompt TEXT, frozen_baseline_json TEXT, report_path TEXT,
+          queue_deadline_at TEXT, admitted_at TEXT, execution_deadline_at TEXT,
+          finalization_deadline_at TEXT, intended_outcome TEXT, execution_timeout_seconds INTEGER,
+          context_mode TEXT, backend_config_json TEXT, launch_contract_json TEXT
+        );
+        CREATE UNIQUE INDEX IF NOT EXISTS unresolved_session_owner ON executions(backend_id,session_id)
+          WHERE session_id IS NOT NULL AND phase NOT IN ('completed','failed','cancelled','timed_out');
+        CREATE TABLE IF NOT EXISTS backend_instances(
+          backend_id TEXT PRIMARY KEY, workspace TEXT NOT NULL, config_digest TEXT NOT NULL,
+          identity_json TEXT NOT NULL, created_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS operations(
+          operation_id TEXT PRIMARY KEY, scope_id TEXT NOT NULL REFERENCES scopes(scope_id),
+          operation TEXT NOT NULL, idempotency_key TEXT NOT NULL, payload_hash TEXT NOT NULL,
+          result_json TEXT NOT NULL, created_at TEXT NOT NULL,
+          UNIQUE(scope_id,operation,idempotency_key)
+        );
+        CREATE TABLE IF NOT EXISTS dispatch_intents(
+          execution_id TEXT PRIMARY KEY REFERENCES executions(execution_id),
+          backend_id TEXT NOT NULL, session_id TEXT NOT NULL, user_message_id TEXT NOT NULL,
+          prompt_hash TEXT NOT NULL, acknowledged INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS creation_intents(
+          execution_id TEXT PRIMARY KEY REFERENCES executions(execution_id),
+          backend_id TEXT NOT NULL, marker TEXT NOT NULL UNIQUE, session_id TEXT,
+          created_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS cancellation_intents(
+          execution_id TEXT PRIMARY KEY REFERENCES executions(execution_id),
+          reason TEXT NOT NULL, requester TEXT NOT NULL, deadline_origin TEXT,
+          created_at TEXT NOT NULL, abort_acknowledged INTEGER NOT NULL DEFAULT 0
+        );
+        CREATE TABLE IF NOT EXISTS resource_reservations(
+          resource_key TEXT PRIMARY KEY, execution_id TEXT NOT NULL REFERENCES executions(execution_id),
+          acquired_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS input_requests(
+          request_id TEXT NOT NULL, execution_id TEXT NOT NULL REFERENCES executions(execution_id),
+          kind TEXT NOT NULL, revision INTEGER NOT NULL, detail_json TEXT NOT NULL, status TEXT NOT NULL,
+          created_at TEXT, response_json TEXT, authorization_basis_json TEXT, worker_explanation TEXT,
+          PRIMARY KEY(execution_id,request_id)
+        );
+        CREATE TABLE IF NOT EXISTS artifacts(
+          artifact_id TEXT PRIMARY KEY, execution_id TEXT NOT NULL REFERENCES executions(execution_id),
+          sha256 TEXT NOT NULL, byte_length INTEGER NOT NULL, media_type TEXT NOT NULL,
+          path TEXT NOT NULL, created_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS reviews(
+          review_id TEXT PRIMARY KEY, execution_id TEXT NOT NULL REFERENCES executions(execution_id),
+          disposition TEXT NOT NULL, record_json TEXT NOT NULL, created_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS events(
+          sequence INTEGER PRIMARY KEY AUTOINCREMENT, execution_id TEXT NOT NULL REFERENCES executions(execution_id),
+          kind TEXT NOT NULL, detail_json TEXT NOT NULL, created_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS diagnostic_logs(
+          execution_id TEXT PRIMARY KEY REFERENCES executions(execution_id),
+          content_blob BLOB NOT NULL, original_bytes INTEGER NOT NULL,
+          updated_at TEXT NOT NULL
+        );
+      `);
+      // Early v2 databases predate these columns. ALTER TABLE preserves admitted work.
+      const columns = new Set((this.db.prepare("PRAGMA table_info(executions)").all() as Array<{ name: string }>).map((row) => row.name));
+      for (const [name, definition] of Object.entries({
+        packet_json: "TEXT", frozen_prompt: "TEXT", frozen_baseline_json: "TEXT", report_path: "TEXT",
+        queue_deadline_at: "TEXT", admitted_at: "TEXT", execution_deadline_at: "TEXT",
+        finalization_deadline_at: "TEXT", intended_outcome: "TEXT", execution_timeout_seconds: "INTEGER", context_mode: "TEXT",
+        backend_config_json: "TEXT", launch_contract_json: "TEXT",
+        worker_instance_id: "TEXT",
+      })) {
+        if (!columns.has(name)) this.db.exec(`ALTER TABLE executions ADD COLUMN ${name} ${definition}`);
+      }
+      const taskColumns = new Set((this.db.prepare("PRAGMA table_info(tasks)").all() as Array<{ name: string }>).map((row) => row.name));
+      for (const [name, definition] of Object.entries({ workspace_access: "TEXT", request_model_json: "TEXT" })) {
+        if (!taskColumns.has(name)) this.db.exec(`ALTER TABLE tasks ADD COLUMN ${name} ${definition}`);
+      }
+      const requestColumns = new Set((this.db.prepare("PRAGMA table_info(input_requests)").all() as Array<{ name: string }>).map((row) => row.name));
+      for (const [name, definition] of Object.entries({ created_at: "TEXT", response_json: "TEXT", authorization_basis_json: "TEXT", worker_explanation: "TEXT" })) {
+        if (!requestColumns.has(name)) this.db.exec(`ALTER TABLE input_requests ADD COLUMN ${name} ${definition}`);
+      }
+      const cancellationColumns = new Set((this.db.prepare("PRAGMA table_info(cancellation_intents)").all() as Array<{ name: string }>).map((row) => row.name));
+      if (!cancellationColumns.has("abort_acknowledged")) this.db.exec("ALTER TABLE cancellation_intents ADD COLUMN abort_acknowledged INTEGER NOT NULL DEFAULT 0");
+      if (objects.has("input_requests") && requestKey !== "execution_id,request_id") {
+        this.db.exec(`
+          CREATE TABLE input_requests_v4(
+            request_id TEXT NOT NULL, execution_id TEXT NOT NULL REFERENCES executions(execution_id),
+            kind TEXT NOT NULL, revision INTEGER NOT NULL, detail_json TEXT NOT NULL, status TEXT NOT NULL,
+            created_at TEXT, response_json TEXT, authorization_basis_json TEXT, worker_explanation TEXT,
+            PRIMARY KEY(execution_id,request_id)
+          );
+          INSERT INTO input_requests_v4 SELECT request_id,execution_id,kind,revision,detail_json,status,
+            created_at,response_json,authorization_basis_json,worker_explanation FROM input_requests;
+          DROP TABLE input_requests;
+          ALTER TABLE input_requests_v4 RENAME TO input_requests;
+        `);
+      }
+      this.db.prepare("UPDATE schema_version SET version=4 WHERE version<4").run();
+      if (this.db.prepare("PRAGMA foreign_key_check").all().length) throw new Error("store migration failed foreign-key validation");
+      this.db.exec("COMMIT");
+    } catch (error) {
+      this.db.exec("ROLLBACK"); this.db.close(); throw error;
     }
-    const taskColumns = new Set((this.db.prepare("PRAGMA table_info(tasks)").all() as Array<{ name: string }>).map((row) => row.name));
-    for (const [name, definition] of Object.entries({ workspace_access: "TEXT", request_model_json: "TEXT" })) {
-      if (!taskColumns.has(name)) this.db.exec(`ALTER TABLE tasks ADD COLUMN ${name} ${definition}`);
-    }
-    const requestColumns = new Set((this.db.prepare("PRAGMA table_info(input_requests)").all() as Array<{ name: string }>).map((row) => row.name));
-    for (const [name, definition] of Object.entries({ created_at: "TEXT", response_json: "TEXT", authorization_basis_json: "TEXT" })) {
-      if (!requestColumns.has(name)) this.db.exec(`ALTER TABLE input_requests ADD COLUMN ${name} ${definition}`);
-    }
-    const cancellationColumns = new Set((this.db.prepare("PRAGMA table_info(cancellation_intents)").all() as Array<{ name: string }>).map((row) => row.name));
-    if (!cancellationColumns.has("abort_acknowledged")) this.db.exec("ALTER TABLE cancellation_intents ADD COLUMN abort_acknowledged INTEGER NOT NULL DEFAULT 0");
-    this.db.prepare("UPDATE schema_version SET version=3 WHERE version<3").run();
     this.purgeExpiredDiagnostics();
     const maintenanceInterval = options.diagnosticMaintenanceIntervalMs ?? 60 * 60 * 1_000;
     if (!Number.isSafeInteger(maintenanceInterval) || maintenanceInterval <= 0)
@@ -1072,7 +1100,13 @@ export class SqliteTaskStore {
       kind: row.kind as StoredInputRequest["kind"], revision: row.revision as number,
       detail: JSON.parse(row.detail_json as string), status: row.status as StoredInputRequest["status"],
       createdAt: (row.created_at as string | null) ?? "", response: row.response_json ? JSON.parse(row.response_json as string) : null,
-      authorizationBasis: row.authorization_basis_json ? JSON.parse(row.authorization_basis_json as string) : null }));
+      authorizationBasis: row.authorization_basis_json ? JSON.parse(row.authorization_basis_json as string) : null,
+      workerExplanation: row.worker_explanation as string | null }));
+  }
+
+  recordInputRegistrationFailure(executionId: string, requestId: string, reason: string): void {
+    this.event(executionId, "input_request_registration_failed", { requestId, reason,
+      next_action: "Observe the exact execution; cancel and wait for confirmed stopping if registration cannot recover." });
   }
 
   upsertInputRequest(scopeId: string, taskId: string, executionId: string, requestId: string,
@@ -1087,8 +1121,8 @@ export class SqliteTaskStore {
       if (previous && previous.status !== "pending") return previous;
       const instant = now();
       if (previous) {
-        this.db.prepare("UPDATE input_requests SET revision=revision+1,detail_json=? WHERE request_id=?")
-          .run(canonical(detail), requestId);
+        this.db.prepare("UPDATE input_requests SET revision=revision+1,detail_json=? WHERE execution_id=? AND request_id=?")
+          .run(canonical(detail), executionId, requestId);
       } else {
         this.db.prepare("INSERT INTO input_requests(request_id,execution_id,kind,revision,detail_json,status,created_at) VALUES(?,?,?,1,?,'pending',?)")
           .run(requestId, executionId, kind, canonical(detail), instant);
@@ -1101,6 +1135,7 @@ export class SqliteTaskStore {
   }
 
   respondToRequest(input: RequestReplyRecord): StoredTask {
+    validateWorkerExplanation(input.reply, input.workerExplanation);
     const payloadHash = replySemanticHash(input);
     return this.transaction(() => {
       const candidate = this.getExecution(input.scopeId, input.taskId, input.executionId);
@@ -1125,18 +1160,20 @@ export class SqliteTaskStore {
           this.cancellationEvent(task.executionId, "cancellation_recovery_intent"))
           throw new StoreConflict("INVALID_STATE", "cancellation permits only permission denial before worker termination begins");
       } else if (task.phase !== "waiting_input") throw new StoreConflict("INVALID_STATE", "execution is not waiting for input");
+      if (input.workerExplanation !== undefined && request.kind !== "permission") throw new StoreConflict("INVALID_STATE");
       const binding = request.detail as { sessionId?: unknown; type?: unknown };
       if (binding.sessionId !== task.sessionId || binding.type !== request.kind)
         throw new StoreConflict("REQUEST_EXPIRED", "request binding does not match the execution; observe the execution");
       const instant = now();
-      this.db.prepare("UPDATE input_requests SET status='responding',response_json=?,authorization_basis_json=? WHERE request_id=?")
-        .run(canonical(input.reply), canonical(input.authorizationBasis), input.requestId);
+      this.db.prepare("UPDATE input_requests SET status='responding',response_json=?,authorization_basis_json=?,worker_explanation=? WHERE execution_id=? AND request_id=?")
+        .run(canonical(input.reply), canonical(input.authorizationBasis), input.workerExplanation ?? null, input.executionId, input.requestId);
       this.db.prepare("UPDATE executions SET revision=revision+1,updated_at=? WHERE execution_id=?")
         .run(instant, input.executionId);
       this.db.prepare("INSERT INTO operations VALUES(?,?,?,?,?,?,?)")
         .run(`op_${randomUUID()}`, input.scopeId, "respond", input.idempotencyKey, payloadHash,
           canonical({ taskId: input.taskId, executionId: input.executionId, requestId: input.requestId }), instant);
-      this.event(input.executionId, "input_response_intent", { requestId: input.requestId, requestRevision: input.requestRevision });
+      this.event(input.executionId, "input_response_intent", { requestId: input.requestId, requestRevision: input.requestRevision,
+        ...(input.workerExplanation === undefined ? {} : { worker_explanation: input.workerExplanation, worker_explanation_delivery: "intent_recorded" }) });
       return this.get(input.scopeId, input.taskId)!;
     });
   }
@@ -1156,8 +1193,9 @@ export class SqliteTaskStore {
     this.transaction(() => {
       const request = this.inputRequests(executionId).find((item) => item.requestId === requestId);
       if (!request || request.status !== "responding") throw new StoreConflict("REQUEST_EXPIRED");
-      this.db.prepare("UPDATE input_requests SET status='responded' WHERE request_id=?").run(requestId);
-      this.event(executionId, "input_response_acknowledged", { requestId });
+      this.db.prepare("UPDATE input_requests SET status='responded' WHERE execution_id=? AND request_id=?").run(executionId, requestId);
+      this.event(executionId, "input_response_acknowledged", { requestId,
+        ...(request.workerExplanation === null ? {} : { worker_explanation_delivery: "acknowledged" }) });
     });
   }
 
@@ -1168,7 +1206,8 @@ export class SqliteTaskStore {
       if (!request || request.status !== "responding") return;
       this.db.prepare("UPDATE input_requests SET status='unconfirmed' WHERE execution_id=? AND request_id=? AND status='responding'")
         .run(executionId, requestId);
-      this.event(executionId, "input_response_unconfirmed", { requestId, reason: "request_absent_after_reply_intent" });
+      this.event(executionId, "input_response_unconfirmed", { requestId, reason: "request_absent_after_reply_intent",
+        ...(request.workerExplanation === null ? {} : { worker_explanation_delivery: "unconfirmed" }) });
     });
   }
 
@@ -1189,7 +1228,8 @@ export class SqliteTaskStore {
         this.db.prepare("UPDATE input_requests SET status=? WHERE execution_id=? AND request_id=?")
           .run(status, executionId, request.requestId);
         this.event(executionId, status === "unconfirmed" ? "input_response_unconfirmed" : "input_request_expired",
-          { requestId: request.requestId, reason: "request_absent_in_exact_session_snapshot" });
+          { requestId: request.requestId, reason: "request_absent_in_exact_session_snapshot",
+            ...(request.workerExplanation === null ? {} : { worker_explanation_delivery: "unconfirmed" }) });
       }
       if (expired.length) this.db.prepare("UPDATE executions SET revision=revision+1,updated_at=? WHERE execution_id=?")
         .run(now(), executionId);
