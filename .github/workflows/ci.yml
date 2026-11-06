@@ -1,0 +1,23 @@
+name: Validate Pi Agents
+on: [push, pull_request]
+jobs:
+  validate:
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: plugins/pi-agents/runtime/package-lock.json
+      - run: npm ci --ignore-scripts
+        working-directory: plugins/pi-agents/runtime
+      - run: npm run check && npm run bundle && npm test
+        working-directory: plugins/pi-agents/runtime
+      - run: node scripts/build_bundle.mjs --check && node --test tests/packaging.test.mjs evaluation/harness.test.mjs && node evaluation/harness.mjs validate
+        working-directory: plugins/pi-agents
+      - run: node scripts/build_bundle.mjs --out "${{ runner.temp }}/pi-agents.zip" && node scripts/smoke_installed_bundle.mjs "${{ runner.temp }}/pi-agents.zip"
+        working-directory: plugins/pi-agents

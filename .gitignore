@@ -1,0 +1,7 @@
+.work/
+**/__pycache__/
+**/.pytest_cache/
+*.py[cod]
+.DS_Store
+plugins/pi-agents/runtime/node_modules/
+plugins/pi-agents/runtime/dist/

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "pi_agents": {
+      "command": "node",
+      "args": ["./bin/pi-agents.mjs", "mcp"],
+      "cwd": "./"
+    }
+  }
+}

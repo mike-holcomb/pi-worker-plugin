@@ -1,0 +1,4 @@
+interface:
+  display_name: "Pi Agents"
+  short_description: "Delegate, monitor, and verify Pi work"
+  default_prompt: "Use $pi-agents:pi-agents to prepare a bounded task, monitor it, and verify the deliverable."

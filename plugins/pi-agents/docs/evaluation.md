@@ -1,0 +1,7 @@
+# V2 evaluation
+
+The twelve frozen v2 scenarios live in [`evaluation/v2-cases.json`](../evaluation/v2-cases.json), with a no-inference Node harness at [`evaluation/harness.mjs`](../evaluation/harness.mjs). Each scenario has a typed task packet, pinned fixture file hashes, automated observations, and an explicit parent review criterion. The harness prepares a fresh workspace, records an external baseline, and checks an exported immutable summary artifact by SHA-256. See the [evaluation instructions](../evaluation/README.md) for commands and exit codes.
+
+These scenarios exercise evidence quality and coordination decisions: narrow lookup, log diagnosis, retry bounds, coupled serialization, contradictory evidence, bounded negative claims, stale snapshots, scope growth, dirty workspaces, false completion, context reconciliation, and failed checks. The coupled wire-format case tests only the v2 envelope and missing-version handling.
+
+No scenario result is claimed until a v2 task actually runs. Automated text markers and local unit tests are triage evidence; the parent must inspect source support, the final manifest, and the exact submitted artifacts before recording acceptance. Record task/execution/session/message IDs, model and destination, limits, elapsed time, observed usage or `not_captured`, review decision, and any unresolved state. Keep each run's workspace, baseline, and exported artifacts separate.

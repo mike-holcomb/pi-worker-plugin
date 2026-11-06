@@ -1,0 +1,20 @@
+{
+  "name": "pi-worker-plugin",
+  "interface": {
+    "displayName": "Pi Worker Plugin"
+  },
+  "plugins": [
+    {
+      "name": "pi-agents",
+      "source": {
+        "source": "local",
+        "path": "./plugins/pi-agents"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

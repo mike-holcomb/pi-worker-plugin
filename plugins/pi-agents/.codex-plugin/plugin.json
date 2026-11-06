@@ -1,0 +1,31 @@
+{
+  "name": "pi-agents",
+  "version": "0.1.0",
+  "description": "Delegate bounded work through durable Pi tasks and verify evidence.",
+  "author": {
+    "name": "Mike Holcomb",
+    "url": "https://github.com/mike-holcomb"
+  },
+  "homepage": "https://github.com/mike-holcomb/pi-worker-plugin",
+  "repository": "https://github.com/mike-holcomb/pi-worker-plugin",
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Pi Agents",
+    "shortDescription": "Delegate, monitor, and verify Pi work",
+    "longDescription": "Durable Pi tasks with bounded handoffs, exact-session recovery and independent parent verification.",
+    "developerName": "Mike Holcomb",
+    "category": "Productivity",
+    "capabilities": [],
+    "websiteURL": "https://github.com/mike-holcomb/pi-worker-plugin",
+    "defaultPrompt": [
+      "Prepare a bounded Pi task and verify its result."
+    ]
+  },
+  "license": "MIT",
+  "keywords": [
+    "pi",
+    "delegation",
+    "verification"
+  ]
+}

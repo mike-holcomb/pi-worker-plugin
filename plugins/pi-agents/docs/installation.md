@@ -1,0 +1,78 @@
+# Installation and configuration
+
+## Local installation
+
+Build the bundle first, then install this repository as a local Codex marketplace:
+
+```bash
+codex plugin marketplace add /absolute/path/pi-worker-plugin
+codex plugin add pi-agents@pi-worker-plugin
+```
+
+Start a fresh session and select `pi-agents:pi-agents`. Node on the host PATH must be `>=24.15 <25`. No Pi CLI, backend server, or startup dependency download is needed. These commands describe local installation; a published remote tag is not yet available.
+
+## Private configuration
+
+Set `PI_AGENTS_CONFIG` to an absolute JSON configuration file. By default it is `config.json` in the state directory. Set `PI_AGENTS_STATE_DIR` to relocate state. macOS defaults to `~/Library/Application Support/pi-agents`; Linux defaults to `$XDG_STATE_HOME/pi-agents` or `~/.local/state/pi-agents`.
+
+A keyless local OpenAI-compatible server:
+
+```json
+{
+  "schema_version": 1,
+  "project_roots": ["/absolute/projects"],
+  "read_roots": [],
+  "providers": {
+    "local": {
+      "kind": "openai-compatible",
+      "base_url": "http://127.0.0.1:8124/v1",
+      "api": "openai-completions",
+      "models": {
+        "my-model": { "context_window": 131072, "max_tokens": 16384, "reasoning": false, "input": ["text"] }
+      }
+    }
+  },
+  "models": {
+    "standard": { "provider_id": "local", "model_id": "my-model", "destination": "local" }
+  },
+  "limits": {
+    "concurrency": 2,
+    "queue_timeout_seconds": 600,
+    "execution_timeout_seconds": 1800,
+    "finalization_timeout_seconds": 60,
+    "artifact_bytes": 52428800
+  }
+}
+```
+
+Pi 1.5.0's OpenAI transport requires a nonempty key. For a loopback provider without `api_key_env`, the adapter supplies the non-secret placeholder `pi-local`. Non-local endpoints require a credential environment variable.
+
+Native provider kinds are `openai`, `anthropic`, `google`, and `openrouter`. Set `base_url` explicitly and `api_key_env` to the name of an environment variable available to the supervisor. Select a model in Pi's pinned catalog. Common endpoints are `https://api.openai.com/v1`, `https://api.anthropic.com`, `https://generativelanguage.googleapis.com`, and `https://openrouter.ai/api/v1`. Hosted model `destination` must equal the configured base URL. Custom providers support `openai-completions` (default) and `openai-responses`, with explicit model metadata.
+
+```json
+{
+  "kind": "anthropic",
+  "base_url": "https://api.anthropic.com",
+  "api_key_env": "ANTHROPIC_API_KEY"
+}
+```
+
+Credentials remain in the host environment. Their values are not stored in launch contracts or included in shell-tool environments. Provider IDs and model aliases are operator-defined. OAuth login, auth-file discovery, attached services, and project extension discovery are unsupported.
+
+## Policy and recovery
+
+Health and `dry_run` never start inference. Live admission freezes the selected route, policy, model, and instructions. Existing tasks retain this contract after configuration changes. A follow-up must preserve the model route and profile; it may declare new scoped writes and receives a new report directory.
+
+`bounded-inspect` permits scoped reads, progress, and assigned report writes. `bounded-build` permits declared file edits after parent permission and explicit parent-approved shell/network operations. Symlink paths are rejected. File tools enforce these bounds; approved arbitrary shell commands run as host-user code and are not an operating-system filesystem or network sandbox. The parent must review the command's requested effects before approval.
+
+Each task has exclusive Pi storage ownership and an owned worker process group. Supervisor restart reconnects to a surviving worker. Worker restart reopens the same SQLite store after confirming the prior owner and process group stopped. Submission IDs deduplicate dispatch. Permission gates survive restart; an interrupted nested effect is not replayed, and another attempt needs fresh approval.
+
+Cancellation is durable. Observe the task until stop confirmation and finalization; a transport timeout is not cancellation. Unknown process identity or uncertain stopping retains reservations for operator recovery. Do not remove state or ownership records while tasks are unresolved.
+
+Build workers have `webfetch` and DuckDuckGo `websearch` tools. Each request needs parent permission, returns at most 64 KiB of response text, and does not follow redirects. Network effects use the same non-replayable nested execution as file and shell effects.
+
+Set `PI_AGENTS_CAPTURE_DIAGNOSTICS=1` to retain bounded permission and effect-status diagnostics. These contain operation IDs and outcomes, without query text, file contents, or shell output. Capture is advisory and may have gaps or repeated status lines across reconnection. The supervisor retains at most 64 KiB per execution for seven days; use the task diagnostic cursor to read it.
+
+## Upgrade and rollback
+
+Keep this plugin's state separate from OpenCode state. There is no OpenCode database migration. Back up the state directory only after stopping resolved workers and the daemon. Install an earlier Pi bundle and restore a matching backup to roll back; do not open newer schemas with older code. Pi dependencies are pinned because their upstream API is experimental.
