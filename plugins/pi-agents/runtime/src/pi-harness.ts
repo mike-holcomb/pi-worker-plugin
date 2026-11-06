@@ -17,8 +17,10 @@ import { networkTools } from "./pi-network-tools.js";
 import { checkedPath, createBoundedEnv } from "./pi-env.js";
 import type { PendingRequest, TurnObservation, BackendEvent } from "./backend.js";
 
+import { validateWorkerExplanation } from "./request-feedback.js";
+
 type Request = { id: string; sessionId: string; messageId: string; taskId: number; tool: string;
-  args: string; status: "pending" | "allow_once" | "deny" | "consumed"; uncertain: boolean };
+  args: string; status: "pending" | "allow_once" | "deny" | "consumed"; uncertain: boolean; workerExplanation?: string };
 type Turn = { sessionId: string; submissionId: number; promptHash: string };
 type State = { markers: Record<string, string>; policies: Record<string, string>;
   messages: Record<string, string>; turns: Record<string, Turn>; requests: Record<string, Request>; cancelled: Record<string, boolean> };
@@ -81,13 +83,18 @@ export class PiHarness {
           checkedPath(policy, String(input.path), true).startsWith(policy.reportPath + "/");
         if (!reportWrite) await w.permission(effect.name, input, api, ctx);
         const result = await api.executeTool(internal, input, ctx, { key: "effect" });
+        // A completed process with a nonzero exit is a known check result, not an interrupted effect.
+        const exitCode = effect.name === "bash" && result.structuredOutput && typeof result.structuredOutput === "object"
+          ? (result.structuredOutput as { exitCode?: unknown }).exitCode : undefined;
+        const knownProcessExit = typeof exitCode === "number" && Number.isInteger(exitCode);
+        const uncertain = result.isError === true && !knownProcessExit;
         await api.commit(async tx => {
           const draft = await tx.doc(WorkerState);
           const request = draft.requests[api.taskId];
-          if (request) { request.status = "consumed"; request.uncertain = result.isError === true; }
+          if (request) { request.status = "consumed"; request.uncertain = uncertain; }
         }, ctx);
         w.emit({ type: "worker.diagnostic", sessionId: String(api.conversationId),
-          data: { text: `${effect.name} task ${api.taskId}: ${result.isError ? "failed; effects may be uncertain" : "completed"}` } });
+          data: { text: `${effect.name} task ${api.taskId}: ${uncertain ? "failed; effects may be uncertain" : knownProcessExit ? `process exited ${exitCode}` : "completed"}` } });
         // The nested call reports interruptions without executing its effect again.
         return { ...text(typeof result.structuredOutput === "string" ? result.structuredOutput : JSON.stringify(result.structuredOutput ?? result.diagnostics)), isError: result.isError,
           ...(effect.structuredOutputSchema && result.structuredOutput !== undefined ? { structuredOutput: result.structuredOutput } : {}) };
@@ -132,7 +139,8 @@ export class PiHarness {
     }, ctx);
     while (true) {
       const request = (await api.snapshot(WorkerState, ctx))!.requests[id]!;
-      if (request.status === "deny") throw new Error("parent denied this exact operation");
+      if (request.status === "deny") throw new Error("parent denied this exact operation" +
+        (request.workerExplanation === undefined ? "" : "\nParent feedback within the existing assignment: " + request.workerExplanation));
       if (request.status === "allow_once" || request.status === "consumed") return;
       await awaitWithContext(new Promise(resolve => setTimeout(resolve, 100)), ctx);
     }
@@ -210,16 +218,19 @@ export class PiHarness {
       finished, uncertainEffects: Object.values(state!.requests).filter(r => r.sessionId === sessionId && r.messageId === messageId && r.uncertain).slice(0, 64).map(r => ({ requestId: r.id, tool: r.tool })),
       error: record.status === "unanswered" ? aborted ? JSON.stringify({ name: "MessageAbortedError" }) : record.reason + ": " + (live?.runFailure?.detail ?? "") : null };
   }
-  async reply(request: PendingRequest, reply: "allow_once" | "deny") {
+  async reply(request: PendingRequest, reply: "allow_once" | "deny", workerExplanation?: string) {
+    validateWorkerExplanation(reply, workerExplanation);
     await this.harness.commit(async tx => {
       const state = await tx.doc(WorkerState);
       const current = state.requests[request.id];
-      if (!current || current.sessionId !== request.sessionId || state.messages[current.sessionId] !== current.messageId) throw new Error("stale or wrong-session permission request");
+      if (!current || current.sessionId !== request.sessionId || state.messages[current.sessionId] !== current.messageId ||
+        (request.detail as { messageId?: unknown } | null)?.messageId !== current.messageId || state.cancelled[current.sessionId]) throw new Error("stale or wrong-session permission request");
       if (current.status !== "pending") {
-        if (current.status === reply || current.status === "consumed" && reply === "allow_once") return;
+        if ((current.status === reply || current.status === "consumed" && reply === "allow_once") && current.workerExplanation === workerExplanation) return;
         throw new Error("permission response conflict");
       }
       current.status = reply;
+      if (workerExplanation !== undefined) current.workerExplanation = workerExplanation;
     }, context);
     this.emit({ type: "worker.diagnostic", sessionId: request.sessionId,
       data: { text: `permission ${request.id}: ${reply}` } });

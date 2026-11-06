@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/server";
 import { StdioServerTransport } from "@modelcontextprotocol/server/stdio";
+import { WorkerExplanationSchema } from "./request-feedback.js";
 import { z } from "zod";
 import { ProgressReadSchema } from "./progress.js";
 import { TaskPacketSchema, ReviewSchema } from "./contracts.js";
@@ -25,7 +26,7 @@ export function createMcpServer(call: (method: string, params: unknown) => Promi
   const server = new McpServer({ name: "pi-agents", version: "0.2.0" });
   server.registerTool("pi_health", {
     description: "Read toolkit and configured backend health without inference.",
-    inputSchema: z.object({ backend_id: Id.optional() }).strict(),
+    inputSchema: z.object({ backend_id: Id.optional(), shell_preflight: z.boolean().optional() }).strict(),
     annotations: { readOnlyHint: true },
   }, async (input) => result(await call("health", input)));
   server.registerTool("pi_start_task", {
@@ -81,7 +82,7 @@ export function createMcpServer(call: (method: string, params: unknown) => Promi
   server.registerTool("pi_respond_to_request", {
     description: "Reply once to a current permission or question request.",
     inputSchema: z.object({ ...Scope, task_id: Id, execution_id: Id, request_id: Id, request_revision: Revision,
-      reply: z.union([z.enum(["allow_once", "deny"]), z.array(z.array(Id))]), authorization_basis: Id, idempotency_key: Key }).strict(),
+      reply: z.union([z.enum(["allow_once", "deny"]), z.array(z.array(Id))]), authorization_basis: Id, worker_explanation: WorkerExplanationSchema.optional(), idempotency_key: Key }).strict(),
   }, async (input) => result(await call("respond_to_request", input)));
   server.registerTool("pi_read_artifact", {
     description: "Read a bounded range of an immutable artifact.",

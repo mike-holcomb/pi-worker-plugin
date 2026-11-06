@@ -48,3 +48,21 @@ test("MCP review preparation retains exact identity and uses a compact text poin
     assert.doesNotMatch(JSON.stringify(response.content), /Inspect sources/);
   } finally { await client.close(); await server.close(); }
 });
+
+test("MCP exposes opt-in preflight and bounded denial feedback without changing audit fields", async () => {
+  const calls: Array<{ method: string; params: unknown }> = [];
+  const server = createMcpServer(async (method, params) => { calls.push({ method, params }); return { ok: true }; });
+  const client = new Client({ name: "feedback-test", version: "1" });
+  const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+  try {
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+    await client.callTool({ name: "pi_health", arguments: { shell_preflight: true } });
+    const reply = { scope_id: "scope", task_id: "task", execution_id: "exec", request_id: "30", request_revision: 1,
+      reply: "deny", authorization_basis: "audit record", worker_explanation: "Finish the report.", idempotency_key: "mcp-denial-key-00001" };
+    await client.callTool({ name: "pi_respond_to_request", arguments: reply });
+    assert.deepEqual(calls, [{ method: "health", params: { shell_preflight: true } }, { method: "respond_to_request", params: reply }]);
+    const oversized = await client.callTool({ name: "pi_respond_to_request", arguments: { ...reply, worker_explanation: "é".repeat(2049) } });
+    assert.equal(oversized.isError, true);
+    assert.equal(calls.length, 2);
+  } finally { await client.close(); await server.close(); }
+});

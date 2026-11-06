@@ -39,9 +39,9 @@ export class PiBackend implements WorkerBackend {
       await new Promise(resolve => setTimeout(resolve, 100));
     }
   }
-  async replyToRequest(request: PendingRequest, reply: "allow_once" | "deny" | string[][], control?: RequestControl) {
+  async replyToRequest(request: PendingRequest, reply: "allow_once" | "deny" | string[][], control?: RequestControl, workerExplanation?: string) {
     if (Array.isArray(reply)) throw new Error("native questions are unsupported");
-    await this.request("reply", { request, reply }, control);
+    await this.request("reply", { request, reply, ...(workerExplanation === undefined ? {} : { workerExplanation }) }, control);
   }
   async abortSession(sessionId: string, control?: RequestControl) { return await this.request("abort", { sessionId }, control) === true; }
   async readResult(sessionId: string, messageId: string, control?: RequestControl) { return await this.request("result", { sessionId, messageId }, control) as { text: string; structured: unknown }; }

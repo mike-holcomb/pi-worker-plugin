@@ -325,7 +325,7 @@ test("old v2 database is backed up before schema changes and retains its data", 
     db.close();
     const upgraded = new DatabaseSync(filename, { readOnly: true });
     assert.equal((upgraded.prepare("SELECT value FROM migration_marker").get() as { value: string }).value, "committed in WAL");
-    assert.equal((upgraded.prepare("SELECT MAX(version) AS version FROM schema_version").get() as { version: number }).version, 3);
+    assert.equal((upgraded.prepare("SELECT MAX(version) AS version FROM schema_version").get() as { version: number }).version, 4);
     upgraded.close();
     const task = store.start({ scopeId: "coord_migrate", idempotencyKey: "start-migrate-000001", workspace: "/tmp/project",
       packet: { objective: "Inspect" }, model: "local/model", profile: "bounded-inspect",
@@ -368,7 +368,7 @@ for (const backupFails of [false, true]) {
         baselineHash: "a".repeat(64), promptHash: "b".repeat(64) });
       initial.close();
       const old = new DatabaseSync(filename);
-      old.exec("ALTER TABLE executions DROP COLUMN worker_instance_id");
+      old.exec("ALTER TABLE executions DROP COLUMN worker_instance_id; UPDATE schema_version SET version=3");
       old.close();
 
       if (backupFails) {
@@ -421,12 +421,12 @@ test("a newer schema is refused without changing stored data or creating a migra
   const filename = join(dir, "state.sqlite");
   try {
     const db = new DatabaseSync(filename);
-    db.exec("CREATE TABLE schema_version(version INTEGER); INSERT INTO schema_version VALUES(4)");
+    db.exec("CREATE TABLE schema_version(version INTEGER); INSERT INTO schema_version VALUES(5)");
     db.exec("CREATE TABLE retained(value BLOB); INSERT INTO retained VALUES(X'000102ff')");
     db.close();
-    assert.throws(() => new SqliteTaskStore(filename), /schema version 4 is newer/);
+    assert.throws(() => new SqliteTaskStore(filename), /schema version 5 is newer/);
     const check = new DatabaseSync(filename, { readOnly: true });
-    assert.deepEqual(check.prepare("SELECT version FROM schema_version").get(), Object.assign(Object.create(null), { version: 4 }));
+    assert.deepEqual(check.prepare("SELECT version FROM schema_version").get(), Object.assign(Object.create(null), { version: 5 }));
     assert.equal((check.prepare("SELECT hex(value) AS value FROM retained").get() as { value: string }).value, "000102FF");
     check.close();
     assert.deepEqual(readdirSync(dir), ["state.sqlite"]);

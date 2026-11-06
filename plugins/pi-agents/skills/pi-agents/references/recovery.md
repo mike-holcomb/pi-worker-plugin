@@ -11,3 +11,9 @@ For a current permission request, use its exact request ID and revision. Reply o
 ## Progress gaps
 
 Retain scope, task, execution, and the separate opaque progress cursor. A progress read never repairs history or queries the backend. After restart, disconnect, retention/aggregate overflow, or terminal-buffer expiry, a gap explicitly marks missed history. Consume the optional bounded snapshot, advance to the returned head cursor, and continue with future checkpoints. A missing snapshot or unavailable channel does not authorize replacement work or cancellation. Final reports and review evidence remain durable through the existing workflow.
+
+## Denial feedback and registration failures
+
+`authorization_basis` records parent authority, not model instructions. Use the separate optional `worker_explanation` only with a permission denial to communicate the next action within the same assignment. Acknowledgement proves durable worker receipt, not compliance. A subsequent similar operation remains independently gated. Do not replay a reply with uncertain delivery. General in-flight steering is unavailable: deny the exact effect, observe, cancel and wait for confirmed stopping, or start a new linked task when the objective changes.
+
+An `input_request_registration_failed` event is a coordinator blocker, even if the phase remains running. Observe its exact execution and request and the unknown observation; cancel and wait for confirmed stopping if registration cannot recover. Ownership and reservations remain held until stopping is established. Native request numbers can recur in other executions and are never sufficient identity by themselves.

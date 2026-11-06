@@ -4,7 +4,7 @@ The plugin registers twelve `pi_` tools. Use their exposed input schemas for fie
 
 | Tool | Use |
 | --- | --- |
-| `pi_health` | Check runtime, backend compatibility, queue, and storage without inference. |
+| `pi_health` | Check runtime, backend compatibility, queue, and storage without inference; opt into `shell_preflight: true` for bounded daemon shell/temp/IPC diagnostics. |
 | `pi_start_task` | Preview with `dry_run: true`, or admit one packet and return durable identities. |
 | `pi_get_task` | Read current execution state, pending requests, artifacts, review, and events after a cursor. |
 | `pi_get_progress` | Read bounded unseen checkpoints for the required exact execution, using an execution-bound progress cursor. |
@@ -12,7 +12,7 @@ The plugin registers twelve `pi_` tools. Use their exposed input schemas for fie
 | `pi_wait_tasks` | Wait up to 30 seconds for a material change; expiration does not stop work. |
 | `pi_continue_task` | Create a follow-up execution after a resolved predecessor, with `resume` or `fresh` context. |
 | `pi_cancel_task` | Record a stop request; inspect again for confirmed stopping. |
-| `pi_respond_to_request` | Reply to an exact current request with its revision and authorization basis. |
+| `pi_respond_to_request` | Reply to an exact current request with its revision and audit basis; permission denials may include `worker_explanation`. |
 | `pi_read_artifact` | Read a bounded range of a captured immutable artifact. |
 | `pi_prepare_review` | Prepare exact-execution criteria, artifact citations, readiness, and a review template without accepting worker claims. |
 | `pi_record_review` | Append the parent's criterion-by-criterion evidence decision. |
@@ -21,7 +21,11 @@ Start and continue return after durable acceptance, which may still be queued. K
 
 For event pagination, repeat `pi_get_task` with `after_cursor` while `has_more_events` is true. An oversized event carries `detailTruncated.cursor`; pass it as `event_detail_cursor` to `pi_get_task` and follow `event_detail.nextDetailCursor` until null. Decode and concatenate the base64 chunks to recover the exact durable detail. The preview is not the full blocker text.
 
-The diagnostic executable supports `pi-agents doctor` and the documented daemon, task, and artifact commands when installed. It uses the same durable services as MCP. Keep configuration, reports, state, and credentials outside the installed plugin; `PI_AGENTS_STATE_DIR` selects a private state location. Pi is bundled; configure an explicit authorized provider/model and environment credentials.
+`authorization_basis` is audit-only and never becomes worker-visible task instructions. Optional `worker_explanation` is a separate nonempty string, at most 4,096 UTF-8 bytes, valid only for a permission `deny`. Retain scope/task/execution/request/revision and the exact payload on retry; changing the explanation with the same key is an idempotency conflict. The intent event records the supplied explanation; the acknowledgement event reports `worker_explanation_delivery: "acknowledged"` only after durable worker acceptance. A vanished request with a lost acknowledgement remains unconfirmed and is not resent. None of these states proves model compliance. Cancelled workers take precedence over feedback. General steering is unavailable; scope changes require a new linked task after confirmed stopping.
+
+Native `request_id` is unique only within an execution. Always retain the scope, task, execution, request ID, and request revision together, including when another worker exposes the same number.
+
+The diagnostic executable supports `pi-agents doctor` and the documented daemon, task, and artifact commands when installed. It uses the same durable services as MCP. Keep configuration, reports, state, and credentials outside the installed plugin; `PI_AGENTS_STATE_DIR` selects a private state location. Pi is bundled; configure an explicit authorized provider/model and environment credentials. `pi-agents doctor --shell-preflight` labels results `local_process`; MCP `pi_health` with `shell_preflight: true` labels the daemon's environment. Both use fixed probes, private temporary storage, and bounded statuses without exposing PATH/HOME values or credentials. Readiness is representative and does not prove a particular project check will pass.
 
 Keep each execution's `next_cursor` after consuming a progress page. `after_cursor` is exclusive; unchanged streams return empty deltas. Retrying the same retained cursor deliberately replays its page. Progress cursors are opaque strings, distinct from numeric lifecycle event cursors, and cannot cross executions or continuations. Defaults are five updates/8 KiB, with caps of twenty/32 KiB. The byte budget covers the structured progress response; MCP framing adds transport overhead. Use `include_snapshot` only when needed; a large snapshot plus checkpoint may require a larger byte budget.
 

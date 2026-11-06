@@ -12,8 +12,8 @@ async function main(args: string[]): Promise<number> {
   if (args[0] === "worker" && args[1] === "run" && args.length === 4) {
     await (await import("./worker-runtime.js")).runWorker(args[2]!, args[3]!); return 0;
   }
-  if (args.length === 1 && args[0] === "doctor") {
-    process.stdout.write(`${JSON.stringify(await doctorAsync(), null, 2)}\n`);
+  if (args[0] === "doctor" && (args.length === 1 || args.length === 2 && args[1] === "--shell-preflight")) {
+    process.stdout.write(`${JSON.stringify(await doctorAsync({ shellPreflight: args[1] === "--shell-preflight" }), null, 2)}\n`);
     return 0;
   }
   if (args.length === 1 && args[0] === "mcp") {
@@ -86,7 +86,7 @@ async function main(args: string[]): Promise<number> {
     } catch (error) { output.destroy(); rmSync(args[6]!, { force: true }); throw error; }
     return 0;
   }
-  process.stderr.write("Usage: pi-agents doctor|mcp|daemon start|status|stop|tasks list|get|diagnostics|wait|cancel|artifacts read|export\n");
+  process.stderr.write("Usage: pi-agents doctor [--shell-preflight]|mcp|daemon start|status|stop|tasks list|get|diagnostics|wait|cancel|artifacts read|export\n");
   return 2;
 }
 
