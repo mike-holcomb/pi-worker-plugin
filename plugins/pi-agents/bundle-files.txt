@@ -1,7 +1,7 @@
 # Reviewed release files; never infer contents from a recursive archive.
 .codex-plugin/plugin.json
-.mcp.json
 .gitignore
+.mcp.json
 CHANGELOG.md
 LICENSE
 README.md
@@ -15,9 +15,22 @@ docs/installation.md
 docs/progress.md
 docs/validation.md
 evaluation/README.md
-evaluation/v2-cases.json
-evaluation/harness.mjs
-evaluation/harness.test.mjs
+evaluation/fixtures/audit-complete/README.md
+evaluation/fixtures/audit-complete/metadata.json
+evaluation/fixtures/audit-complete/plugins/alpha/README.md
+evaluation/fixtures/audit-complete/plugins/alpha/implementation.json
+evaluation/fixtures/audit-complete/plugins/alpha/skills/audit/SKILL.md
+evaluation/fixtures/audit-complete/plugins/beta/README.md
+evaluation/fixtures/audit-complete/plugins/beta/implementation.json
+evaluation/fixtures/audit-complete/plugins/beta/skills/author/SKILL.md
+evaluation/fixtures/audit-sampled/README.md
+evaluation/fixtures/audit-sampled/metadata.json
+evaluation/fixtures/audit-sampled/plugins/alpha/README.md
+evaluation/fixtures/audit-sampled/plugins/alpha/implementation.json
+evaluation/fixtures/audit-sampled/plugins/alpha/skills/audit/SKILL.md
+evaluation/fixtures/audit-sampled/plugins/beta/README.md
+evaluation/fixtures/audit-sampled/plugins/beta/implementation.json
+evaluation/fixtures/audit-sampled/plugins/beta/skills/author/SKILL.md
 evaluation/fixtures/context-reconcile/decision-log.md
 evaluation/fixtures/context-reconcile/handoff.md
 evaluation/fixtures/context-reconcile/source.py
@@ -49,10 +62,14 @@ evaluation/fixtures/stale-snapshot/snapshot.json
 evaluation/fixtures/wire-serialization/consumer.py
 evaluation/fixtures/wire-serialization/producer.py
 evaluation/fixtures/wire-serialization/test_wire.py
+evaluation/harness.mjs
+evaluation/harness.test.mjs
+evaluation/v2-cases.json
 runtime/package-lock.json
 runtime/package.json
 schemas/progress-checkpoint.schema.json
 schemas/progress-read.schema.json
+schemas/review-preparation.schema.json
 schemas/review.schema.json
 schemas/task-packet.schema.json
 schemas/worker-report.schema.json
@@ -61,6 +78,8 @@ scripts/lib/zip.mjs
 scripts/smoke_installed_bundle.mjs
 skills/pi-agents/SKILL.md
 skills/pi-agents/agents/openai.yaml
+skills/pi-agents/assets/audit-inspect.md
+skills/pi-agents/assets/audit-inspect.packet.json
 skills/pi-agents/assets/task-full.md
 skills/pi-agents/assets/task-lite.md
 skills/pi-agents/assets/task-standard.md
@@ -69,6 +88,7 @@ skills/pi-agents/references/operations.md
 skills/pi-agents/references/orchestration.md
 skills/pi-agents/references/recovery.md
 skills/pi-agents/references/reporting.md
+skills/pi-agents/references/review-preparation.md
 skills/pi-agents/references/tools.md
 skills/pi-agents/references/verification.md
 tests/packaging.test.mjs

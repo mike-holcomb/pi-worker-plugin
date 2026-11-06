@@ -6,6 +6,7 @@ import type { Review } from "./contracts.js";
 import type { UserConfig } from "./config.js";
 import type { ManagedLaunchContract } from "./launch-config.js";
 import type { ArtifactRegistration } from "./artifacts.js";
+import { ARTIFACT_REFERENCE_FORMAT, ARTIFACT_REFERENCE_PATTERN, ReviewInputError } from "./review-input.js";
 
 export type ExecutionPhase = "queued" | "dispatching" | "running" | "waiting_input" | "cancelling" | "finalizing" | "completed" | "failed" | "cancelled" | "timed_out";
 export type Observation = "current" | "reconciling" | "unknown";
@@ -737,6 +738,12 @@ export class SqliteTaskStore {
     return row ? { backendId: row.backend_id, sessionId: row.session_id, messageId: row.user_message_id, acknowledged: Boolean(row.acknowledged) } : null;
   }
 
+  eventCursor(executionId: string): number {
+    const row = this.db.prepare("SELECT COALESCE(MAX(sequence),0) AS cursor FROM events WHERE execution_id=?")
+      .get(executionId) as { cursor: number };
+    return row.cursor;
+  }
+
   events(executionId: string, afterCursor = 0, limit = 100): Array<{ cursor: number; kind: string; detail: unknown; createdAt: string }> {
     const rows = this.db.prepare("SELECT sequence,kind,detail_json,created_at FROM events WHERE execution_id=? AND sequence>? ORDER BY sequence LIMIT ?")
       .all(executionId, afterCursor, limit) as Array<{ sequence: number; kind: string; detail_json: string; created_at: string }>;
@@ -1270,18 +1277,25 @@ export class SqliteTaskStore {
           !artifacts.some((entry) => entry.mediaType === "text/markdown")) throw new StoreConflict("INVALID_STATE");
         const reviewed = new Set<string>();
         for (const criterion of review.criteria) {
-          if (!declared.has(criterion.id) || reviewed.has(criterion.id)) throw new StoreConflict("INVALID_STATE");
+          if (!declared.has(criterion.id)) throw new ReviewInputError({ criterion_id: criterion.id, reason: "undeclared_criterion" });
+          if (reviewed.has(criterion.id)) throw new ReviewInputError({ criterion_id: criterion.id, reason: "duplicate_criterion" });
           reviewed.add(criterion.id);
-          if (criterion.result === "satisfied" && criterion.evidence.length === 0) throw new StoreConflict("INVALID_STATE");
-          for (const reference of criterion.evidence) {
-            const match = /^artifact:([^@\s]+)@sha256:([0-9a-f]{64})$/.exec(reference);
-            if (!match || byId.get(match[1]!)?.sha256 !== match[2]) throw new StoreConflict("INVALID_STATE");
+          if (criterion.result === "satisfied" && criterion.evidence.length === 0)
+            throw new ReviewInputError({ criterion_id: criterion.id, reason: "missing_evidence" });
+          for (const [index, reference] of criterion.evidence.entries()) {
+            const match = ARTIFACT_REFERENCE_PATTERN.exec(reference);
+            const details = { criterion_id: criterion.id, evidence_index: index, required_format: ARTIFACT_REFERENCE_FORMAT };
+            if (!match) throw new ReviewInputError({ ...details, reason: "malformed_reference" });
+            const artifact = byId.get(match[1]!);
+            if (!artifact) throw new ReviewInputError({ ...details, reason: "unknown_artifact" });
+            if (artifact.sha256 !== match[2]) throw new ReviewInputError({ ...details, reason: "hash_mismatch" });
           }
         }
         for (const [id, required] of declared) {
           if (!required) continue;
           const result = review.criteria.find((item) => item.id === id);
-          if (!result || result.result !== "satisfied" || result.evidence.length === 0) throw new StoreConflict("INVALID_STATE");
+          if (!result || result.result !== "satisfied") throw new ReviewInputError({ criterion_id: id, reason: "required_criterion_unsatisfied" });
+          if (result.evidence.length === 0) throw new ReviewInputError({ criterion_id: id, reason: "missing_evidence" });
         }
       }
       const created = now();

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/** Prepare and check the twelve frozen v2 scenarios. This tool never launches inference. */
+/** Prepare and check the frozen v2 scenarios. This tool never launches inference. */
 import { createHash } from 'node:crypto';
 import { copyFileSync, existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, realpathSync, writeFileSync } from 'node:fs';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
@@ -96,8 +96,8 @@ function loadManifest() {
   const packetSchemaBytes = readFileSync(packetSchemaPath);
   const packetSchema = JSON.parse(packetSchemaBytes.toString('utf8'));
   validateSchema(packetSchema);
-  if (manifest.schema_version !== 2 || manifest.manifest_status !== 'frozen-before-run' || !Array.isArray(manifest.cases) || manifest.cases.length !== 12)
-    die('expected twelve frozen v2 scenarios');
+  if (manifest.schema_version !== 2 || manifest.manifest_status !== 'frozen-before-run' || !Array.isArray(manifest.cases) || manifest.cases.length === 0)
+    die('expected a nonempty frozen v2 scenario manifest');
   const ids = new Set();
   let checks = 0, fixtures = 0;
   for (const scenario of manifest.cases) {

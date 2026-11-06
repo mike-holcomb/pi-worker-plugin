@@ -5,7 +5,7 @@ import { createWorkerModels } from "./pi-models.js";
 export function doctor() {
   const [major, minor] = process.versions.node.split(".").map(Number);
   const result = {
-    runtime: { node: process.versions.node, supportedNode: major === 24 && minor! >= 15 && process.platform !== "win32", toolkit: "0.1.0" },
+    runtime: { node: process.versions.node, supportedNode: major === 24 && minor! >= 15 && process.platform !== "win32", toolkit: "0.2.0" },
     configuration: { path: configurationPath(), status: "missing" as "missing" | "invalid" | "valid", message: "" },
     backend: { mode: "managed", binary: null, version: PI_VERSION, configuredModels: [] as string[],
       supportedVersions: [PI_VERSION], supportedForExecution: false },

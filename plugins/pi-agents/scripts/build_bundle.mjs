@@ -101,7 +101,7 @@ function walkRuntime(root, directory, entries) {
 }
 
 function validateV2(root, entries, manifest) {
-  if (!/^0\.1\.0(?:-[A-Za-z0-9.-]+)?$/.test(String(manifest.version ?? ""))) fail("plugin manifest must declare Pi version 0.1.0");
+  if (!/^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[A-Za-z0-9.-]+)?$/.test(String(manifest.version ?? ""))) fail("plugin manifest must declare a semantic Pi version");
   const missing = [...requiredV2].filter((name) => !entries.has(name)).sort();
   if (missing.length) fail(`v2 runtime assets are not listed: ${missing.join(", ")}`);
   if (manifest.mcpServers !== "./.mcp.json") fail("v2 manifest must reference ./.mcp.json");

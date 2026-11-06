@@ -10,6 +10,7 @@ import { ExecutionCoordinator } from "../coordinator.js";
 import { createMcpServer } from "../mcp.js";
 import { SupervisorService } from "../service.js";
 import { SqliteTaskStore, type StoredTask } from "../store.js";
+import { ReviewInputError } from "../review-input.js";
 
 const packet = {
   title: "Inspect", objective: "Inspect the selected workspace", tier: "lightweight",
@@ -121,7 +122,8 @@ test("T17: accepted review rejects failed or unchecked required criteria", async
       await assert.rejects(fx.service.handle("record_review", { scope_id: "scope", task_id: task.taskId,
         execution_id: task.executionId, expected_revision: task.revision,
         idempotency_key: `review-${result}-123456789`, review }), (error: unknown) =>
-        error instanceof Error && "code" in error && error.code === "INVALID_STATE");
+        error instanceof ReviewInputError && error.code === "INVALID_INPUT" &&
+          error.retry === "change_input" && error.details.reason === "required_criterion_unsatisfied");
     }
     assert.equal(fx.store.get("scope", task.taskId)?.reviewStatus, "pending");
   } finally { fx.close(); }

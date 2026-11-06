@@ -1,6 +1,6 @@
 # V2 MCP operations
 
-The plugin registers eleven `pi_` tools. Use their exposed input schemas for field spelling. `scope_id` is a durable parent workflow label. Generate a distinct 16–128 character `idempotency_key` for each mutation and reuse the exact key and payload when acknowledgement is lost. Read-only observation never starts inference.
+The plugin registers twelve `pi_` tools. Use their exposed input schemas for field spelling. `scope_id` is a durable parent workflow label. Generate a distinct 16–128 character `idempotency_key` for each mutation and reuse the exact key and payload when acknowledgement is lost. Read-only observation never starts inference.
 
 | Tool | Use |
 | --- | --- |
@@ -14,6 +14,7 @@ The plugin registers eleven `pi_` tools. Use their exposed input schemas for fie
 | `pi_cancel_task` | Record a stop request; inspect again for confirmed stopping. |
 | `pi_respond_to_request` | Reply to an exact current request with its revision and authorization basis. |
 | `pi_read_artifact` | Read a bounded range of a captured immutable artifact. |
+| `pi_prepare_review` | Prepare exact-execution criteria, artifact citations, readiness, and a review template without accepting worker claims. |
 | `pi_record_review` | Append the parent's criterion-by-criterion evidence decision. |
 
 Start and continue return after durable acceptance, which may still be queued. Keep the returned IDs, revision, and event cursor. Permission replies are `allow_once` or `deny`; `allow_once` is not a standing permission. Native questions may be unavailable on a backend. Treat `UNSUPPORTED_BACKEND` and `POLICY_MISMATCH` as dispatch gates, not prompts to use the old runner.
@@ -27,3 +28,7 @@ Keep each execution's `next_cursor` after consuming a progress page. `after_curs
 Progress is memory-first advisory data. Restart, disconnect, attribution or publication failure, and eviction return an explicit gap and a head recovery cursor, plus the latest snapshot when available. Attribution and publication failures use `attribution_failure` and increment `dropped_count` without reconnecting the event stream or changing the task lifecycle. Advance to the recovery cursor to consume future checkpoints. V1 does not recover checkpoints from message history. `unsupported` or `not_enabled` availability does not block normal execution. Runtime observation and last-checkpoint timestamps are separate; silence is not a stalled verdict.
 
 To wake a wait for checkpoints, supply `execution_id` and `after_progress_cursor` on that target. The wait returns only a progress hint, never checkpoint bodies. Read unseen checkpoints when coordination benefits; avoid tight polling. The read endpoint contains no steering/reply operation and invokes no model or backend inspection.
+
+For review preparation, retain exact identity and collect every bounded page before constructing the review criteria array. Preparation cursors bind the execution, revision, and evidence collection; stale pages must be restarted. See [review preparation](review-preparation.md) for fields, artifact roles, byte budgets, and a complete parent assembly example.
+
+Progress pages and hints expose `worker_checkpoint_observed` independently of `availability`/`progress_available`. It means at least one checkpoint remains observed in the retained supervisor buffer, not that the worker is currently active. An empty delta can still have `true`; restart/full eviction resets observation to `false`. Follow the [quiet-worker supervision pattern](../../../docs/progress.md) and retain both cursor types.

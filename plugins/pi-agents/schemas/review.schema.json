@@ -37,7 +37,8 @@
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "For accepted reviews, every entry must be only artifact:<artifact_id>@sha256:<64 lowercase hexadecimal characters>, belonging to the reviewed execution. Put explanatory prose in review-level rationale, freshness, or integration_checks. Non-accepted reviews may use narrative evidence."
           }
         },
         "required": [

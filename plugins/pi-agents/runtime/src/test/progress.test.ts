@@ -242,3 +242,25 @@ test("per-execution byte and dedup metadata caps disclose drops and preserve adm
   assert.equal(manager.append("exec", "source0", checkpoint).duplicate, true);
   assert.throws(() => manager.append("exec", "source0", { ...checkpoint, summary: "Changed claim" }), /conflicting/);
 });
+
+
+test("channel support and retained checkpoint observation are independent", () => {
+  let now = 0;
+  const manager = new ProgressManager({ now: () => now, terminalTtlMs: 10 });
+  assert.equal(manager.read("unknown").worker_checkpoint_observed, false);
+  for (const availability of ["supported", "unsupported", "not_enabled"] as const) {
+    manager.register(availability, availability);
+    assert.equal(manager.read(availability).worker_checkpoint_observed, false);
+    assert.equal(manager.hint(availability).worker_checkpoint_observed, false);
+  }
+  manager.append("supported", "milestone", checkpoint);
+  const cursor = manager.hint("supported").progress_cursor;
+  assert.equal(manager.read("supported").worker_checkpoint_observed, true);
+  manager.reset("supported", "disconnect");
+  assert.equal(manager.read("supported", { after_cursor: cursor }).worker_checkpoint_observed, true);
+  assert.equal(manager.hint("supported").worker_checkpoint_observed, true);
+  assert.equal(new ProgressManager().read("supported", { after_cursor: cursor }).worker_checkpoint_observed, false);
+  manager.markTerminal("supported"); now = 10; manager.maintain();
+  assert.equal(manager.read("supported").worker_checkpoint_observed, false);
+  assert.equal(manager.hint("supported").worker_checkpoint_observed, false);
+});

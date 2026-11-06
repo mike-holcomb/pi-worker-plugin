@@ -55,14 +55,20 @@ export class ArtifactStore {
     if (!Number.isSafeInteger(offset) || offset < 0 || !Number.isSafeInteger(maxBytes) || maxBytes < 1 || maxBytes > 65_536) {
       throw new RangeError("invalid artifact read range");
     }
+    const all = this.readAllVerified(entry);
+    const bytes = all.subarray(offset, offset + maxBytes);
+    const nextOffset = offset + bytes.byteLength < all.byteLength ? offset + bytes.byteLength : null;
+    return { bytes, nextOffset };
+  }
+
+  /** Internal evidence consumers need the complete verified object, without public read-range limits. */
+  readAllVerified(entry: ArtifactRegistration): Uint8Array {
     if (resolve(entry.path) !== join(this.objects, entry.sha256) || basename(entry.path) !== entry.sha256) throw new Error("artifact path is outside store");
     const stat = lstatSync(entry.path);
     if (!stat.isFile() || stat.isSymbolicLink() || stat.size !== entry.byteLength) throw new Error("artifact changed");
     const all = readFileSync(entry.path);
     if (createHash("sha256").update(all).digest("hex") !== entry.sha256) throw new Error("artifact changed");
-    const bytes = all.subarray(offset, offset + maxBytes);
-    const nextOffset = offset + bytes.byteLength < all.byteLength ? offset + bytes.byteLength : null;
-    return { bytes, nextOffset };
+    return all;
   }
 
   stagedFiles(): string[] {

@@ -1,0 +1,9 @@
+{
+  "inspect": {
+    "shell": false,
+    "network": false
+  },
+  "build": {
+    "shell": "permission_required"
+  }
+}

@@ -69,7 +69,7 @@ async function main(args: string[]): Promise<number> {
       let digest: string | null = null;
       while (true) {
         const result = await rpcRequest(stateDirectory(), "read_artifact", { scope_id: args[2], task_id: args[3],
-          execution_id: args[4], artifact_id: args[5], byte_offset: offset, max_bytes: 65_536 }) as
+          execution_id: args[4], artifact_id: args[5], byte_offset: offset, max_bytes: 65_536, encoding: "base64" }) as
           { sha256: string; content_base64: string; next_offset: number | null };
         if (digest && result.sha256 !== digest) throw new Error("artifact changed during export");
         digest = result.sha256;

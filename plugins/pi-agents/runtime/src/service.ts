@@ -12,6 +12,7 @@ import { doctor, doctorAsync } from "./doctor.js";
 import { SqliteTaskStore, StoreConflict, type StoredTask } from "./store.js";
 import { renderPrompt } from "./prompt.js";
 import { captureBaseline, WorkspaceError } from "./workspace.js";
+import { prepareReview } from "./review-preparation.js";
 
 const Id = z.string().min(1);
 const ScopeTask = z.object({ scope_id: Id, task_id: Id }).strict();
@@ -61,6 +62,7 @@ export class SupervisorService {
       case "list_tasks": return this.listTasks(params);
       case "wait_tasks": return this.waitTasks(params);
       case "read_artifact": return this.readArtifact(params);
+      case "prepare_review": return prepareReview(params, this.store, this.artifacts, this.progress);
       case "record_review": return this.recordReview(params);
       case "start_task": return this.startTask(params);
       case "continue_task": return this.continueTask(params);
@@ -152,17 +154,28 @@ export class SupervisorService {
 
   private readArtifact(params: unknown) {
     const input = ScopeTask.extend({ execution_id: Id, artifact_id: Id,
-      byte_offset: z.number().int().min(0).default(0), max_bytes: z.number().int().min(1).max(65_536).default(16_384) }).parse(params);
+      byte_offset: z.number().int().min(0).default(0), max_bytes: z.number().int().min(1).max(65_536).default(16_384),
+      encoding: z.enum(["auto", "text", "base64"]).default("auto") }).parse(params);
     const task = this.store.getExecution(input.scope_id, input.task_id, input.execution_id);
     if (!task) throw new ToolkitError("INVALID_INPUT", "execution not found", "change_input");
     const entry = this.store.artifact(input.execution_id, input.artifact_id);
     if (!entry) throw new ToolkitError("INVALID_INPUT", "artifact not found", "change_input");
     const range = this.artifacts.read(entry, input.byte_offset, input.max_bytes);
+    let body: { encoding: "text"; content: string } | { encoding: "base64"; content_base64: string };
+    if (input.encoding === "text" || (input.encoding === "auto" &&
+      (entry.mediaType.startsWith("text/") || entry.mediaType === "application/json"))) {
+      try {
+        // Preserve BOMs and reject incomplete or invalid UTF-8 rather than replacing bytes.
+        body = { encoding: "text", content: new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(range.bytes) };
+      } catch {
+        if (input.encoding === "text") throw new ToolkitError("INVALID_INPUT",
+          "artifact byte range is not complete valid UTF-8; use encoding: base64 to read these exact bytes", "change_input");
+        body = { encoding: "base64", content_base64: Buffer.from(range.bytes).toString("base64") };
+      }
+    } else body = { encoding: "base64", content_base64: Buffer.from(range.bytes).toString("base64") };
     return { artifact_id: entry.artifactId, sha256: entry.sha256, byte_length: entry.byteLength,
       media_type: entry.mediaType, byte_offset: input.byte_offset, next_offset: range.nextOffset,
-      content: entry.mediaType.startsWith("text/") || entry.mediaType === "application/json"
-        ? Buffer.from(range.bytes).toString("utf8") : null,
-      content_base64: Buffer.from(range.bytes).toString("base64") };
+      ...body };
   }
 
   private recordReview(params: unknown) {

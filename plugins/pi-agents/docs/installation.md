@@ -2,7 +2,7 @@
 
 ## Install release 0.1.0
 
-The first release is being prepared. These commands apply once the `v0.1.0` tag is available; until then, use local installation below.
+Version 0.1.0 is the published stable release. This checkout prepares 0.2.0; use local installation below to try the candidate. Once 0.2.0 is published, select `--ref v0.2.0` explicitly.
 
 1. Install Node.js `>=24.15 <25` on macOS or Linux and ensure the Codex host's `node` resolves to that version.
 2. Add the repository marketplace and install the plugin:
@@ -15,7 +15,7 @@ The first release is being prepared. These commands apply once the `v0.1.0` tag 
 3. Start a fresh Codex session and select `pi-agents:pi-agents` (**Pi Agents**).
 4. Configure project roots and model routes as described below before submitting live tasks.
 
-The GitHub release will include `pi-agents-v0.1.0.zip`, its per-file `.manifest.json`, and `.sha256` checksums. The runtime and provider dependencies are prebuilt. End-user installation needs no Pi CLI, backend server, TypeScript compilation, Python, or `npm install`. Repository marketplace distribution is separate from OpenAI's public plugin directory.
+The GitHub release includes `pi-agents-v0.1.0.zip`, its per-file `.manifest.json`, and `.sha256` checksums. The runtime and provider dependencies are prebuilt. End-user installation needs no Pi CLI, backend server, TypeScript compilation, Python, or `npm install`. Repository marketplace distribution is separate from OpenAI's public plugin directory.
 
 ## Local installation
 
@@ -93,6 +93,8 @@ Build workers have `webfetch` and DuckDuckGo `websearch` tools. Each request nee
 Set `PI_AGENTS_CAPTURE_DIAGNOSTICS=1` to retain bounded permission and effect-status diagnostics. These contain operation IDs and outcomes, without query text, file contents, or shell output. Capture is advisory and may have gaps or repeated status lines across reconnection. The supervisor retains at most 64 KiB per execution for seven days; use the task diagnostic cursor to read it.
 
 ## Upgrade and rollback
+
+In 0.2.0, `pi_read_artifact` returns one body field and a resolved `encoding`; clients requiring exact bytes must request `encoding: "base64"`. CLI export does this automatically. The new `pi_prepare_review` tool is read-only. No SQLite schema migration or Pi dependency upgrade is introduced.
 
 Before updating, reconcile active tasks, stop resolved workers and the daemon, and preserve the state database and reports. Do not run two plugin versions against the same state directory. Refresh a configured marketplace with `codex plugin marketplace upgrade pi-worker-plugin`; when changing a pinned release, select the new `--ref` explicitly and start a fresh Codex session. Uninstalling the plugin does not cancel accepted work or delete evidence.
 

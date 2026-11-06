@@ -6,6 +6,7 @@ import { join } from "node:path";
 import { createModels } from "@earendil-works/pi-ai/models";
 import { fauxProvider, fauxAssistantMessage, fauxToolCall } from "@earendil-works/pi-ai/providers/faux";
 import { PiHarness } from "../pi-harness.js";
+import { PiBackend } from "../pi-backend.js";
 import { effectiveConfigHash, type FrozenPolicy, type ManagedLaunchContract } from "../launch-config.js";
 import { createWorkerModels } from "../pi-models.js";
 import { checkedPath, createBoundedEnv } from "../pi-env.js";
@@ -38,7 +39,7 @@ test("Pi admits one exact turn, runs coding/progress/report tools, and recovers 
   const checkpoint = { stage: "verifying", summary: "Read input", completed: [], remaining: [], blocker: null, evidence_refs: [] };
   fx.fake.setResponses([
     fauxAssistantMessage([fauxToolCall("read", { path: "input.txt" }), fauxToolCall("report_progress", checkpoint)], { stopReason: "toolUse" }),
-    fauxAssistantMessage([fauxToolCall("write_report", { json: JSON.stringify(report) })], { stopReason: "toolUse" }),
+    fauxAssistantMessage([fauxToolCall("report_progress", { ...checkpoint, stage: "preparing_report", summary: "Reconciling coverage" }), fauxToolCall("write_report", { json: JSON.stringify(report) })], { stopReason: "toolUse" }),
     fauxAssistantMessage("Finished reading alpha."),
   ]);
   let worker = await PiHarness.open(join(fx.root, "storage"), fx.contract(), "backend_test", fx.models);
@@ -52,7 +53,14 @@ test("Pi admits one exact turn, runs coding/progress/report tools, and recovers 
     assert.equal(fx.fake.state.callCount, 3);
     assert.equal(JSON.parse(readFileSync(join(fx.policy.reportPath, "result.json"), "utf8")).task_id, "task_test");
     assert.ok(existsSync(join(fx.policy.reportPath, "summary.md")));
-    assert.equal(worker.eventPage(0).events.length, 1);
+    const emitted = worker.eventPage(0).events;
+    assert.equal(emitted.length, 2);
+    const backend = new PiBackend("unused");
+    const checkpoints = await Promise.all(emitted.map(({ event }) => backend.readCheckpoint(event, session.id, "msg_one")));
+    assert.deepEqual(checkpoints.map(value => (value!.checkpoint as typeof checkpoint).summary), ["Read input", "Reconciling coverage"]);
+    assert.notEqual(checkpoints[0]!.sourceId, checkpoints[1]!.sourceId);
+    assert.equal(await backend.readCheckpoint(emitted[0]!.event, session.id, "wrong-message"), null);
+    assert.equal(await backend.readCheckpoint(emitted[0]!.event, "wrong-session", "msg_one"), null);
     assert.match((await worker.readResult(session.id, "msg_one")).text, /alpha/);
     await worker.close();
     worker = await PiHarness.open(join(fx.root, "storage"), fx.contract(), "backend_test", fx.models);

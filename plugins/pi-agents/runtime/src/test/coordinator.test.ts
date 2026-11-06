@@ -5,18 +5,21 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import { ArtifactStore } from "../artifacts.js";
-import type { WorkerBackend, PendingRequest, RequestControl, TurnObservation } from "../backend.js";
+import type { WorkerBackend, PendingRequest, RequestControl, TurnObservation, BackendEvent } from "../backend.js";
 import { loadConfiguration } from "../config.js";
 import { ExecutionCoordinator } from "../coordinator.js";
 import type { TaskPacket } from "../contracts.js";
 import { renderPrompt } from "../prompt.js";
 import { SupervisorService } from "../service.js";
+import { PiBackend } from "../pi-backend.js";
 import { SqliteTaskStore, type CancellationDiagnostic } from "../store.js";
 import { captureBaseline } from "../workspace.js";
 
 class FakeBackend implements WorkerBackend {
   readonly backendId = "backend_fake";
   readonly workspace: string;
+  supportsProgress = false;
+  progressEvents: BackendEvent[] = [];
   submitted = false;
   finished = false;
   aborted = false;
@@ -37,7 +40,7 @@ class FakeBackend implements WorkerBackend {
   async inspectBackend() { return { version: "fake", dependencyDigest: "fake", backendId: this.backendId,
     workspace: this.workspace, configurationDigest: "fake", supportedForExecution: true,
     capabilities: { callerAssignedMessageId: true, permissionRequests: true, questionRequests: false,
-      structuredOutput: false, sessionRecovery: true } }; }
+      structuredOutput: false, sessionRecovery: true, progressCheckpoints: this.supportsProgress } }; }
   async createSession() {
     this.created = true;
     if (this.createAckLost) { this.createAckLost = false; throw new Error("lost session acknowledgement"); }
@@ -55,7 +58,17 @@ class FakeBackend implements WorkerBackend {
       activeTools: this.stopped ? 0 : 1, status: this.stopped ? "idle" : "busy", pendingRequests: this.requests,
       statusOmitted: this.stopped, finished: this.finished, error: this.error };
   }
-  async *subscribeEvents(_control?: RequestControl) { await new Promise(() => {}); }
+  async *subscribeEvents(control?: RequestControl) {
+    if (!this.supportsProgress) { await new Promise(() => {}); return; }
+    while (!control?.signal?.aborted) {
+      const event = this.progressEvents.shift();
+      if (event) yield event;
+      else await new Promise(resolve => setTimeout(resolve, 10));
+    }
+  }
+  readCheckpoint(event: BackendEvent, sessionId: string, messageId: string) {
+    return new PiBackend("unused").readCheckpoint(event, sessionId, messageId);
+  }
   async replyToRequest(request: PendingRequest, _reply: "allow_once" | "deny" | string[][]) {
     this.replyCount++;
     if (this.replyFailure !== "pending") this.requests = this.requests.filter((item) => item.id !== request.id);
@@ -916,5 +929,36 @@ test("storage failure before dispatch intent prevents any prompt submission", as
     assert.equal(fx.store.dispatchIntent(task.executionId), null);
     assert.equal(fx.backend.submitCount, 0);
     assert.equal(fx.store.reserve(`other_${randomUUID()}`, [`workspace:${task.workspace}`]), false);
+  } finally { await fx.coordinator.close(); fx.restore(); }
+});
+
+
+test("multi-milestone events are ingested for the exact execution and wake advisory waits", async () => {
+  const fx = setup(); fx.backend.supportsProgress = true;
+  try {
+    fx.coordinator.start();
+    await until(() => fx.backend.submitted && fx.store.get("scope", fx.task.taskId)!.phase === "running");
+    const service = new SupervisorService(fx.store, fx.artifacts, fx.coordinator);
+    const task = fx.store.get("scope", fx.task.taskId)!;
+    const eventsBefore = fx.store.events(task.executionId);
+    const request = { scope_id: "scope", task_id: task.taskId, execution_id: task.executionId };
+    const initial = await service.handle("get_progress", request) as any;
+    assert.equal(initial.availability, "supported");
+    assert.equal(initial.worker_checkpoint_observed, false);
+    const waiting = service.handle("wait_tasks", { scope_id: "scope", targets: [{ task_id: task.taskId,
+      execution_id: task.executionId, after_cursor: eventsBefore.at(-1)!.cursor, after_progress_cursor: initial.next_cursor }], timeout_ms: 1000 });
+    const checkpoint = { stage: "investigating", summary: "Inventory checked", completed: ["Required inventory"], remaining: ["Source comparison"], blocker: null, evidence_refs: [] };
+    const event = (sourceId: string, messageId: string, summary: string): BackendEvent => ({ type: "message.part.updated",
+      sessionId: fx.backend.sessionId, data: { sourceId, messageId, checkpoint: { ...checkpoint, summary } } });
+    fx.backend.progressEvents.push(event("foreign", "other-message", "Ignore foreign execution"),
+      event("inventory", task.userMessageId!, "Inventory checked"), event("comparison", task.userMessageId!, "Sources compared"));
+    assert.equal((await waiting as any).timed_out, false);
+    await until(() => fx.coordinator.progress.read(task.executionId).updates.length === 2);
+    const page = await service.handle("get_progress", { ...request, after_cursor: initial.next_cursor, include_snapshot: true }) as any;
+    assert.equal(page.worker_checkpoint_observed, true);
+    assert.deepEqual(page.updates.map((item: any) => item.summary), ["Inventory checked", "Sources compared"]);
+    assert.equal(page.snapshot.summary, "Sources compared");
+    assert.equal(fx.store.get("scope", task.taskId)!.revision, task.revision);
+    assert.deepEqual(fx.store.events(task.executionId), eventsBefore);
   } finally { await fx.coordinator.close(); fx.restore(); }
 });
