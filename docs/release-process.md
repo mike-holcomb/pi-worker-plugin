@@ -30,6 +30,13 @@ Each archive output path must be new. The builder emits a ZIP, `.manifest.json`,
 
 ## Prepare a GitHub draft
 
+Before tagging `v0.2.0`, complete these gates:
+
+- Confirm the final release commit passes metadata, runtime, schema, packaging, fixture, and installed-bundle checks. Regenerate schemas with `npm run schemas` in `plugins/pi-agents/runtime` and confirm no unexpected diff.
+- Review the schema 4 migration and matching-backup rollback instructions, artifact encoding change, and new optional MCP inputs in the release notes.
+- Confirm issues 1–10 are represented in the changelog and release notes, and retain the documented validation limits. A sandbox-blocked IPC or process test is an incomplete check; obtain passing CI or unrestricted test evidence before tagging.
+- Merge the reviewed candidate to `main`, confirm the four-platform/Node CI matrix passes for that exact commit, and build release assets from a clean checkout.
+
 After the reviewed changes reach `main` and CI passes, create and push an annotated tag identifying that tested commit:
 
 ```bash

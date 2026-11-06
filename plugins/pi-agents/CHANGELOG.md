@@ -2,6 +2,8 @@
 
 ## 0.2.0
 
+Release candidate; 0.1.0 remains the published stable release.
+
 - Explain accepted-review input errors with criterion/evidence details while preserving evidence and revision gates (#1).
 - Document worker profile capabilities and parent ownership of shell-based audit checks (#2).
 - Return one lossless artifact representation with explicit encoding and compact MCP framing (#3).
@@ -13,6 +15,8 @@
 - Explain exact approval granularity and measure three edits versus a combined edit separately from completion quality; retain `allow_once` without reusable grants (#9).
 - Add optional, durable worker-visible permission-denial explanations distinct from audit rationale, with bounded payloads and exact retry/session bindings (#10).
 - Keep Pi Durable 1.5.0 and existing permissions; update the packaged runtime to 0.2.0.
+
+Upgrade requires reconciling active work, stopping resolved workers and the daemon, and preserving state and reports. Stores migrate to schema 4 with a pre-upgrade backup; rollback requires the matching older runtime and backup. Clients requiring base64 artifact bodies must request `encoding: "base64"` explicitly.
 
 ## 0.1.0
 
