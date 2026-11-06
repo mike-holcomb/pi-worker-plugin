@@ -13,6 +13,21 @@ Delegate when work is independent enough to justify handoff and complete review.
 
 Choose the smallest adequate [lightweight](assets/task-lite.md), [standard](assets/task-standard.md), or [full](assets/task-full.md) packet. Every tier supplies the typed packet fields, authoritative sources, explicit allowed writes, observable criteria, checks, stop conditions, and shared resources. Record the base revision and relevant dirty state for mutable inputs. [Orchestration](references/orchestration.md) covers independence, starting state, and shared resources.
 
+## Profile capabilities and audit checks
+
+Choose the profile before constructing checks. Declared commands do not grant permission to run them; even read-only Git/Python commands are shell effects.
+
+| Capability | `bounded-inspect` | `bounded-build` |
+| --- | --- | --- |
+| Read/list/search declared source roots | Yes | Yes |
+| Modify declared project paths | No | Scoped, with task authorization and effective permission |
+| Write assigned report and summary | Yes, through `write_report` | Yes, through `write_report` |
+| Shell commands | Disabled | Scoped, with task authorization and effective permission |
+| Network/external endpoints | Disabled | Scoped, with task authorization and effective permission |
+| Publish advisory progress | Yes | Yes |
+
+`shared_read` requires `bounded-inspect`; it does not enable shell commands. Use worker static-inspection checks without `argv` and keep parent-owned Git/validator commands outside the worker check list. See the [complete audit example](assets/audit-inspect.md), which specifies required file coverage and separates supervisor captures from parent freshness checks. A check declaration is neither proof that it ran nor a permission grant.
+
 ## Run and recover
 
 Use the registered MCP tools described in [tools](references/tools.md). Optionally preview with `pi_start_task` and `dry_run: true`. For a real start, supply a caller-generated idempotency key and retain the returned scope, task, execution, and revision. Continue independent parent work and use bounded `pi_wait_tasks` calls for material changes. When semantic milestones help coordination, read only unseen `pi_get_progress` checkpoints for the exact execution and retain its separate cursor. Treat claims as advisory and gaps as missed transient history.

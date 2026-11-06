@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import { SqliteTaskStore, StoreConflict } from "../store.js";
+import { ReviewInputError } from "../review-input.js";
 import { DatabaseSync } from "node:sqlite";
 
 test("a lost start response is recovered by the same key after reopening the store", () => {
@@ -91,7 +92,7 @@ test("accepted review requires valid frozen evidence and every required criterio
     };
     assert.throws(() => store.recordReview(task.scopeId, task.taskId, task.revision, "review-key-0000001", {
       ...review, criteria: [{ id: "criterion-1", result: "not_checked", evidence: [] }],
-    }), (error) => error instanceof StoreConflict && error.code === "INVALID_STATE");
+    }), (error) => error instanceof ReviewInputError && error.details.reason === "required_criterion_unsatisfied");
     const invalidCriteria = [
       [{ id: "criterion-1", result: "satisfied" as const, evidence: ["artifact:123"] }],
       [{ id: "criterion-1", result: "satisfied" as const, evidence: [`artifact:artifact_report@sha256:${"f".repeat(64)}`] }],
@@ -104,7 +105,8 @@ test("accepted review requires valid frozen evidence and every required criterio
     for (const [index, criteria] of invalidCriteria.entries()) {
       assert.throws(() => store.recordReview(task.scopeId, task.taskId, task.revision,
         `review-invalid-${index}-000001`, { ...review, criteria }),
-      (error) => error instanceof StoreConflict && error.code === "INVALID_STATE");
+      (error) => error instanceof ReviewInputError && error.details.reason ===
+        ["malformed_reference", "hash_mismatch", "unknown_artifact", "duplicate_criterion", "undeclared_criterion"][index]);
     }
     const other = store.start({ scopeId: task.scopeId, idempotencyKey: "start-other-review-0001",
       workspace: "/tmp/elsewhere", packet: { acceptance_criteria: [] }, model: "local/model",
@@ -113,7 +115,7 @@ test("accepted review requires valid frozen evidence and every required criterio
       byteLength: 1, mediaType: "application/json", path: join(dir, "other") });
     assert.throws(() => store.recordReview(task.scopeId, task.taskId, task.revision, "review-wrong-exec-0001", {
       ...review, criteria: [{ id: "criterion-1", result: "satisfied", evidence: [`artifact:artifact_other@sha256:${reportHash}`] }],
-    }), (error) => error instanceof StoreConflict && error.code === "INVALID_STATE");
+    }), (error) => error instanceof ReviewInputError && error.details.reason === "unknown_artifact");
     assert.equal(store.get(task.scopeId, task.taskId)?.reviewStatus, "pending");
     const reviewed = store.recordReview(task.scopeId, task.taskId, task.revision, "review-key-0000002", review);
     assert.equal(reviewed.reviewStatus, "accepted");

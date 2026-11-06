@@ -44,6 +44,7 @@ function fixture(git = false, allowed_writes: TaskPacket["allowed_writes"] = [])
       return JSON.parse(Buffer.from(artifacts.read(entry!, 0, 65_536).bytes).toString("utf8")) as {
         changes: Array<{ path: string; change: string; artifact_id: string | null; declared: boolean }>;
         gaps: string[]; snapshot_bytes: number; snapshot_limit_bytes: number;
+        artifacts: Array<{ artifact_id: string; roles: string[] }>;
       };
     };
     return { baseline, task, capture, manifest };
@@ -76,6 +77,28 @@ test("Git evidence separates pre-existing dirt from added files and deletions", 
     assert.ok(artifact);
     assert.equal(Buffer.from(fx.artifacts.read(artifact!, 0, 100).bytes).toString("utf8"), "delivered\n");
     assert.equal(manifest.gaps.length, 0);
+  } finally { fx.cleanup(); }
+});
+
+test("manifest records explicit evidence roles and preserves both roles for deduplicated empty diffs", () => {
+  const fx = fixture(true, []);
+  try {
+    writeFileSync(join(fx.workspace, "base.txt"), "unchanged\n");
+    execFileSync("git", ["-C", fx.workspace, "add", "."]);
+    execFileSync("git", ["-C", fx.workspace, "commit", "-qm", "base"]);
+    const frozen = fx.freeze();
+    const first = frozen.capture();
+    assert.equal(first.reportValidity, "valid", first.gaps.join("; "));
+    const manifest = frozen.manifest(first.finalManifestHash);
+    assert.equal(manifest.artifacts.filter((entry) => entry.roles.includes("report")).length, 1);
+    assert.equal(manifest.artifacts.filter((entry) => entry.roles.includes("summary")).length, 1);
+    const diffs = manifest.artifacts.filter((entry) => entry.roles.includes("tracked_diff") || entry.roles.includes("staged_diff"));
+    assert.equal(diffs.length, 1);
+    assert.deepEqual(diffs[0]!.roles, ["staged_diff", "tracked_diff"]);
+    assert.equal(fx.store.artifact(frozen.task.executionId, diffs[0]!.artifact_id)!.byteLength, 0);
+    const second = frozen.capture();
+    assert.equal(second.finalManifestHash, first.finalManifestHash);
+    assert.deepEqual(frozen.manifest(second.finalManifestHash).artifacts, manifest.artifacts);
   } finally { fx.cleanup(); }
 });
 

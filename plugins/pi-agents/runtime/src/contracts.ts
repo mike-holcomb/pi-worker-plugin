@@ -146,7 +146,7 @@ const ReviewCriterionSchema = z
 	.object({
 		id: Id,
 		result: z.enum(["satisfied", "unsatisfied", "not_checked"]),
-		evidence: z.array(TextLine),
+		evidence: z.array(TextLine).describe("For accepted reviews, every entry must be only artifact:<artifact_id>@sha256:<64 lowercase hexadecimal characters>, belonging to the reviewed execution. Put explanatory prose in review-level rationale, freshness, or integration_checks. Non-accepted reviews may use narrative evidence."),
 	})
 	.strict();
 

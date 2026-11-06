@@ -6,6 +6,7 @@ import { WorkerReportSchema, type TaskPacket } from "./contracts.js";
 import type { ArtifactRegistration, ArtifactStore } from "./artifacts.js";
 import type { SqliteTaskStore } from "./store.js";
 import { captureEvidenceIndex, type EvidenceEntry, type WorkspaceBaseline } from "./workspace.js";
+import type { EvidenceRole } from "./review-preparation.js";
 
 export type EvidenceResult = {
   reportValidity: "valid" | "missing" | "invalid";
@@ -70,6 +71,7 @@ export function captureEvidence(input: {
   const workspace = baseline.workspace;
   const registered: ArtifactRegistration[] = store.artifactsForExecution(executionId);
   const captured: ArtifactRegistration[] = [];
+  const artifactRoles = new Map<string, Set<EvidenceRole>>();
   const gaps: string[] = [];
   const maxSnapshotBytes = input.maxSnapshotBytes ?? 50 * 1024 * 1024;
   if (!Number.isSafeInteger(maxSnapshotBytes) || maxSnapshotBytes <= 0)
@@ -79,16 +81,20 @@ export function captureEvidence(input: {
   const identity = (digest: string, length: number, mediaType: string) => JSON.stringify([digest, length, mediaType]);
   const existingByIdentity = new Map(registered.map((entry) =>
     [identity(entry.sha256, entry.byteLength, entry.mediaType), entry]));
-  const include = (entry: ArtifactRegistration): void => {
+  const include = (entry: ArtifactRegistration, role?: EvidenceRole): void => {
     if (!captured.some((item) => item.artifactId === entry.artifactId)) captured.push(entry);
+    if (role) {
+      const roles = artifactRoles.get(entry.artifactId) ?? new Set<EvidenceRole>();
+      roles.add(role); artifactRoles.set(entry.artifactId, roles);
+    }
   };
-  const capture = (bytes: Uint8Array, mediaType: string, label: string): ArtifactRegistration | null => {
+  const capture = (bytes: Uint8Array, mediaType: string, label: string, role?: EvidenceRole): ArtifactRegistration | null => {
     const key = identity(sha(bytes), bytes.byteLength, mediaType);
     const existing = existingByIdentity.get(key);
     if (existing) {
       // Reading through ArtifactStore verifies the recorded path, length and full hash.
       artifacts.read(existing, 0, 1);
-      include(existing);
+      include(existing, role);
       return existing;
     }
     if (bytes.byteLength > artifacts.maxBytes || capturedBytes + bytes.byteLength > maxSnapshotBytes) {
@@ -98,7 +104,7 @@ export function captureEvidence(input: {
     const entry = artifacts.captureBytes(executionId, bytes, mediaType, (value) => store.registerArtifact(value));
     capturedBytes += bytes.byteLength;
     existingByIdentity.set(key, entry);
-    include(entry);
+    include(entry, role);
     return entry;
   };
   const reportPath = join(outputDirectory, "result.json");
@@ -111,7 +117,7 @@ export function captureEvidence(input: {
   }
   let reportValidity: EvidenceResult["reportValidity"] = "missing";
   if (reportBytes) {
-    if (capture(reportBytes, "application/json", "result.json")) {
+    if (capture(reportBytes, "application/json", "result.json", "report")) {
       try {
         const report = WorkerReportSchema.parse(JSON.parse(reportBytes.toString("utf8")));
         reportValidity = report.task_id === taskId && report.execution_id === executionId ? "valid" : "invalid";
@@ -122,7 +128,7 @@ export function captureEvidence(input: {
   const summaryPath = join(outputDirectory, "summary.md");
   if (existsSync(summaryPath)) {
     try {
-      if (!capture(safeRegularBytes(summaryPath, maxSnapshotBytes), "text/markdown", "summary.md") && reportValidity === "valid")
+      if (!capture(safeRegularBytes(summaryPath, maxSnapshotBytes), "text/markdown", "summary.md", "summary") && reportValidity === "valid")
         reportValidity = "invalid";
     } catch (error) { gaps.push(`summary.md cannot be captured safely: ${String(error)}`); if (reportValidity === "valid") reportValidity = "invalid"; }
   } else { gaps.push("summary.md is missing"); if (reportValidity === "valid") reportValidity = "invalid"; }
@@ -131,8 +137,8 @@ export function captureEvidence(input: {
   const staged = baseline.git ? git(workspace, ["diff", "--cached", "--binary", "--"]) : null;
   if (baseline.git && tracked === null) gaps.push("Git tracked diff could not be captured");
   if (baseline.git && staged === null) gaps.push("Git staged diff could not be captured");
-  if (tracked) capture(tracked, "text/x-diff", "Git worktree diff");
-  if (staged) capture(staged, "text/x-diff", "Git staged diff");
+  if (tracked) capture(tracked, "text/x-diff", "Git worktree diff", "tracked_diff");
+  if (staged) capture(staged, "text/x-diff", "Git staged diff", "staged_diff");
 
   const initial = baseline.evidenceIndex;
   if (!initial?.complete) gaps.push(...(initial?.gaps ?? ["frozen baseline has no change index"]));
@@ -158,7 +164,7 @@ export function captureEvidence(input: {
     if (current.kind === "file") {
       try {
         if (current.byteLength === null) gaps.push(`changed file has no captured byte length: ${path}`);
-        else artifactId = capture(regularBytes(absolute, current), "application/octet-stream", `changed file ${path}`)?.artifactId ?? null;
+        else artifactId = capture(regularBytes(absolute, current), "application/octet-stream", `changed file ${path}`, "changed_file")?.artifactId ?? null;
       } catch (error) { gaps.push(`changed file could not be captured: ${path}: ${String(error)}`); }
     } else if (current.kind === "symlink" || current.kind === "other") {
       gaps.push(`changed non-regular path cannot be accepted as complete file evidence: ${path}`);
@@ -178,7 +184,8 @@ export function captureEvidence(input: {
     snapshot_bytes: captured.reduce((sum, artifact) => sum + artifact.byteLength, 0),
     snapshot_limit_bytes: maxSnapshotBytes,
     artifacts: captured.map(({ artifactId, sha256, byteLength, mediaType }) =>
-      ({ artifact_id: artifactId, sha256, byte_length: byteLength, media_type: mediaType })), gaps,
+      ({ artifact_id: artifactId, sha256, byte_length: byteLength, media_type: mediaType,
+        roles: [...(artifactRoles.get(artifactId) ?? [])].sort() })), gaps,
   };
   const manifestBytes = Buffer.from(JSON.stringify(manifest));
   const manifestEntry = capture(manifestBytes, "application/json", "final change manifest");

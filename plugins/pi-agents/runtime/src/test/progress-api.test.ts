@@ -22,6 +22,7 @@ test("progress delta reads and progress waits leave lifecycle, revision and even
     const request = { scope_id: "scope", task_id: task.taskId, execution_id: task.executionId };
     const empty = await service.handle("get_progress", request) as any;
     assert.equal(empty.availability, "not_enabled");
+    assert.equal(empty.worker_checkpoint_observed, false);
     assert.deepEqual(empty.updates, []);
     assert.equal(empty.runtime.observed_at, null);
     service.progress.register(task.executionId, "supported");
@@ -33,8 +34,10 @@ test("progress delta reads and progress waits leave lifecycle, revision and even
     assert.equal(waited.timed_out, false);
     assert.deepEqual(waited.changed[0].events, []);
     assert.ok(waited.changed[0].progress_cursor);
+    assert.equal(waited.changed[0].worker_checkpoint_observed, true);
     assert.equal(waited.changed[0].updates, undefined);
     const delta = await service.handle("get_progress", { ...request, after_cursor: cursor }) as any;
+    assert.equal(delta.worker_checkpoint_observed, true);
     assert.equal(delta.scope_id, "scope");
     assert.equal(delta.execution_id, task.executionId);
     assert.equal(delta.updates[0].summary, checkpoint.summary);

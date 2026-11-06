@@ -1,0 +1,94 @@
+{
+  "title": "Audit documentation with explicit bounds",
+  "objective": "Inspect every authoritative input in full and compare root/plugin/skill documentation against its implementation metadata. Report each required file/check as inspected, sampled, or not-inspected with reason and source references. Sampling any required input leaves required coverage unmet. Report useful partial findings honestly; do not claim complete coverage or parent acceptance. Publish short progress after meaningful inventory/source-comparison/coverage milestones when report_progress is available, at most one routine checkpoint per minute.",
+  "tier": "standard",
+  "authoritative_inputs": [
+    {
+      "reference": "README.md",
+      "kind": "file",
+      "purpose": "Required full-read audit input"
+    },
+    {
+      "reference": "metadata.json",
+      "kind": "file",
+      "purpose": "Required full-read audit input"
+    },
+    {
+      "reference": "plugins/alpha/README.md",
+      "kind": "file",
+      "purpose": "Required full-read audit input"
+    },
+    {
+      "reference": "plugins/alpha/implementation.json",
+      "kind": "file",
+      "purpose": "Required full-read audit input"
+    },
+    {
+      "reference": "plugins/alpha/skills/audit/SKILL.md",
+      "kind": "file",
+      "purpose": "Required full-read audit input"
+    },
+    {
+      "reference": "plugins/beta/README.md",
+      "kind": "file",
+      "purpose": "Required full-read audit input"
+    },
+    {
+      "reference": "plugins/beta/implementation.json",
+      "kind": "file",
+      "purpose": "Required full-read audit input"
+    },
+    {
+      "reference": "plugins/beta/skills/author/SKILL.md",
+      "kind": "file",
+      "purpose": "Required full-read audit input"
+    }
+  ],
+  "context": {
+    "verified_facts": [],
+    "rejected_assumptions": [
+      "A valid report or sampled audit establishes complete coverage."
+    ],
+    "exclusions": [
+      "Parent shell commands are not worker checks."
+    ]
+  },
+  "allowed_writes": [],
+  "acceptance_criteria": [
+    {
+      "id": "required-coverage",
+      "requirement": "Fully inspect all eight authoritative files; compare version/plugin inventory, alpha inspect capabilities, and beta accepted format/modalities against metadata.",
+      "evidence_required": "Per-file/check coverage status, original source references, reasons for omissions, and explicit unmet coverage.",
+      "required": true
+    },
+    {
+      "id": "grounded-findings",
+      "requirement": "Ground each finding in original documentation plus implementation metadata and disclose contrary evidence.",
+      "evidence_required": "Exact file and statement/field references with observation versus inference distinguished.",
+      "required": true
+    }
+  ],
+  "checks": [
+    {
+      "id": "root-metadata",
+      "description": "Statically compare root version/plugin inventory with metadata.json."
+    },
+    {
+      "id": "alpha-capabilities",
+      "description": "Read alpha README and audit skill in full; compare shell instructions with implementation.json inspect.shell."
+    },
+    {
+      "id": "beta-ingestion",
+      "description": "Read beta README and author skill in full; compare accepted formats/modalities with implementation.json."
+    }
+  ],
+  "constraints": [
+    "No project writes, shell commands, or external endpoints.",
+    "Use write_report for assigned report output.",
+    "Describe missing required coverage as a gap, not a completed required check."
+  ],
+  "stop_conditions": [
+    "Report inaccessible required input or a scope/permission conflict; do not broaden authority."
+  ],
+  "shared_resources": []
+}

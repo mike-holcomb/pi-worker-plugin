@@ -1762,8 +1762,8 @@ var init_checks = __esm({
       (_a9 = inst._zod.def).when ?? (_a9.when = _whenHasSize);
       inst._zod.check = (payload) => {
         const input2 = payload.value;
-        const size2 = input2.size;
-        if (size2 <= def.maximum)
+        const size3 = input2.size;
+        if (size3 <= def.maximum)
           return;
         payload.issues.push({
           origin: getSizableOrigin(input2),
@@ -1782,8 +1782,8 @@ var init_checks = __esm({
       (_a9 = inst._zod.def).when ?? (_a9.when = _whenHasSize);
       inst._zod.check = (payload) => {
         const input2 = payload.value;
-        const size2 = input2.size;
-        if (size2 >= def.minimum)
+        const size3 = input2.size;
+        if (size3 >= def.minimum)
           return;
         payload.issues.push({
           origin: getSizableOrigin(input2),
@@ -1802,10 +1802,10 @@ var init_checks = __esm({
       (_a9 = inst._zod.def).when ?? (_a9.when = _whenHasSize);
       inst._zod.check = (payload) => {
         const input2 = payload.value;
-        const size2 = input2.size;
-        if (size2 === def.size)
+        const size3 = input2.size;
+        if (size3 === def.size)
           return;
-        const tooBig = size2 > def.size;
+        const tooBig = size3 > def.size;
         payload.issues.push({
           origin: getSizableOrigin(input2),
           ...tooBig ? { code: "too_big", maximum: def.size } : { code: "too_small", minimum: def.size },
@@ -15057,11 +15057,11 @@ function _minSize(minimum, params) {
   });
 }
 // @__NO_SIDE_EFFECTS__
-function _size(size2, params) {
+function _size(size3, params) {
   return new $ZodCheckSizeEquals({
     check: "size_equals",
     ...normalizeParams(params),
-    size: size2
+    size: size3
   });
 }
 // @__NO_SIDE_EFFECTS__
@@ -18905,8 +18905,8 @@ var init_schemas2 = __esm({
       $ZodFile.init(inst, def);
       ZodType.init(inst, def);
       inst._zod.processJSONSchema = (ctx, json3, params) => fileProcessor(inst, ctx, json3, params);
-      inst.min = (size2, params) => inst.check(_minSize(size2, params));
-      inst.max = (size2, params) => inst.check(_maxSize(size2, params));
+      inst.min = (size3, params) => inst.check(_minSize(size3, params));
+      inst.max = (size3, params) => inst.check(_maxSize(size3, params));
       inst.mime = (types3, params) => inst.check(_mime(Array.isArray(types3) ? types3 : [types3], params));
     });
     ZodTransform = /* @__PURE__ */ $constructor("ZodTransform", (inst, def) => {
@@ -20544,17 +20544,17 @@ function hashRegularFile(path6) {
     if (!before.isFile()) throw new Error("not a regular file");
     const digest = createHash("sha256");
     const chunk = Buffer.allocUnsafe(1024 * 1024);
-    let size2 = 0;
+    let size3 = 0;
     while (true) {
       const count = readSync(fd, chunk, 0, chunk.byteLength, null);
       if (!count) break;
       digest.update(chunk.subarray(0, count));
-      size2 += count;
+      size3 += count;
     }
     const after = fstatSync(fd);
-    if (size2 !== before.size || after.size !== before.size || after.mtimeMs !== before.mtimeMs || after.ino !== before.ino)
+    if (size3 !== before.size || after.size !== before.size || after.mtimeMs !== before.mtimeMs || after.ino !== before.ino)
       throw new Error("file changed during evidence scan");
-    return { sha256: digest.digest("hex"), byteLength: size2 };
+    return { sha256: digest.digest("hex"), byteLength: size3 };
   } finally {
     closeSync(fd);
   }
@@ -50170,14 +50170,14 @@ var require_sha256 = __commonJS({
         })()
       );
       exports2.HMAC = HMAC;
-      function hash3(data) {
+      function hash4(data) {
         var h2 = new Hash().update(data);
         var digest = h2.digest();
         h2.clean();
         return digest;
       }
-      exports2.hash = hash3;
-      exports2["default"] = hash3;
+      exports2.hash = hash4;
+      exports2["default"] = hash4;
       function hmac(key, data) {
         var h2 = new HMAC(key).update(data);
         var digest = h2.digest();
@@ -65298,12 +65298,12 @@ var require_common2 = __commonJS({
       createDebug.skips = [];
       createDebug.formatters = {};
       function selectColor(namespace) {
-        let hash3 = 0;
+        let hash4 = 0;
         for (let i2 = 0; i2 < namespace.length; i2++) {
-          hash3 = (hash3 << 5) - hash3 + namespace.charCodeAt(i2);
-          hash3 |= 0;
+          hash4 = (hash4 << 5) - hash4 + namespace.charCodeAt(i2);
+          hash4 |= 0;
         }
-        return createDebug.colors[Math.abs(hash3) % createDebug.colors.length];
+        return createDebug.colors[Math.abs(hash4) % createDebug.colors.length];
       }
       createDebug.selectColor = selectColor;
       function createDebug(namespace) {
@@ -67004,12 +67004,12 @@ var require_ponyfill_es2018 = __commonJS({
         }
         return pair.value;
       }
-      function EnqueueValueWithSize(container, value2, size2) {
-        if (!IsNonNegativeNumber(size2) || size2 === Infinity) {
+      function EnqueueValueWithSize(container, value2, size3) {
+        if (!IsNonNegativeNumber(size3) || size3 === Infinity) {
           throw new RangeError("Size must be a finite, non-NaN, non-negative number.");
         }
-        container._queue.push({ value: value2, size: size2 });
-        container._queueTotalSize += size2;
+        container._queue.push({ value: value2, size: size3 });
+        container._queueTotalSize += size3;
       }
       function PeekQueueValue(container) {
         const pair = container._queue.peek();
@@ -67337,8 +67337,8 @@ var require_ponyfill_es2018 = __commonJS({
         }
         return ready;
       }
-      function ReadableByteStreamControllerFillHeadPullIntoDescriptor(controller, size2, pullIntoDescriptor) {
-        pullIntoDescriptor.bytesFilled += size2;
+      function ReadableByteStreamControllerFillHeadPullIntoDescriptor(controller, size3, pullIntoDescriptor) {
+        pullIntoDescriptor.bytesFilled += size3;
       }
       function ReadableByteStreamControllerHandleQueueDrain(controller) {
         if (controller._queueTotalSize === 0 && controller._closeRequested) {
@@ -67918,19 +67918,19 @@ var require_ponyfill_es2018 = __commonJS({
         return highWaterMark;
       }
       function ExtractSizeAlgorithm(strategy) {
-        const { size: size2 } = strategy;
-        if (!size2) {
+        const { size: size3 } = strategy;
+        if (!size3) {
           return () => 1;
         }
-        return size2;
+        return size3;
       }
       function convertQueuingStrategy(init, context) {
         assertDictionary(init, context);
         const highWaterMark = init === null || init === void 0 ? void 0 : init.highWaterMark;
-        const size2 = init === null || init === void 0 ? void 0 : init.size;
+        const size3 = init === null || init === void 0 ? void 0 : init.size;
         return {
           highWaterMark: highWaterMark === void 0 ? void 0 : convertUnrestrictedDouble(highWaterMark),
-          size: size2 === void 0 ? void 0 : convertQueuingStrategySize(size2, `${context} has member 'size' that`)
+          size: size3 === void 0 ? void 0 : convertQueuingStrategySize(size3, `${context} has member 'size' that`)
         };
       }
       function convertQueuingStrategySize(fn, context) {
@@ -70661,8 +70661,8 @@ async function* toIterator(parts, clone3 = true) {
         let position = part.byteOffset;
         const end = part.byteOffset + part.byteLength;
         while (position !== end) {
-          const size2 = Math.min(end - position, POOL_SIZE);
-          const chunk = part.buffer.slice(position, position + size2);
+          const size3 = Math.min(end - position, POOL_SIZE);
+          const chunk = part.buffer.slice(position, position + size3);
           position += chunk.byteLength;
           yield new Uint8Array(chunk);
         }
@@ -70801,9 +70801,9 @@ var init_fetch_blob = __esm({
        * @param {string} [type]
        */
       slice(start = 0, end = this.size, type = "") {
-        const { size: size2 } = this;
-        let relativeStart = start < 0 ? Math.max(size2 + start, 0) : Math.min(start, size2);
-        let relativeEnd = end < 0 ? Math.max(size2 + end, 0) : Math.min(end, size2);
+        const { size: size3 } = this;
+        let relativeStart = start < 0 ? Math.max(size3 + start, 0) : Math.min(start, size3);
+        let relativeEnd = end < 0 ? Math.max(size3 + end, 0) : Math.min(end, size3);
         const span = Math.max(relativeEnd - relativeStart, 0);
         const parts = this.#parts;
         const blobParts = [];
@@ -70812,20 +70812,20 @@ var init_fetch_blob = __esm({
           if (added >= span) {
             break;
           }
-          const size3 = ArrayBuffer.isView(part) ? part.byteLength : part.size;
-          if (relativeStart && size3 <= relativeStart) {
-            relativeStart -= size3;
-            relativeEnd -= size3;
+          const size4 = ArrayBuffer.isView(part) ? part.byteLength : part.size;
+          if (relativeStart && size4 <= relativeStart) {
+            relativeStart -= size4;
+            relativeEnd -= size4;
           } else {
             let chunk;
             if (ArrayBuffer.isView(part)) {
-              chunk = part.subarray(relativeStart, Math.min(size3, relativeEnd));
+              chunk = part.subarray(relativeStart, Math.min(size4, relativeEnd));
               added += chunk.byteLength;
             } else {
-              chunk = part.slice(relativeStart, Math.min(size3, relativeEnd));
+              chunk = part.slice(relativeStart, Math.min(size4, relativeEnd));
               added += chunk.size;
             }
-            relativeEnd -= size3;
+            relativeEnd -= size4;
             blobParts.push(chunk);
             relativeStart = 0;
           }
@@ -71563,7 +71563,7 @@ var init_body = __esm({
     INTERNALS = /* @__PURE__ */ Symbol("Body internals");
     Body = class {
       constructor(body, {
-        size: size2 = 0
+        size: size3 = 0
       } = {}) {
         let boundary = null;
         if (body === null) {
@@ -71596,7 +71596,7 @@ var init_body = __esm({
           disturbed: false,
           error: null
         };
-        this.size = size2;
+        this.size = size3;
         if (body instanceof Stream3) {
           body.on("error", (error_) => {
             const error62 = error_ instanceof FetchBaseError ? error_ : new FetchError(`Invalid response body while trying to fetch ${this.url}: ${error_.message}`, "system", error_);
@@ -72098,8 +72098,8 @@ var init_get_search = __esm({
         return parsedURL.search;
       }
       const lastOffset = parsedURL.href.length - 1;
-      const hash3 = parsedURL.hash || (parsedURL.href[lastOffset] === "#" ? "#" : "");
-      return parsedURL.href[lastOffset - hash3.length] === "?" ? "?" : "";
+      const hash4 = parsedURL.hash || (parsedURL.href[lastOffset] === "#" ? "#" : "");
+      return parsedURL.href[lastOffset - hash4.length] === "?" ? "?" : "";
     };
   }
 });
@@ -76075,11 +76075,11 @@ var require_safe_buffer = __commonJS({
       }
       return Buffer4(arg, encodingOrOffset, length);
     };
-    SafeBuffer.alloc = function(size2, fill, encoding) {
-      if (typeof size2 !== "number") {
+    SafeBuffer.alloc = function(size3, fill, encoding) {
+      if (typeof size3 !== "number") {
         throw new TypeError("Argument must be a number");
       }
-      var buf = Buffer4(size2);
+      var buf = Buffer4(size3);
       if (fill !== void 0) {
         if (typeof encoding === "string") {
           buf.fill(fill, encoding);
@@ -76091,17 +76091,17 @@ var require_safe_buffer = __commonJS({
       }
       return buf;
     };
-    SafeBuffer.allocUnsafe = function(size2) {
-      if (typeof size2 !== "number") {
+    SafeBuffer.allocUnsafe = function(size3) {
+      if (typeof size3 !== "number") {
         throw new TypeError("Argument must be a number");
       }
-      return Buffer4(size2);
+      return Buffer4(size3);
     };
-    SafeBuffer.allocUnsafeSlow = function(size2) {
-      if (typeof size2 !== "number") {
+    SafeBuffer.allocUnsafeSlow = function(size3) {
+      if (typeof size3 !== "number") {
         throw new TypeError("Argument must be a number");
       }
-      return buffer.SlowBuffer(size2);
+      return buffer.SlowBuffer(size3);
     };
   }
 });
@@ -85211,7 +85211,7 @@ var require_websocket = __commonJS({
     var http3 = __require("http");
     var net = __require("net");
     var tls = __require("tls");
-    var { randomBytes: randomBytes2, createHash: createHash12 } = __require("crypto");
+    var { randomBytes: randomBytes2, createHash: createHash13 } = __require("crypto");
     var { Duplex, Readable: Readable2 } = __require("stream");
     var { URL: URL2 } = __require("url");
     var PerMessageDeflate2 = require_permessage_deflate();
@@ -85879,7 +85879,7 @@ var require_websocket = __commonJS({
           abortHandshake(websocket, socket, "Invalid Upgrade header");
           return;
         }
-        const digest = createHash12("sha1").update(key + GUID).digest("base64");
+        const digest = createHash13("sha1").update(key + GUID).digest("base64");
         if (res.headers["sec-websocket-accept"] !== digest) {
           abortHandshake(websocket, socket, "Invalid Sec-WebSocket-Accept header");
           return;
@@ -86248,7 +86248,7 @@ var require_websocket_server = __commonJS({
     var EventEmitter = __require("events");
     var http3 = __require("http");
     var { Duplex } = __require("stream");
-    var { createHash: createHash12 } = __require("crypto");
+    var { createHash: createHash13 } = __require("crypto");
     var extension2 = require_extension();
     var PerMessageDeflate2 = require_permessage_deflate();
     var subprotocol2 = require_subprotocol();
@@ -86555,7 +86555,7 @@ var require_websocket_server = __commonJS({
           );
         }
         if (this._state > RUNNING) return abortHandshake(socket, 503);
-        const digest = createHash12("sha1").update(key + GUID).digest("base64");
+        const digest = createHash13("sha1").update(key + GUID).digest("base64");
         const headers = [
           "HTTP/1.1 101 Switching Protocols",
           "Upgrade: websocket",
@@ -110004,9 +110004,9 @@ function convertMessages3(model2, context, compat, options) {
       if (combinedId.length <= 40) {
         return combinedId;
       }
-      const hash3 = shortHash(id).slice(0, 8);
-      const prefix = callId.slice(0, Math.max(1, 40 - hash3.length - 1));
-      return `${prefix}_${hash3}`;
+      const hash4 = shortHash(id).slice(0, 8);
+      const prefix = callId.slice(0, Math.max(1, 40 - hash4.length - 1));
+      return `${prefix}_${hash4}`;
     }
     if (model2.provider === "openai")
       return id.length > 40 ? id.slice(0, 40) : id;
@@ -111289,13 +111289,13 @@ var init_progress = __esm({
           } : null,
           evidence_refs: checkpoint.evidence_refs
         });
-        const hash3 = sha(canonical4);
+        const hash4 = sha(canonical4);
         this.sweep();
         const state2 = this.states.get(executionId);
         if (!state2 || state2.availability !== "supported") return { accepted: false, duplicate: false };
         const prior = state2.dedup.get(sourceId);
         if (prior) {
-          if (prior !== hash3) throw new Error("checkpoint source ID has conflicting content");
+          if (prior !== hash4) throw new Error("checkpoint source ID has conflicting content");
           return { accepted: true, duplicate: true };
         }
         const now2 = this.now();
@@ -111323,7 +111323,7 @@ var init_progress = __esm({
         state2.sequence = sequence2;
         state2.entries.push(entry2);
         state2.latest = entry2;
-        state2.dedup.set(sourceId, hash3);
+        state2.dedup.set(sourceId, hash4);
         state2.rate.push({ at: now2, routine });
         state2.blocker = blocker;
         state2.lastActivity = now2;
@@ -111358,7 +111358,7 @@ var init_progress = __esm({
       }
       hint(executionId) {
         const state2 = this.states.get(executionId);
-        return { progress_cursor: this.cursor(executionId, state2), progress_available: state2?.availability ?? "not_enabled" };
+        return { progress_cursor: this.cursor(executionId, state2), progress_available: state2?.availability ?? "not_enabled", worker_checkpoint_observed: !!state2?.latest };
       }
       read(executionId, input2 = {}, runtime = {}, identity = {}) {
         Id.parse(executionId);
@@ -111376,6 +111376,7 @@ var init_progress = __esm({
         const page2 = {
           ...identity,
           availability: state2?.availability ?? "not_enabled",
+          worker_checkpoint_observed: !!state2?.latest,
           updates: [],
           next_cursor: reason ? this.cursor(executionId, state2) : options.after_cursor ?? this.cursor(executionId, state2, state2?.entries[0] ? state2.entries[0].sequence - 1 : 0),
           has_more: false,
@@ -111525,7 +111526,7 @@ var init_contracts = __esm({
     ReviewCriterionSchema = external_exports.object({
       id: Id2,
       result: external_exports.enum(["satisfied", "unsatisfied", "not_checked"]),
-      evidence: external_exports.array(TextLine)
+      evidence: external_exports.array(TextLine).describe("For accepted reviews, every entry must be only artifact:<artifact_id>@sha256:<64 lowercase hexadecimal characters>, belonging to the reviewed execution. Put explanatory prose in review-level rationale, freshness, or integration_checks. Non-accepted reviews may use narrative evidence.")
     }).strict();
     ReviewSchema = external_exports.object({
       disposition: ReviewDispositionSchema,
@@ -112100,27 +112101,27 @@ var init_line_scan = __esm({
       finish() {
         if (this.#head !== void 0)
           this.#releaseHead();
-        const size2 = this.#position;
+        const size3 = this.#position;
         if (this.#start === void 0) {
           return {
             newlines: this.#newlines,
-            start: size2,
-            end: size2,
-            firstLineEnd: size2,
-            lastLineStart: size2,
+            start: size3,
+            end: size3,
+            firstLineEnd: size3,
+            lastLineStart: size3,
             selectedBytes: 0,
             firstLineBytes: 0
           };
         }
         if (this.#firstLineEnd === void 0)
-          this.#endFirstLine(size2);
+          this.#endFirstLine(size3);
         if (this.#end === void 0)
-          this.#endSelection(size2);
+          this.#endSelection(size3);
         return {
           newlines: this.#newlines,
           start: this.#start,
-          end: this.#end ?? size2,
-          firstLineEnd: this.#firstLineEnd ?? size2,
+          end: this.#end ?? size3,
+          firstLineEnd: this.#firstLineEnd ?? size3,
           // A selection that reaches past the last line ends with the last line.
           lastLineStart: this.#lastLineStart ?? this.#lineStart,
           selectedBytes: this.#selectedBytes,
@@ -112367,8 +112368,8 @@ function resolveUri(ref, base) {
   }
 }
 function documentOf(uri) {
-  const hash3 = uri.indexOf("#");
-  return hash3 < 0 ? uri : uri.slice(0, hash3);
+  const hash4 = uri.indexOf("#");
+  return hash4 < 0 ? uri : uri.slice(0, hash4);
 }
 var DEFAULT_BASE, Resolver, SCHEMA_KEYWORDS2, MAP_KEYWORDS, ARRAY_KEYWORDS;
 var init_resolver = __esm({
@@ -132263,11 +132264,11 @@ async function readImage(reader, info, path6, mimeType, processor, { vision, lim
       return imageError(`${path6} is an image (${mimeType}) of ${formatSize(info.size)}, too large to send, ${unshrinkable}`);
     }
     const bytes2 = getOrThrow(await reader.read(0, info.size, context));
-    const size2 = imageDimensions(bytes2, mimeType);
-    if (size2 === void 0)
+    const size3 = imageDimensions(bytes2, mimeType);
+    if (size3 === void 0)
       return imageError(`${path6} is an image (${mimeType}) whose size cannot be read`);
-    if (size2.width > limits.maxWidth || size2.height > limits.maxHeight) {
-      return imageError(`${path6} is an image (${mimeType}) of ${size2.width}x${size2.height}, larger than ${limits.maxWidth}x${limits.maxHeight}, ${unshrinkable}`);
+    if (size3.width > limits.maxWidth || size3.height > limits.maxHeight) {
+      return imageError(`${path6} is an image (${mimeType}) of ${size3.width}x${size3.height}, larger than ${limits.maxWidth}x${limits.maxHeight}, ${unshrinkable}`);
     }
     image = { data: toBase64(bytes2), mimeType };
   }
@@ -132454,7 +132455,7 @@ var init_tools = __esm({
 });
 
 // node_modules/@earendil-works/pi-durable/dist/env/node-watch.js
-import { createHash as createHash10 } from "node:crypto";
+import { createHash as createHash11 } from "node:crypto";
 import { watch as fsWatch } from "node:fs";
 import { lstat, readdir as readdir2, readFile as readFile2, stat as stat4, statfs } from "node:fs/promises";
 import { dirname as dirname6, relative as relative3, sep as sep3 } from "node:path";
@@ -132464,7 +132465,7 @@ function isNodeError(error62) {
 function isDenied(error62) {
   return isNodeError(error62) && (error62.code === "EACCES" || error62.code === "EPERM");
 }
-function entryOf(stats, hash3) {
+function entryOf(stats, hash4) {
   const kind = stats.isFile() ? "file" : stats.isDirectory() ? "directory" : stats.isSymbolicLink() ? "symlink" : "other";
   return {
     kind,
@@ -132472,7 +132473,7 @@ function entryOf(stats, hash3) {
     ino: stats.ino,
     size: kind === "directory" ? 0 : stats.size,
     mtimeMs: kind === "directory" ? 0 : stats.mtimeMs,
-    ...hash3 === void 0 ? {} : { hash: hash3 }
+    ...hash4 === void 0 ? {} : { hash: hash4 }
   };
 }
 function sameEntry2(a, b) {
@@ -132719,11 +132720,11 @@ var init_node_watch = __esm({
           }
         };
         const record2 = async (path6, stats) => {
-          let hash3;
+          let hash4;
           if (this.#mode === "polling" && stats.isFile() && stats.size <= HASH_MAX_BYTES && Date.now() - stats.mtimeMs < HASH_RECENT_MS) {
-            hash3 = await readFile2(path6).then((content) => createHash10("sha256").update(content).digest("hex"), () => void 0);
+            hash4 = await readFile2(path6).then((content) => createHash11("sha256").update(content).digest("hex"), () => void 0);
           }
-          snapshot.set(path6, entryOf(stats, hash3));
+          snapshot.set(path6, entryOf(stats, hash4));
         };
         const scanDirectory = async (index, target, directory) => {
           const key = `${index}\0${directory}`;
@@ -133814,19 +133815,19 @@ Cannot execute bash commands.`, cause));
           return err(toFileError(error62, resolved));
         }
       }
-      async truncateFile(path6, size2, context) {
+      async truncateFile(path6, size3, context) {
         const resolved = resolvePath3(this.cwd, path6);
         const signal = context.abortSignal;
         const aborted2 = abortResult(signal, resolved);
         if (aborted2)
           return aborted2;
-        if (!Number.isSafeInteger(size2) || size2 < 0) {
+        if (!Number.isSafeInteger(size3) || size3 < 0) {
           return err(new FileError("invalid", "File size must be a non-negative safe integer", resolved));
         }
         let file2;
         try {
           file2 = await openFile(resolved, "r+");
-          await file2.truncate(size2);
+          await file2.truncate(size3);
           const afterTruncateAbort = abortResult(signal, resolved);
           return afterTruncateAbort ?? ok(void 0);
         } catch (error62) {
@@ -134663,7 +134664,7 @@ var init_worker_runtime = __esm({
 });
 
 // src/cli.ts
-import { createHash as createHash11 } from "node:crypto";
+import { createHash as createHash12 } from "node:crypto";
 import { createWriteStream as createWriteStream3, rmSync as rmSync6 } from "node:fs";
 import { once } from "node:events";
 
@@ -134675,7 +134676,7 @@ import { existsSync as existsSync3 } from "node:fs";
 function doctor() {
   const [major, minor] = process.versions.node.split(".").map(Number);
   const result2 = {
-    runtime: { node: process.versions.node, supportedNode: major === 24 && minor >= 15 && process.platform !== "win32", toolkit: "0.1.0" },
+    runtime: { node: process.versions.node, supportedNode: major === 24 && minor >= 15 && process.platform !== "win32", toolkit: "0.2.0" },
     configuration: { path: configurationPath(), status: "missing", message: "" },
     backend: {
       mode: "managed",
@@ -141250,9 +141251,9 @@ var require_util3 = /* @__PURE__ */ __commonJSMin(((exports) => {
   const codegen_1 = require_codegen();
   const code_1 = require_code$1();
   function toHash(arr2) {
-    const hash3 = {};
-    for (const item of arr2) hash3[item] = true;
-    return hash3;
+    const hash4 = {};
+    for (const item of arr2) hash4[item] = true;
+    return hash4;
   }
   exports.toHash = toHash;
   function alwaysValidSchema(it, schema) {
@@ -148893,14 +148894,19 @@ var ArtifactStore = class {
     if (!Number.isSafeInteger(offset) || offset < 0 || !Number.isSafeInteger(maxBytes) || maxBytes < 1 || maxBytes > 65536) {
       throw new RangeError("invalid artifact read range");
     }
+    const all = this.readAllVerified(entry2);
+    const bytes2 = all.subarray(offset, offset + maxBytes);
+    const nextOffset = offset + bytes2.byteLength < all.byteLength ? offset + bytes2.byteLength : null;
+    return { bytes: bytes2, nextOffset };
+  }
+  /** Internal evidence consumers need the complete verified object, without public read-range limits. */
+  readAllVerified(entry2) {
     if (resolve4(entry2.path) !== join4(this.objects, entry2.sha256) || basename4(entry2.path) !== entry2.sha256) throw new Error("artifact path is outside store");
     const stat5 = lstatSync2(entry2.path);
     if (!stat5.isFile() || stat5.isSymbolicLink() || stat5.size !== entry2.byteLength) throw new Error("artifact changed");
     const all = readFileSync4(entry2.path);
     if (createHash5("sha256").update(all).digest("hex") !== entry2.sha256) throw new Error("artifact changed");
-    const bytes2 = all.subarray(offset, offset + maxBytes);
-    const nextOffset = offset + bytes2.byteLength < all.byteLength ? offset + bytes2.byteLength : null;
-    return { bytes: bytes2, nextOffset };
+    return all;
   }
   stagedFiles() {
     return readdirSync2(this.staging).filter((name) => name.endsWith(".tmp"));
@@ -149026,6 +149032,7 @@ function captureEvidence(input2) {
   const workspace = baseline.workspace;
   const registered = store.artifactsForExecution(executionId);
   const captured = [];
+  const artifactRoles = /* @__PURE__ */ new Map();
   const gaps = [];
   const maxSnapshotBytes = input2.maxSnapshotBytes ?? 50 * 1024 * 1024;
   if (!Number.isSafeInteger(maxSnapshotBytes) || maxSnapshotBytes <= 0)
@@ -149034,15 +149041,20 @@ function captureEvidence(input2) {
   if (capturedBytes > maxSnapshotBytes) gaps.push("previously registered artifacts exceed the per-execution evidence snapshot limit");
   const identity = (digest, length, mediaType) => JSON.stringify([digest, length, mediaType]);
   const existingByIdentity = new Map(registered.map((entry2) => [identity(entry2.sha256, entry2.byteLength, entry2.mediaType), entry2]));
-  const include = (entry2) => {
+  const include = (entry2, role) => {
     if (!captured.some((item) => item.artifactId === entry2.artifactId)) captured.push(entry2);
+    if (role) {
+      const roles = artifactRoles.get(entry2.artifactId) ?? /* @__PURE__ */ new Set();
+      roles.add(role);
+      artifactRoles.set(entry2.artifactId, roles);
+    }
   };
-  const capture = (bytes2, mediaType, label) => {
+  const capture = (bytes2, mediaType, label, role) => {
     const key = identity(sha2(bytes2), bytes2.byteLength, mediaType);
     const existing = existingByIdentity.get(key);
     if (existing) {
       artifacts.read(existing, 0, 1);
-      include(existing);
+      include(existing, role);
       return existing;
     }
     if (bytes2.byteLength > artifacts.maxBytes || capturedBytes + bytes2.byteLength > maxSnapshotBytes) {
@@ -149052,7 +149064,7 @@ function captureEvidence(input2) {
     const entry2 = artifacts.captureBytes(executionId, bytes2, mediaType, (value2) => store.registerArtifact(value2));
     capturedBytes += bytes2.byteLength;
     existingByIdentity.set(key, entry2);
-    include(entry2);
+    include(entry2, role);
     return entry2;
   };
   const reportPath = join5(outputDirectory, "result.json");
@@ -149068,7 +149080,7 @@ function captureEvidence(input2) {
   }
   let reportValidity = "missing";
   if (reportBytes) {
-    if (capture(reportBytes, "application/json", "result.json")) {
+    if (capture(reportBytes, "application/json", "result.json", "report")) {
       try {
         const report2 = WorkerReportSchema.parse(JSON.parse(reportBytes.toString("utf8")));
         reportValidity = report2.task_id === taskId && report2.execution_id === executionId ? "valid" : "invalid";
@@ -149082,7 +149094,7 @@ function captureEvidence(input2) {
   const summaryPath = join5(outputDirectory, "summary.md");
   if (existsSync6(summaryPath)) {
     try {
-      if (!capture(safeRegularBytes(summaryPath, maxSnapshotBytes), "text/markdown", "summary.md") && reportValidity === "valid")
+      if (!capture(safeRegularBytes(summaryPath, maxSnapshotBytes), "text/markdown", "summary.md", "summary") && reportValidity === "valid")
         reportValidity = "invalid";
     } catch (error62) {
       gaps.push(`summary.md cannot be captured safely: ${String(error62)}`);
@@ -149096,8 +149108,8 @@ function captureEvidence(input2) {
   const staged = baseline.git ? git2(workspace, ["diff", "--cached", "--binary", "--"]) : null;
   if (baseline.git && tracked === null) gaps.push("Git tracked diff could not be captured");
   if (baseline.git && staged === null) gaps.push("Git staged diff could not be captured");
-  if (tracked) capture(tracked, "text/x-diff", "Git worktree diff");
-  if (staged) capture(staged, "text/x-diff", "Git staged diff");
+  if (tracked) capture(tracked, "text/x-diff", "Git worktree diff", "tracked_diff");
+  if (staged) capture(staged, "text/x-diff", "Git staged diff", "staged_diff");
   const initial = baseline.evidenceIndex;
   if (!initial?.complete) gaps.push(...initial?.gaps ?? ["frozen baseline has no change index"]);
   const final = captureEvidenceIndex(workspace, baseline.writeTargetState, Boolean(baseline.git));
@@ -149119,7 +149131,7 @@ function captureEvidence(input2) {
     if (current.kind === "file") {
       try {
         if (current.byteLength === null) gaps.push(`changed file has no captured byte length: ${path6}`);
-        else artifactId = capture(regularBytes(absolute, current), "application/octet-stream", `changed file ${path6}`)?.artifactId ?? null;
+        else artifactId = capture(regularBytes(absolute, current), "application/octet-stream", `changed file ${path6}`, "changed_file")?.artifactId ?? null;
       } catch (error62) {
         gaps.push(`changed file could not be captured: ${path6}: ${String(error62)}`);
       }
@@ -149143,7 +149155,13 @@ function captureEvidence(input2) {
     report_validity: reportValidity,
     snapshot_bytes: captured.reduce((sum, artifact) => sum + artifact.byteLength, 0),
     snapshot_limit_bytes: maxSnapshotBytes,
-    artifacts: captured.map(({ artifactId, sha256, byteLength, mediaType }) => ({ artifact_id: artifactId, sha256, byte_length: byteLength, media_type: mediaType })),
+    artifacts: captured.map(({ artifactId, sha256, byteLength, mediaType }) => ({
+      artifact_id: artifactId,
+      sha256,
+      byte_length: byteLength,
+      media_type: mediaType,
+      roles: [...artifactRoles.get(artifactId) ?? []].sort()
+    })),
     gaps
   };
   const manifestBytes = Buffer.from(JSON.stringify(manifest));
@@ -149810,6 +149828,21 @@ import { createHash as createHash8, randomUUID as randomUUID7 } from "node:crypt
 import { chmodSync as chmodSync2, closeSync as closeSync4, existsSync as existsSync8, fsyncSync as fsyncSync2, mkdirSync as mkdirSync5, openSync as openSync4, rmSync as rmSync4 } from "node:fs";
 import { dirname as dirname4, join as join7 } from "node:path";
 import { DatabaseSync } from "node:sqlite";
+
+// src/review-input.ts
+var ARTIFACT_REFERENCE_FORMAT = "artifact:<artifact_id>@sha256:<64 lowercase hexadecimal characters>";
+var ARTIFACT_REFERENCE_PATTERN = /^artifact:([^@\s]+)@sha256:([0-9a-f]{64})$/;
+var ReviewInputError = class extends Error {
+  constructor(details) {
+    super(`Review criterion ${details.criterion_id}${details.evidence_index === void 0 ? "" : ` evidence[${details.evidence_index}]`}: ${details.reason.replaceAll("_", " ")}${details.required_format ? `; expected ${details.required_format}. Put explanatory prose in review rationale, freshness, or integration_checks.` : ""}`);
+    this.details = details;
+  }
+  details;
+  code = "INVALID_INPUT";
+  retry = "change_input";
+};
+
+// src/store.ts
 var StoreConflict = class extends Error {
   constructor(code, message = code) {
     super(message);
@@ -150465,6 +150498,10 @@ var SqliteTaskStore = class {
     const row = this.db.prepare("SELECT backend_id,session_id,user_message_id,acknowledged FROM dispatch_intents WHERE execution_id=?").get(executionId);
     return row ? { backendId: row.backend_id, sessionId: row.session_id, messageId: row.user_message_id, acknowledged: Boolean(row.acknowledged) } : null;
   }
+  eventCursor(executionId) {
+    const row = this.db.prepare("SELECT COALESCE(MAX(sequence),0) AS cursor FROM events WHERE execution_id=?").get(executionId);
+    return row.cursor;
+  }
   events(executionId, afterCursor = 0, limit3 = 100) {
     const rows = this.db.prepare("SELECT sequence,kind,detail_json,created_at FROM events WHERE execution_id=? AND sequence>? ORDER BY sequence LIMIT ?").all(executionId, afterCursor, limit3);
     return rows.map((row) => ({ cursor: row.sequence, kind: row.kind, detail: JSON.parse(row.detail_json), createdAt: row.created_at }));
@@ -150983,18 +151020,25 @@ var SqliteTaskStore = class {
         if (!artifacts.some((entry2) => entry2.sha256 === task.finalManifestHash && entry2.mediaType === "application/json") || artifacts.filter((entry2) => entry2.mediaType === "application/json").length < 2 || !artifacts.some((entry2) => entry2.mediaType === "text/markdown")) throw new StoreConflict("INVALID_STATE");
         const reviewed = /* @__PURE__ */ new Set();
         for (const criterion of review.criteria) {
-          if (!declared.has(criterion.id) || reviewed.has(criterion.id)) throw new StoreConflict("INVALID_STATE");
+          if (!declared.has(criterion.id)) throw new ReviewInputError({ criterion_id: criterion.id, reason: "undeclared_criterion" });
+          if (reviewed.has(criterion.id)) throw new ReviewInputError({ criterion_id: criterion.id, reason: "duplicate_criterion" });
           reviewed.add(criterion.id);
-          if (criterion.result === "satisfied" && criterion.evidence.length === 0) throw new StoreConflict("INVALID_STATE");
-          for (const reference of criterion.evidence) {
-            const match2 = /^artifact:([^@\s]+)@sha256:([0-9a-f]{64})$/.exec(reference);
-            if (!match2 || byId.get(match2[1])?.sha256 !== match2[2]) throw new StoreConflict("INVALID_STATE");
+          if (criterion.result === "satisfied" && criterion.evidence.length === 0)
+            throw new ReviewInputError({ criterion_id: criterion.id, reason: "missing_evidence" });
+          for (const [index, reference] of criterion.evidence.entries()) {
+            const match2 = ARTIFACT_REFERENCE_PATTERN.exec(reference);
+            const details = { criterion_id: criterion.id, evidence_index: index, required_format: ARTIFACT_REFERENCE_FORMAT };
+            if (!match2) throw new ReviewInputError({ ...details, reason: "malformed_reference" });
+            const artifact = byId.get(match2[1]);
+            if (!artifact) throw new ReviewInputError({ ...details, reason: "unknown_artifact" });
+            if (artifact.sha256 !== match2[2]) throw new ReviewInputError({ ...details, reason: "hash_mismatch" });
           }
         }
         for (const [id, required2] of declared) {
           if (!required2) continue;
           const result2 = review.criteria.find((item) => item.id === id);
-          if (!result2 || result2.result !== "satisfied" || result2.evidence.length === 0) throw new StoreConflict("INVALID_STATE");
+          if (!result2 || result2.result !== "satisfied") throw new ReviewInputError({ criterion_id: id, reason: "required_criterion_unsatisfied" });
+          if (result2.evidence.length === 0) throw new ReviewInputError({ criterion_id: id, reason: "missing_evidence" });
         }
       }
       const created = now();
@@ -151072,8 +151116,228 @@ function renderPrompt(input2) {
 
 // src/service.ts
 init_workspace();
+
+// src/review-preparation.ts
+init_zod();
+init_contracts();
+import { createHash as createHash10 } from "node:crypto";
 var Id3 = external_exports.string().min(1);
-var ScopeTask = external_exports.object({ scope_id: Id3, task_id: Id3 }).strict();
+var Digest = external_exports.string().regex(/^[0-9a-f]{64}$/);
+var PrepareReviewSchema = external_exports.object({
+  scope_id: Id3,
+  task_id: Id3,
+  execution_id: Id3,
+  after_cursor: external_exports.string().min(1).max(512).optional(),
+  max_bytes: external_exports.number().int().min(8192).max(262144).default(32768),
+  limit: external_exports.number().int().min(1).max(20).default(10)
+}).strict();
+var CursorSchema3 = external_exports.object({
+  v: external_exports.literal(1),
+  e: Id3.max(128),
+  r: external_exports.number().int().positive(),
+  d: Digest,
+  o: external_exports.number().int().min(0).max(Number.MAX_SAFE_INTEGER)
+}).strict();
+var EvidenceRoleSchema = external_exports.enum(["report", "summary", "tracked_diff", "staged_diff", "changed_file"]);
+var ReviewPreparationError = class extends Error {
+  constructor(code, message, retry2, details) {
+    super(message);
+    this.code = code;
+    this.retry = retry2;
+    this.details = details;
+  }
+  code;
+  retry;
+  details;
+};
+var size2 = (value2) => Buffer.byteLength(JSON.stringify(value2), "utf8");
+var hash3 = (value2) => createHash10("sha256").update(JSON.stringify(value2)).digest("hex");
+var terminalPhases2 = /* @__PURE__ */ new Set(["completed", "failed", "cancelled", "timed_out"]);
+function budgetError(required2, subject) {
+  return new ReviewPreparationError(
+    "INVALID_INPUT",
+    required2 > 262144 ? `review preparation is unavailable: ${subject} exceeds the maximum 262144-byte response budget` : `${subject} exceeds max_bytes; increase the budget without truncating evidence or criteria`,
+    "change_input",
+    { required_min_bytes: required2, maximum_max_bytes: 262144 }
+  );
+}
+function encodeCursor(cursor) {
+  const encoded = Buffer.from(JSON.stringify(cursor)).toString("base64url");
+  if (encoded.length > 512) throw new ReviewPreparationError("INVALID_INPUT", "execution identity is too large for review preparation", "change_input");
+  return encoded;
+}
+function decodeCursor(encoded) {
+  try {
+    if (!/^[A-Za-z0-9_-]+$/.test(encoded) || Buffer.from(encoded, "base64url").toString("base64url") !== encoded)
+      throw new Error("invalid encoding");
+    return CursorSchema3.parse(JSON.parse(Buffer.from(encoded, "base64url").toString("utf8")));
+  } catch {
+    throw new ReviewPreparationError("INVALID_INPUT", "malformed review preparation cursor; start a new preparation read", "change_input");
+  }
+}
+function manifestRoles(task, entries2, artifacts) {
+  const roles = /* @__PURE__ */ new Map();
+  if (!task.finalManifestHash) return { roles, available: false, validManifest: false, reasons: ["final_manifest_missing"] };
+  if (!Digest.safeParse(task.finalManifestHash).success)
+    return { roles, available: false, validManifest: false, reasons: ["final_manifest_hash_invalid"] };
+  const entry2 = entries2.find((artifact) => artifact.sha256 === task.finalManifestHash && artifact.mediaType === "application/json");
+  if (!entry2) return { roles, available: false, validManifest: false, reasons: ["final_manifest_registration_missing"] };
+  roles.set(entry2.artifactId, ["manifest"]);
+  let bytes2;
+  try {
+    bytes2 = artifacts.readAllVerified(entry2);
+  } catch {
+    throw new ReviewPreparationError("ARTIFACT_CHANGED", `final manifest is missing or changed: ${entry2.artifactId}`, "observe_first");
+  }
+  let manifest;
+  try {
+    const parsed = JSON.parse(Buffer.from(bytes2).toString("utf8"));
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("not an object");
+    manifest = parsed;
+  } catch {
+    return { roles, available: false, validManifest: false, reasons: ["final_manifest_invalid"] };
+  }
+  if (manifest.task_id !== task.taskId || manifest.execution_id !== task.executionId || manifest.starting_state_sha256 !== task.baselineHash)
+    return { roles, available: false, validManifest: false, reasons: ["final_manifest_identity_or_baseline_mismatch"] };
+  if (!Array.isArray(manifest.artifacts)) return { roles, available: false, validManifest: false, reasons: ["final_manifest_artifacts_invalid"] };
+  const byId = new Map(entries2.map((artifact) => [artifact.artifactId, artifact]));
+  const seen = /* @__PURE__ */ new Set();
+  let hasRoles = true;
+  const candidateRoles = new Map(roles);
+  for (const raw of manifest.artifacts) {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return { roles, available: false, validManifest: false, reasons: ["final_manifest_artifacts_invalid"] };
+    const metadata = raw;
+    const registered = typeof metadata.artifact_id === "string" ? byId.get(metadata.artifact_id) : void 0;
+    if (!registered || seen.has(registered.artifactId) || metadata.sha256 !== registered.sha256 || metadata.byte_length !== registered.byteLength || metadata.media_type !== registered.mediaType)
+      return { roles, available: false, validManifest: false, reasons: ["final_manifest_artifact_reference_invalid"] };
+    seen.add(registered.artifactId);
+    if (metadata.roles === void 0) {
+      hasRoles = false;
+      continue;
+    }
+    const parsedRoles = external_exports.array(EvidenceRoleSchema).max(5).safeParse(metadata.roles);
+    if (!parsedRoles.success || new Set(parsedRoles.data).size !== parsedRoles.data.length)
+      return { roles, available: false, validManifest: false, reasons: ["final_manifest_roles_invalid"] };
+    candidateRoles.set(registered.artifactId, parsedRoles.data);
+  }
+  return { roles: hasRoles ? candidateRoles : roles, available: hasRoles, validManifest: true, reasons: [] };
+}
+function prepareReview(params, store, artifacts, progress) {
+  const parsed = PrepareReviewSchema.safeParse(params);
+  if (!parsed.success) throw new ReviewPreparationError("INVALID_INPUT", `invalid review preparation request: ${parsed.error.message}`, "change_input");
+  const input2 = parsed.data;
+  const task = store.getExecution(input2.scope_id, input2.task_id, input2.execution_id);
+  if (!task) throw new ReviewPreparationError("INVALID_INPUT", "exact task execution not found", "change_input");
+  const packet = TaskPacketSchema.safeParse(task.packet);
+  const declarations = packet.success ? packet.data.acceptance_criteria : [];
+  const declarationIds = new Set(declarations.map((criterion) => criterion.id));
+  const criteriaValid = packet.success && declarationIds.size === declarations.length;
+  const entries2 = store.artifactsForExecution(task.executionId);
+  const manifest = manifestRoles(task, entries2, artifacts);
+  const reasons = [...manifest.reasons];
+  if (task.phase !== "completed") reasons.push("execution_not_completed");
+  if (task.observation !== "current") reasons.push("execution_observation_not_current");
+  if (!["bounded-build", "bounded-inspect"].includes(task.profile)) reasons.push("unsupported_execution_profile");
+  if (task.reportValidity !== "valid") reasons.push("report_not_valid");
+  if (!Digest.safeParse(task.baselineHash).success) reasons.push("starting_state_hash_invalid");
+  if (!packet.success) reasons.push("frozen_packet_invalid");
+  else if (!criteriaValid) reasons.push("duplicate_criterion_ids");
+  const items = [
+    ...declarations.map((criterion, index) => ({
+      kind: "criterion",
+      index,
+      criterion: { ...criterion, result: "not_checked", evidence: [] }
+    })),
+    ...entries2.map((entry2, index) => ({
+      kind: "artifact",
+      index,
+      artifact_id: entry2.artifactId,
+      sha256: entry2.sha256,
+      byte_length: entry2.byteLength,
+      media_type: entry2.mediaType,
+      roles: manifest.roles.get(entry2.artifactId) ?? [],
+      reference: `artifact:${entry2.artifactId}@sha256:${entry2.sha256}`,
+      read_artifact: { scope_id: task.scopeId, task_id: task.taskId, execution_id: task.executionId, artifact_id: entry2.artifactId }
+    }))
+  ];
+  const digest = hash3({
+    scope_id: task.scopeId,
+    task_id: task.taskId,
+    execution_id: task.executionId,
+    packet_valid: packet.success,
+    criteria_valid: criteriaValid,
+    starting_state_sha256: task.baselineHash,
+    final_manifest_sha256: task.finalManifestHash,
+    items
+  });
+  const cursor = input2.after_cursor ? decodeCursor(input2.after_cursor) : null;
+  if (cursor && cursor.e !== task.executionId) throw new ReviewPreparationError("INVALID_INPUT", "review preparation cursor belongs to another execution", "change_input");
+  if (cursor && (cursor.r !== task.revision || cursor.d !== digest)) throw new ReviewPreparationError("STALE_PREPARATION", "review preparation changed; restart from the first page and inspect the current execution", "observe_first");
+  const offset = cursor?.o ?? 0;
+  if (offset > items.length) throw new ReviewPreparationError("INVALID_INPUT", "review preparation cursor is beyond the collection", "change_input");
+  const terminal = terminalPhases2.has(task.phase);
+  const hasHashes = Digest.safeParse(task.baselineHash).success && Digest.safeParse(task.finalManifestHash).success;
+  const reviewTemplate = hasHashes && criteriaValid && manifest.validManifest ? {
+    disposition: "awaiting_evidence",
+    rationale: "Parent verification required; inspect the cited artifacts and every declared criterion.",
+    criteria: [],
+    starting_state_sha256: task.baselineHash,
+    final_manifest_sha256: task.finalManifestHash,
+    freshness: "Parent freshness verification required.",
+    integration_checks: [],
+    coverage_limits: [],
+    unresolved_issues: [],
+    next_action: "Collect every preparation page, assemble all criteria, inspect full evidence, and record the parent decision."
+  } : null;
+  const hint = progress.hint(task.executionId);
+  const page2 = {
+    scope_id: task.scopeId,
+    task_id: task.taskId,
+    execution_id: task.executionId,
+    expected_revision: task.revision,
+    phase: task.phase,
+    observation: task.observation,
+    terminal,
+    operationally_resolved: terminal,
+    report_validity: task.reportValidity,
+    review_status: task.reviewStatus,
+    starting_state_sha256: task.baselineHash,
+    final_manifest_sha256: task.finalManifestHash,
+    lifecycle_cursor: store.eventCursor(task.executionId),
+    ...hint,
+    readiness: { ready_for_parent_review: reasons.length === 0, reasons, parent_verification_required: true },
+    roles_available: manifest.available,
+    review_template: reviewTemplate,
+    totals: { criteria: packet.success ? declarations.length : null, artifacts: entries2.length },
+    page_offsets: { criteria: Math.min(offset, declarations.length), artifacts: Math.max(0, offset - declarations.length) },
+    items: [],
+    next_cursor: null,
+    has_more: offset < items.length
+  };
+  const nextCursor2 = (next) => next < items.length ? encodeCursor({ v: 1, e: task.executionId, r: task.revision, d: digest, o: next }) : null;
+  page2.next_cursor = nextCursor2(offset);
+  if (size2(page2) > input2.max_bytes) throw budgetError(size2(page2), "review preparation metadata");
+  for (const item of items.slice(offset, offset + input2.limit)) {
+    const trial = {
+      ...page2,
+      items: [...page2.items, item],
+      next_cursor: nextCursor2(offset + page2.items.length + 1),
+      has_more: offset + page2.items.length + 1 < items.length
+    };
+    if (size2(trial) > input2.max_bytes) {
+      if (page2.items.length === 0) throw budgetError(size2(trial), "next review preparation item");
+      break;
+    }
+    page2.items = trial.items;
+    page2.next_cursor = trial.next_cursor;
+    page2.has_more = trial.has_more;
+  }
+  return page2;
+}
+
+// src/service.ts
+var Id4 = external_exports.string().min(1);
+var ScopeTask = external_exports.object({ scope_id: Id4, task_id: Id4 }).strict();
 function compactTask(task) {
   const {
     packet: _packet,
@@ -151147,6 +151411,8 @@ var SupervisorService = class {
         return this.waitTasks(params);
       case "read_artifact":
         return this.readArtifact(params);
+      case "prepare_review":
+        return prepareReview(params, this.store, this.artifacts, this.progress);
       case "record_review":
         return this.recordReview(params);
       case "start_task":
@@ -151174,7 +151440,7 @@ var SupervisorService = class {
   }
   getTask(params) {
     const input2 = ScopeTask.extend({
-      execution_id: Id3.optional(),
+      execution_id: Id4.optional(),
       after_cursor: external_exports.number().int().min(0).default(0),
       event_detail_cursor: external_exports.string().min(1).max(512).optional(),
       diagnostic_cursor: external_exports.string().min(1).max(512).optional()
@@ -151218,7 +151484,7 @@ var SupervisorService = class {
     }
   }
   listTasks(params) {
-    const input2 = external_exports.object({ scope_id: Id3, limit: external_exports.number().int().min(1).max(100).default(20), states: external_exports.array(Id3).optional(), page_cursor: Id3.optional() }).strict().parse(params);
+    const input2 = external_exports.object({ scope_id: Id4, limit: external_exports.number().int().min(1).max(100).default(20), states: external_exports.array(Id4).optional(), page_cursor: Id4.optional() }).strict().parse(params);
     const page2 = this.store.listPage(input2.scope_id, {
       limit: input2.limit,
       ...input2.states ? { states: input2.states } : {},
@@ -151228,8 +151494,8 @@ var SupervisorService = class {
   }
   async waitTasks(params) {
     const input2 = external_exports.object({
-      scope_id: Id3,
-      targets: external_exports.array(external_exports.object({ task_id: Id3, after_cursor: external_exports.number().int().min(0).default(0), execution_id: Id3.optional(), after_progress_cursor: Id3.max(512).optional() }).strict()).min(1).max(16),
+      scope_id: Id4,
+      targets: external_exports.array(external_exports.object({ task_id: Id4, after_cursor: external_exports.number().int().min(0).default(0), execution_id: Id4.optional(), after_progress_cursor: Id4.max(512).optional() }).strict()).min(1).max(16),
       timeout_ms: external_exports.number().int().min(0).max(3e4).default(2e4)
     }).strict().parse(params);
     const deadline2 = Date.now() + input2.timeout_ms;
@@ -151268,16 +151534,30 @@ var SupervisorService = class {
   }
   readArtifact(params) {
     const input2 = ScopeTask.extend({
-      execution_id: Id3,
-      artifact_id: Id3,
+      execution_id: Id4,
+      artifact_id: Id4,
       byte_offset: external_exports.number().int().min(0).default(0),
-      max_bytes: external_exports.number().int().min(1).max(65536).default(16384)
+      max_bytes: external_exports.number().int().min(1).max(65536).default(16384),
+      encoding: external_exports.enum(["auto", "text", "base64"]).default("auto")
     }).parse(params);
     const task = this.store.getExecution(input2.scope_id, input2.task_id, input2.execution_id);
     if (!task) throw new ToolkitError("INVALID_INPUT", "execution not found", "change_input");
     const entry2 = this.store.artifact(input2.execution_id, input2.artifact_id);
     if (!entry2) throw new ToolkitError("INVALID_INPUT", "artifact not found", "change_input");
     const range = this.artifacts.read(entry2, input2.byte_offset, input2.max_bytes);
+    let body;
+    if (input2.encoding === "text" || input2.encoding === "auto" && (entry2.mediaType.startsWith("text/") || entry2.mediaType === "application/json")) {
+      try {
+        body = { encoding: "text", content: new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(range.bytes) };
+      } catch {
+        if (input2.encoding === "text") throw new ToolkitError(
+          "INVALID_INPUT",
+          "artifact byte range is not complete valid UTF-8; use encoding: base64 to read these exact bytes",
+          "change_input"
+        );
+        body = { encoding: "base64", content_base64: Buffer.from(range.bytes).toString("base64") };
+      }
+    } else body = { encoding: "base64", content_base64: Buffer.from(range.bytes).toString("base64") };
     return {
       artifact_id: entry2.artifactId,
       sha256: entry2.sha256,
@@ -151285,12 +151565,11 @@ var SupervisorService = class {
       media_type: entry2.mediaType,
       byte_offset: input2.byte_offset,
       next_offset: range.nextOffset,
-      content: entry2.mediaType.startsWith("text/") || entry2.mediaType === "application/json" ? Buffer.from(range.bytes).toString("utf8") : null,
-      content_base64: Buffer.from(range.bytes).toString("base64")
+      ...body
     };
   }
   recordReview(params) {
-    const input2 = ScopeTask.extend({ execution_id: Id3, expected_revision: external_exports.number().int().positive(), idempotency_key: external_exports.string().min(16).max(128), review: ReviewSchema }).parse(params);
+    const input2 = ScopeTask.extend({ execution_id: Id4, expected_revision: external_exports.number().int().positive(), idempotency_key: external_exports.string().min(16).max(128), review: ReviewSchema }).parse(params);
     const task = this.store.getExecution(input2.scope_id, input2.task_id, input2.execution_id);
     if (!task) throw new ToolkitError("INVALID_INPUT", "execution not found", "change_input");
     if (!["bounded-build", "bounded-inspect"].includes(task.profile)) throw new StoreConflict("INVALID_STATE");
@@ -151314,10 +151593,10 @@ var SupervisorService = class {
   }
   async startTask(params) {
     const input2 = external_exports.object({
-      scope_id: Id3,
+      scope_id: Id4,
       idempotency_key: external_exports.string().min(16).max(128).optional(),
-      workspace: external_exports.object({ path: Id3, access: external_exports.enum(["exclusive", "shared_read"]).default("exclusive") }).strict(),
-      model: external_exports.union([external_exports.object({ provider_id: Id3, model_id: Id3 }).strict(), external_exports.object({ profile: Id3 }).strict()]),
+      workspace: external_exports.object({ path: Id4, access: external_exports.enum(["exclusive", "shared_read"]).default("exclusive") }).strict(),
+      model: external_exports.union([external_exports.object({ provider_id: Id4, model_id: Id4 }).strict(), external_exports.object({ profile: Id4 }).strict()]),
       profile: external_exports.enum(["bounded-build", "bounded-inspect"]),
       limits: external_exports.object({ queue_timeout_seconds: external_exports.number().int().positive(), execution_timeout_seconds: external_exports.number().int().positive() }).strict(),
       packet: TaskPacketSchema,
@@ -151411,7 +151690,7 @@ var SupervisorService = class {
   }
   async continueTask(params) {
     const input2 = ScopeTask.extend({
-      predecessor_execution_id: Id3,
+      predecessor_execution_id: Id4,
       expected_revision: external_exports.number().int().positive(),
       idempotency_key: external_exports.string().min(16).max(128),
       context_mode: external_exports.enum(["resume", "fresh"]),
@@ -151486,8 +151765,8 @@ var SupervisorService = class {
   }
   cancelTask(params) {
     const input2 = ScopeTask.extend({
-      execution_id: Id3,
-      reason: Id3,
+      execution_id: Id4,
+      reason: Id4,
       expected_revision: external_exports.number().int().positive(),
       idempotency_key: external_exports.string().min(16).max(128)
     }).parse(params);
@@ -151514,11 +151793,11 @@ var SupervisorService = class {
   }
   async respondToRequest(params) {
     const input2 = ScopeTask.extend({
-      execution_id: Id3,
-      request_id: Id3,
+      execution_id: Id4,
+      request_id: Id4,
       request_revision: external_exports.number().int().positive(),
-      reply: external_exports.union([external_exports.enum(["allow_once", "deny"]), external_exports.array(external_exports.array(Id3))]),
-      authorization_basis: Id3,
+      reply: external_exports.union([external_exports.enum(["allow_once", "deny"]), external_exports.array(external_exports.array(Id4))]),
+      authorization_basis: Id4,
       idempotency_key: external_exports.string().min(16).max(128)
     }).parse(params);
     if (!this.coordinator) throw new ToolkitError("UNSUPPORTED_BACKEND", "execution coordinator is unavailable");
@@ -151653,10 +151932,10 @@ async function stopDaemon() {
 }
 
 // src/mcp.ts
-var Id4 = external_exports.string().min(1);
+var Id5 = external_exports.string().min(1);
 var Key = external_exports.string().min(16).max(128);
 var Revision = external_exports.number().int().positive();
-var Scope = { scope_id: Id4 };
+var Scope = { scope_id: Id5 };
 function result(value2) {
   const structuredContent = value2 && typeof value2 === "object" && !Array.isArray(value2) ? value2 : { value: value2 };
   const raw = JSON.stringify(structuredContent);
@@ -151664,10 +151943,10 @@ function result(value2) {
   return { structuredContent, content: [{ type: "text", text: text3 }] };
 }
 function createMcpServer(call) {
-  const server = new McpServer({ name: "pi-agents", version: "0.1.0" });
+  const server = new McpServer({ name: "pi-agents", version: "0.2.0" });
   server.registerTool("pi_health", {
     description: "Read toolkit and configured backend health without inference.",
-    inputSchema: external_exports.object({ backend_id: Id4.optional() }).strict(),
+    inputSchema: external_exports.object({ backend_id: Id5.optional() }).strict(),
     annotations: { readOnlyHint: true }
   }, async (input2) => result(await call("health", input2)));
   server.registerTool("pi_start_task", {
@@ -151675,10 +151954,10 @@ function createMcpServer(call) {
     inputSchema: external_exports.object({
       ...Scope,
       idempotency_key: Key.optional(),
-      workspace: external_exports.object({ path: Id4, access: external_exports.enum(["exclusive", "shared_read"]).default("exclusive") }).strict(),
+      workspace: external_exports.object({ path: Id5, access: external_exports.enum(["exclusive", "shared_read"]).default("exclusive") }).strict(),
       model: external_exports.union([
-        external_exports.object({ provider_id: Id4, model_id: Id4 }).strict(),
-        external_exports.object({ profile: Id4 }).strict()
+        external_exports.object({ provider_id: Id5, model_id: Id5 }).strict(),
+        external_exports.object({ profile: Id5 }).strict()
       ]),
       profile: external_exports.enum(["bounded-build", "bounded-inspect"]),
       limits: external_exports.object({ queue_timeout_seconds: external_exports.number().int().positive(), execution_timeout_seconds: external_exports.number().int().positive() }).strict(),
@@ -151690,11 +151969,11 @@ function createMcpServer(call) {
     description: "Read a compact task snapshot and material events.",
     inputSchema: external_exports.object({
       ...Scope,
-      task_id: Id4,
-      execution_id: Id4.optional(),
+      task_id: Id5,
+      execution_id: Id5.optional(),
       after_cursor: external_exports.number().int().min(0).optional(),
-      event_detail_cursor: Id4.optional(),
-      diagnostic_cursor: Id4.optional()
+      event_detail_cursor: Id5.optional(),
+      diagnostic_cursor: Id5.optional()
     }).strict(),
     annotations: { readOnlyHint: true }
   }, async (input2) => result(await call("get_task", input2)));
@@ -151711,20 +151990,20 @@ function createMcpServer(call) {
   });
   server.registerTool("pi_list_tasks", {
     description: "Recover task identities in a coordination scope.",
-    inputSchema: external_exports.object({ ...Scope, states: external_exports.array(Id4).optional(), limit: external_exports.number().int().min(1).max(100).default(20), page_cursor: Id4.optional() }).strict(),
+    inputSchema: external_exports.object({ ...Scope, states: external_exports.array(Id5).optional(), limit: external_exports.number().int().min(1).max(100).default(20), page_cursor: Id5.optional() }).strict(),
     annotations: { readOnlyHint: true }
   }, async (input2) => result(await call("list_tasks", input2)));
   server.registerTool("pi_wait_tasks", {
     description: "Wait briefly for material changes; timeout never cancels work.",
-    inputSchema: external_exports.object({ ...Scope, targets: external_exports.array(external_exports.object({ task_id: Id4, after_cursor: external_exports.number().int().min(0).default(0), execution_id: Id4.optional(), after_progress_cursor: Id4.max(512).optional() }).strict()).min(1).max(16), timeout_ms: external_exports.number().int().min(0).max(3e4).default(2e4) }).strict(),
+    inputSchema: external_exports.object({ ...Scope, targets: external_exports.array(external_exports.object({ task_id: Id5, after_cursor: external_exports.number().int().min(0).default(0), execution_id: Id5.optional(), after_progress_cursor: Id5.max(512).optional() }).strict()).min(1).max(16), timeout_ms: external_exports.number().int().min(0).max(3e4).default(2e4) }).strict(),
     annotations: { readOnlyHint: true }
   }, async (input2) => result(await call("wait_tasks", input2)));
   server.registerTool("pi_continue_task", {
     description: "Continue a resolved task in its exact recorded session or fresh context.",
     inputSchema: external_exports.object({
       ...Scope,
-      task_id: Id4,
-      predecessor_execution_id: Id4,
+      task_id: Id5,
+      predecessor_execution_id: Id5,
       expected_revision: Revision,
       idempotency_key: Key,
       context_mode: external_exports.enum(["resume", "fresh"]),
@@ -151733,18 +152012,18 @@ function createMcpServer(call) {
   }, async (input2) => result(await call("continue_task", input2)));
   server.registerTool("pi_cancel_task", {
     description: "Record a cancellation request; confirmation is reported separately.",
-    inputSchema: external_exports.object({ ...Scope, task_id: Id4, execution_id: Id4, reason: Id4, expected_revision: Revision, idempotency_key: Key }).strict()
+    inputSchema: external_exports.object({ ...Scope, task_id: Id5, execution_id: Id5, reason: Id5, expected_revision: Revision, idempotency_key: Key }).strict()
   }, async (input2) => result(await call("cancel_task", input2)));
   server.registerTool("pi_respond_to_request", {
     description: "Reply once to a current permission or question request.",
     inputSchema: external_exports.object({
       ...Scope,
-      task_id: Id4,
-      execution_id: Id4,
-      request_id: Id4,
+      task_id: Id5,
+      execution_id: Id5,
+      request_id: Id5,
       request_revision: Revision,
-      reply: external_exports.union([external_exports.enum(["allow_once", "deny"]), external_exports.array(external_exports.array(Id4))]),
-      authorization_basis: Id4,
+      reply: external_exports.union([external_exports.enum(["allow_once", "deny"]), external_exports.array(external_exports.array(Id5))]),
+      authorization_basis: Id5,
       idempotency_key: Key
     }).strict()
   }, async (input2) => result(await call("respond_to_request", input2)));
@@ -151752,18 +152031,30 @@ function createMcpServer(call) {
     description: "Read a bounded range of an immutable artifact.",
     inputSchema: external_exports.object({
       ...Scope,
-      task_id: Id4,
-      execution_id: Id4,
-      artifact_id: Id4,
+      task_id: Id5,
+      execution_id: Id5,
+      artifact_id: Id5,
       byte_offset: external_exports.number().int().min(0).default(0),
-      max_bytes: external_exports.number().int().min(1).max(65536).default(16384)
+      max_bytes: external_exports.number().int().min(1).max(65536).default(16384),
+      encoding: external_exports.enum(["auto", "text", "base64"]).default("auto")
     }).strict(),
     annotations: { readOnlyHint: true }
-  }, async (input2) => result(await call("read_artifact", input2)));
+  }, async (input2) => ({
+    structuredContent: await call("read_artifact", input2),
+    content: [{ type: "text", text: "Read structuredContent for the bounded artifact bytes, encoding, hash, and pagination metadata." }]
+  }));
   server.registerTool("pi_record_review", {
     description: "Append the parent's evidence-based review decision.",
-    inputSchema: external_exports.object({ ...Scope, task_id: Id4, execution_id: Id4, expected_revision: Revision, idempotency_key: Key, review: ReviewSchema }).strict()
+    inputSchema: external_exports.object({ ...Scope, task_id: Id5, execution_id: Id5, expected_revision: Revision, idempotency_key: Key, review: ReviewSchema }).strict()
   }, async (input2) => result(await call("record_review", input2)));
+  server.registerTool("pi_prepare_review", {
+    description: "Prepare bounded exact-execution review criteria and artifact citations; parent verification remains required.",
+    inputSchema: PrepareReviewSchema,
+    annotations: { readOnlyHint: true }
+  }, async (input2) => ({
+    structuredContent: await call("prepare_review", input2),
+    content: [{ type: "text", text: "Read structuredContent for review preparation; collect all pages and inspect cited evidence before deciding acceptance." }]
+  }));
   return server;
 }
 async function runMcp() {
@@ -151865,7 +152156,7 @@ async function main(args) {
   }
   if (args[0] === "artifacts" && args[1] === "export" && args.length === 7) {
     const output2 = createWriteStream3(args[6], { flags: "wx", mode: 384 });
-    const hash3 = createHash11("sha256");
+    const hash4 = createHash12("sha256");
     try {
       let offset = 0;
       let digest = null;
@@ -151876,19 +152167,20 @@ async function main(args) {
           execution_id: args[4],
           artifact_id: args[5],
           byte_offset: offset,
-          max_bytes: 65536
+          max_bytes: 65536,
+          encoding: "base64"
         });
         if (digest && result2.sha256 !== digest) throw new Error("artifact changed during export");
         digest = result2.sha256;
         const bytes2 = Buffer.from(result2.content_base64, "base64");
-        hash3.update(bytes2);
+        hash4.update(bytes2);
         if (!output2.write(bytes2)) await once(output2, "drain");
         if (result2.next_offset === null) break;
         offset = result2.next_offset;
       }
       output2.end();
       await once(output2, "finish");
-      if (hash3.digest("hex") !== digest) throw new Error("exported bytes do not match artifact hash");
+      if (hash4.digest("hex") !== digest) throw new Error("exported bytes do not match artifact hash");
       process.stdout.write(`${JSON.stringify({ path: args[6], sha256: digest })}
 `);
     } catch (error62) {

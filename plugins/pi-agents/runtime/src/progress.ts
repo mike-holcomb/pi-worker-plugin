@@ -19,7 +19,7 @@ type ReadInput = z.input<typeof ReadOptions>;
 const CursorSchema = z.object({ v: z.literal(1), e: Id, p: z.string().uuid(), g: z.string().uuid(), s: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER) }).strict();
 type Cursor = z.infer<typeof CursorSchema>;
 export type ProgressCheckpoint = CheckpointInput & { checkpoint_id: string; cursor: string; recorded_at: string; source: "worker" };
-export type ProgressPage = { availability: ProgressAvailability; updates: ProgressCheckpoint[]; next_cursor: string; has_more: boolean;
+export type ProgressPage = { availability: ProgressAvailability; worker_checkpoint_observed: boolean; updates: ProgressCheckpoint[]; next_cursor: string; has_more: boolean;
   gap: { reason: string; history_missed: true; snapshot_available: boolean } | null; snapshot: ProgressCheckpoint | null;
   runtime: Record<string, unknown>; dropped_count: number; [key: string]: unknown };
 type Entry = { sequence: number; checkpoint: ProgressCheckpoint; bytes: number };
@@ -137,9 +137,9 @@ export class ProgressManager {
     if (state) state.terminalAt = this.now();
     this.sweep();
   }
-  hint(executionId: string): { progress_cursor: string; progress_available: ProgressAvailability } {
+  hint(executionId: string): { progress_cursor: string; progress_available: ProgressAvailability; worker_checkpoint_observed: boolean } {
     const state = this.states.get(executionId);
-    return { progress_cursor: this.cursor(executionId, state), progress_available: state?.availability ?? "not_enabled" };
+    return { progress_cursor: this.cursor(executionId, state), progress_available: state?.availability ?? "not_enabled", worker_checkpoint_observed: !!state?.latest };
   }
   read(executionId: string, input: ReadInput = {}, runtime: Record<string, unknown> = {}, identity: Record<string, unknown> = {}): ProgressPage {
     Id.parse(executionId);
@@ -156,7 +156,7 @@ export class ProgressManager {
     else if (cursor && state && cursor.g !== state.generation && !freshBaseline) reason = state.resetReason ?? "buffer_evicted";
     else if (cursor && state && cursor.s > state.sequence) throw new Error("progress cursor is ahead of the execution stream");
     else if (cursor && state?.entries.length && cursor.s < state.entries[0]!.sequence - 1) reason = "retention";
-    const page: ProgressPage = { ...identity, availability: state?.availability ?? "not_enabled", updates: [],
+    const page: ProgressPage = { ...identity, availability: state?.availability ?? "not_enabled", worker_checkpoint_observed: !!state?.latest, updates: [],
       next_cursor: reason ? this.cursor(executionId, state) : options.after_cursor ?? this.cursor(executionId, state, state?.entries[0] ? state.entries[0].sequence - 1 : 0),
       has_more: false, gap: reason ? { reason, history_missed: true, snapshot_available: !!state?.latest } : null,
       snapshot: (options.include_snapshot || reason) && state?.latest ? state.latest.checkpoint : null,
