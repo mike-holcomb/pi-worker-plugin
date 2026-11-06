@@ -152051,10 +152051,22 @@ function createMcpServer(call) {
     description: "Prepare bounded exact-execution review criteria and artifact citations; parent verification remains required.",
     inputSchema: PrepareReviewSchema,
     annotations: { readOnlyHint: true }
-  }, async (input2) => ({
-    structuredContent: await call("prepare_review", input2),
-    content: [{ type: "text", text: "Read structuredContent for review preparation; collect all pages and inspect cited evidence before deciding acceptance." }]
-  }));
+  }, async (input2) => {
+    try {
+      return {
+        structuredContent: await call("prepare_review", input2),
+        content: [{ type: "text", text: "Read structuredContent for review preparation; collect all pages and inspect cited evidence before deciding acceptance." }]
+      };
+    } catch (error62) {
+      const known = error62 && typeof error62 === "object" ? error62 : null;
+      return { isError: true, ...result({ error: {
+        code: typeof known?.code === "string" ? known.code : "INTERNAL",
+        message: typeof known?.message === "string" ? known.message : String(error62),
+        ...typeof known?.retry === "string" ? { retry: known.retry } : {},
+        ...known?.details !== void 0 ? { details: known.details } : {}
+      } }) };
+    }
+  });
   return server;
 }
 async function runMcp() {

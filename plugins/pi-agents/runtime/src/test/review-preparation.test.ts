@@ -3,9 +3,12 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
+import { Client } from "@modelcontextprotocol/client";
+import { InMemoryTransport } from "@modelcontextprotocol/server";
 import { ArtifactStore, type ArtifactRegistration } from "../artifacts.js";
 import { ReviewSchema, type TaskPacket } from "../contracts.js";
 import { ProgressManager } from "../progress.js";
+import { createMcpServer } from "../mcp.js";
 import { prepareReview, ReviewPreparationError, type PrepareReviewPage, type ReviewPreparationItem } from "../review-preparation.js";
 import { SqliteTaskStore, StoreConflict } from "../store.js";
 
@@ -130,6 +133,55 @@ test("a large individual criterion requests a sufficient larger budget without t
     if (item.kind === "criterion") assert.equal(item.criterion.requirement, "x".repeat(100000));
     assert.ok(Buffer.byteLength(JSON.stringify(page)) <= required);
   } finally { fx.cleanup(); }
+});
+
+test("MCP exposes the required budget and permits retrying the same preparation cursor", async () => {
+  const fx = fixture(2, "x".repeat(100000));
+  const server = createMcpServer(async (method, params) => {
+    assert.equal(method, "prepare_review");
+    try { return fx.read(params as Record<string, unknown>); }
+    catch (error) {
+      assert.ok(error instanceof ReviewPreparationError);
+      // Match rpcRequest's reconstructed Error rather than relying on instanceof.
+      throw Object.assign(new Error(`${error.code}: ${error.message}`), {
+        code: error.code, retry: error.retry, details: error.details,
+      });
+    }
+  });
+  const client = new Client({ name: "review-budget-test", version: "1.0.0" });
+  const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+  const call = (options: Record<string, unknown>) => client.callTool({ name: "pi_prepare_review",
+    arguments: { ...fx.request(), limit: 1, ...options } });
+  try {
+    fx.finish();
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+    const first = await call({ max_bytes: 262144 });
+    const cursor = (first.structuredContent as PrepareReviewPage).next_cursor;
+    assert.equal(typeof cursor, "string");
+    const failed = await call({ after_cursor: cursor, max_bytes: 8192 });
+    assert.equal(failed.isError, true);
+    const { error } = failed.structuredContent as { error: {
+      code: string; message: string; retry: string;
+      details: { required_min_bytes: number; maximum_max_bytes: number };
+    } };
+    assert.equal(error.code, "INVALID_INPUT");
+    assert.equal(error.retry, "change_input");
+    assert.match(error.message, /increase the budget/);
+    assert.ok(error.details.required_min_bytes > 8192);
+    assert.equal(error.details.maximum_max_bytes, 262144);
+    assert.ok(error.details.required_min_bytes <= error.details.maximum_max_bytes);
+    assert.deepEqual(failed.content, [{ type: "text", text: JSON.stringify(failed.structuredContent) }]);
+    const retried = await call({ after_cursor: cursor, max_bytes: error.details.required_min_bytes });
+    assert.notEqual(retried.isError, true);
+    const page = retried.structuredContent as PrepareReviewPage;
+    assert.equal(page.execution_id, fx.task.executionId);
+    assert.equal(page.items.length, 1);
+    assert.equal(page.items[0]!.index, 1);
+    const item = page.items[0]!;
+    assert.equal(item.kind, "criterion");
+    if (item.kind === "criterion") assert.equal(item.criterion.requirement, "x".repeat(100000));
+    assert.ok(Buffer.byteLength(JSON.stringify(page)) <= error.details.required_min_bytes);
+  } finally { await client.close(); await server.close(); fx.cleanup(); }
 });
 
 test("unpreparable legacy metadata explains the maximum budget rather than requesting impossible growth", () => {

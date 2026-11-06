@@ -99,8 +99,23 @@ export function createMcpServer(call: (method: string, params: unknown) => Promi
     description: "Prepare bounded exact-execution review criteria and artifact citations; parent verification remains required.",
     inputSchema: PrepareReviewSchema,
     annotations: { readOnlyHint: true },
-  }, async (input) => ({ structuredContent: await call("prepare_review", input) as Record<string, unknown>,
-    content: [{ type: "text" as const, text: "Read structuredContent for review preparation; collect all pages and inspect cited evidence before deciding acceptance." }] }));
+  }, async (input) => {
+    try {
+      return { structuredContent: await call("prepare_review", input) as Record<string, unknown>,
+        content: [{ type: "text" as const, text: "Read structuredContent for review preparation; collect all pages and inspect cited evidence before deciding acceptance." }] };
+    } catch (error) {
+      // RPC reconstructs errors as plain Error objects; preserve their fields
+      // explicitly because the MCP SDK only exposes the message of thrown errors.
+      const known = error && typeof error === "object"
+        ? error as { code?: unknown; message?: unknown; retry?: unknown; details?: unknown } : null;
+      return { isError: true, ...result({ error: {
+        code: typeof known?.code === "string" ? known.code : "INTERNAL",
+        message: typeof known?.message === "string" ? known.message : String(error),
+        ...(typeof known?.retry === "string" ? { retry: known.retry } : {}),
+        ...(known?.details !== undefined ? { details: known.details } : {}),
+      } }) };
+    }
+  });
   return server;
 }
 

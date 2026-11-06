@@ -55,4 +55,4 @@ const review = { ...first.review_template, criteria: [...criteria.values()].map(
 // and current freshness before calling pi_record_review with expected_revision.
 ```
 
-For a large criterion, handle `required_min_bytes` by retrying that same cursor with a larger `max_bytes` within the documented cap. A stale-preparation error requires restarting the entire collection.
+MCP preparation failures return `isError: true` with an `error` object in both `structuredContent` and the JSON text content. Inspect `error.code`, `error.message`, `error.retry`, and optional `error.details`. For a large criterion, retry that same cursor with `max_bytes` set to `error.details.required_min_bytes` within `error.details.maximum_max_bytes`. A stale-preparation error requires restarting the entire collection.
