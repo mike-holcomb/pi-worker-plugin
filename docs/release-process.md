@@ -1,6 +1,6 @@
 # GitHub release preparation
 
-Pi Agents is distributed through this repository's Codex marketplace. The current candidate is `v0.2.0`; `v0.1.0` is published. Repository changes, a pushed tag, a draft release, and publication are separate steps. This process does not submit the plugin to OpenAI's public directory.
+Pi Agents is distributed through this repository's Codex marketplace. The current published stable release is `v0.2.0`; `v0.1.0` remains available for rollback. Repository changes, a pushed tag, a draft release, and publication are separate steps. This process does not submit the plugin to OpenAI's public directory.
 
 ## Prepare the candidate
 

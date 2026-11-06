@@ -2,7 +2,7 @@
 
 ## 0.2.0
 
-Release candidate; 0.1.0 remains the published stable release.
+Published stable release.
 
 - Explain accepted-review input errors with criterion/evidence details while preserving evidence and revision gates (#1).
 - Document worker profile capabilities and parent ownership of shell-based audit checks (#2).

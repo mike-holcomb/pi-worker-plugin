@@ -1,21 +1,21 @@
 # Installation, configuration, and rollback
 
-## Install release 0.1.0
+## Install release 0.2.0
 
-Version 0.1.0 is the published stable release. This checkout prepares 0.2.0; use local installation below to try the candidate. Once 0.2.0 is published, select `--ref v0.2.0` explicitly.
+Version 0.2.0 is the published stable release. Select `--ref v0.2.0` explicitly, or use local installation below for a development checkout.
 
 1. Install Node.js `>=24.15 <25` on macOS or Linux and ensure the Codex host's `node` resolves to that version.
 2. Add the repository marketplace and install the plugin:
 
    ```bash
-   codex plugin marketplace add mike-holcomb/pi-worker-plugin --ref v0.1.0
+   codex plugin marketplace add mike-holcomb/pi-worker-plugin --ref v0.2.0
    codex plugin add pi-agents@pi-worker-plugin
    ```
 
 3. Start a fresh Codex session and select `pi-agents:pi-agents` (**Pi Agents**).
 4. Configure project roots and model routes as described below before submitting live tasks.
 
-The GitHub release includes `pi-agents-v0.1.0.zip`, its per-file `.manifest.json`, and `.sha256` checksums. The runtime and provider dependencies are prebuilt. End-user installation needs no Pi CLI, backend server, TypeScript compilation, Python, or `npm install`. Repository marketplace distribution is separate from OpenAI's public plugin directory.
+The GitHub release includes `pi-agents-v0.2.0.zip`, its per-file `.manifest.json`, and `.sha256` checksums. The runtime and provider dependencies are prebuilt. End-user installation needs no Pi CLI, backend server, TypeScript compilation, Python, or `npm install`. Repository marketplace distribution is separate from OpenAI's public plugin directory.
 
 ## Local installation
 

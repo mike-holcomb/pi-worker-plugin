@@ -4,7 +4,7 @@ Delegate bounded work through a local supervisor and owned Pi Durable worker pro
 
 ## Install and configure
 
-This checkout prepares the **0.2.0 release candidate**, covering issues 1–10. Version **0.1.0** remains the published stable release. Use local installation to try the candidate; select `--ref v0.2.0` only after that release is published.
+Version **0.2.0** is the published stable release, covering issues 1–10. Select `--ref v0.2.0` for the release, or use local installation for a development checkout.
 
 Use Node `>=24.15 <25` on macOS or Linux. Pi Durable 1.5.0 and provider SDKs ship in the executable; startup needs no `npm install` or Pi CLI. See [installation](docs/installation.md) for local marketplace installation, model routes, credentials, and state locations.
 
